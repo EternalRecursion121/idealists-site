@@ -5,7 +5,7 @@
 	let theme = $state('cream');
 
 	const themes = {
-		cream: { bg: '#F6E9CD', text: '#1B367E', accent: '#3F812A' },
+		cream: { bg: '#E9E2D2', text: '#1B367E', accent: '#3F812A' },
 		navy: { bg: '#1B367E', text: '#F6E9CD', accent: '#96E8B3' },
 		mint: { bg: '#b8e8c8', text: '#1B367E', accent: '#1B367E' },
 		lavender: { bg: '#C3BBFF', text: '#1B367E', accent: '#1B367E' },
@@ -21,6 +21,7 @@
 
 	$effect(() => {
 		document.body.style.background = themes[theme].bg;
+		document.body.style.backgroundImage = "radial-gradient(circle, var(\"#FFFFFF\") 0.9px, rgba(0,0,0,0) 1px)";
 	});
 </script>
 
@@ -33,10 +34,10 @@
 <div 
 	class="app"
 	style="--bg: {themes[theme].bg}; --text: {themes[theme].text}; --accent: {themes[theme].accent};"
->
+><!-- 
 	<button class="theme-toggle" onclick={cycleTheme}>
 		{theme}
-	</button>
+	</button> -->
 	{@render children()}
 </div>
 
