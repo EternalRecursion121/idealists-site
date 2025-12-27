@@ -142,7 +142,7 @@
             </li>
             <li>
                 <h3 class="font-semibold mb-1">living</h3>
-                <p class="opacity-80">dynamic systems over static entities. things that grow, adapt, and die when they need to.</p>
+                <p class="opacity-80">dynamic systems over static entities. things that grow, adapt, merge, and die when they need to.</p>
             </li>
             <li>
                 <h3 class="font-semibold mb-1">cooperative</h3>
