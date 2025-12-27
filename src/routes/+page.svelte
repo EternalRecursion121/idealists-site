@@ -25,9 +25,6 @@
     let starRotation = $state(0);
     let starVelocity = $state(0);
     let isHovering = $state(false);
-    let isDragging = $state(false);
-    let lastMouseY = $state(0);
-    let lastTime = $state(0);
 
     function cycleDefinition(divid: number) {
         if (divid == 0){
@@ -70,49 +67,6 @@
         return () => cancelAnimationFrame(frameId);
     });
 
-    // Star momentum effect
-    $effect(() => {
-        let frameId: number;
-        const animate = () => {
-            if (!isDragging) {
-                // Apply friction
-                starVelocity *= 0.95;
-                if (Math.abs(starVelocity) < 0.1) {
-                    starVelocity = 0;
-                }
-            }
-            starRotation += starVelocity;
-            if (starVelocity !== 0 || isDragging) {
-                frameId = requestAnimationFrame(animate);
-            }
-        };
-        frameId = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(frameId);
-    });
-
-    function handleStarMouseDown(e: MouseEvent) {
-        isDragging = true;
-        lastMouseY = e.clientY;
-        lastTime = Date.now();
-        starVelocity = 0;
-    }
-
-    function handleStarMouseMove(e: MouseEvent) {
-        if (!isDragging) return;
-        const currentTime = Date.now();
-        const deltaY = e.clientY - lastMouseY;
-        const deltaTime = Math.max(currentTime - lastTime, 1);
-
-        // Calculate velocity based on vertical mouse movement
-        starVelocity = (deltaY / deltaTime) * -0.5; // negative for natural direction
-
-        lastMouseY = e.clientY;
-        lastTime = currentTime;
-    }
-
-    function handleStarMouseUp() {
-        isDragging = false;
-    }
 
     import { onMount } from 'svelte';
 
