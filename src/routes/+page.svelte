@@ -21,6 +21,14 @@
     let currentIndexes = $state([0,0]);
     let visible = $state(true);
 
+    // Star rotation physics
+    let starRotation = $state(0);
+    let starVelocity = $state(0);
+    let isHovering = $state(false);
+    let isDragging = $state(false);
+    let lastMouseY = $state(0);
+    let lastTime = $state(0);
+
     function cycleDefinition(divid: number) {
         if (divid == 0){
             visible = false;
@@ -39,6 +47,72 @@
         const timeout = setTimeout(() => cycleDefinition(0), delay);
         return () => clearTimeout(timeout);
     });
+
+    // Star momentum effect
+    $effect(() => {
+        let frameId: number;
+        const animate = () => {
+            // Accelerate while hovering
+            if (isHovering) {
+                starVelocity += 0.5;
+                starVelocity = Math.min(starVelocity, 15); // max speed
+            } else {
+                // Apply friction when not hovering
+                starVelocity *= 0.96;
+                if (Math.abs(starVelocity) < 0.05) {
+                    starVelocity = 0;
+                }
+            }
+            starRotation += starVelocity;
+            frameId = requestAnimationFrame(animate);
+        };
+        frameId = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(frameId);
+    });
+
+    // Star momentum effect
+    $effect(() => {
+        let frameId: number;
+        const animate = () => {
+            if (!isDragging) {
+                // Apply friction
+                starVelocity *= 0.95;
+                if (Math.abs(starVelocity) < 0.1) {
+                    starVelocity = 0;
+                }
+            }
+            starRotation += starVelocity;
+            if (starVelocity !== 0 || isDragging) {
+                frameId = requestAnimationFrame(animate);
+            }
+        };
+        frameId = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(frameId);
+    });
+
+    function handleStarMouseDown(e: MouseEvent) {
+        isDragging = true;
+        lastMouseY = e.clientY;
+        lastTime = Date.now();
+        starVelocity = 0;
+    }
+
+    function handleStarMouseMove(e: MouseEvent) {
+        if (!isDragging) return;
+        const currentTime = Date.now();
+        const deltaY = e.clientY - lastMouseY;
+        const deltaTime = Math.max(currentTime - lastTime, 1);
+
+        // Calculate velocity based on vertical mouse movement
+        starVelocity = (deltaY / deltaTime) * -0.5; // negative for natural direction
+
+        lastMouseY = e.clientY;
+        lastTime = currentTime;
+    }
+
+    function handleStarMouseUp() {
+        isDragging = false;
+    }
 
     import { onMount } from 'svelte';
 
@@ -76,7 +150,12 @@
 
     <div class="word-header mb-6">
         <div class="ideal-title">
-            <span>THE IDEALISTS C✺LLECTIVE</span>
+            <span>THE IDEALISTS C<span
+                class="star"
+                style="transform: rotate({starRotation}deg)"
+                onmouseenter={() => isHovering = true}
+                onmouseleave={() => isHovering = false}
+            >✺</span>LLECTIVE</span>
         </div>
     </div>
 
@@ -308,6 +387,14 @@
         pointer-events: none;
         height: 0;
         overflow: hidden;
+    }
+
+    .star {
+        display: inline-block;
+        font-size: 1.3em;
+        transform-origin: 50% 55%;
+        cursor: pointer;
+        user-select: none;
     }
 
 </style>
