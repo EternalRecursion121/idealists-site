@@ -60,8 +60,6 @@
     <title>The Idealists Collective</title>
 </svelte:head>
 
-
-
 <div bind:this={measureEl} class="definition-measure">
     {#each alt_texts as alts,j}
         {#each alts as def, i}
