@@ -83,7 +83,7 @@
     <section>
         <p class="opacity-80" style="color: #18440B">we are the SF counterculture. we are embracing the new world of infinite software. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: #BE0000">idealists</i>.</p>
         <br>
-        <p style="text-align: center; color: #235613;">✺✺✺</p>
+        <p style="text-align: center; color: #235613;">✺✺✺✺✺</p>
         <br>
     </section>
     
