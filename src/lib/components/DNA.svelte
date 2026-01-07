@@ -20,7 +20,7 @@
         },
         {
             title: "playful",
-            description: "we create with whimsy and joy. what is life without a little fun?"
+            description: "we create with whimsy and joy. what is life without fun?"
         },
         {
             title: "living",
