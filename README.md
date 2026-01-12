@@ -1,38 +1,46 @@
-# sv
+# The Idealists Collective
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A website for a collective embracing the new world of infinite software, with a direction towards utopia.
 
-## Creating a project
+## Tech Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- [Svelte 5](https://svelte.dev/) with runes
+- [SvelteKit](https://kit.svelte.dev/)
+- [Tailwind CSS v4](https://tailwindcss.com/)
+- TypeScript
 
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Quick Start
 
 ```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Scripts
 
-To create a production version of your app:
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run check` | Type-check the codebase |
 
-```sh
-npm run build
+## Project Structure
+
+```
+src/
+├── routes/
+│   ├── +layout.svelte    # Root layout with theming
+│   ├── +page.svelte      # Homepage
+│   └── library/
+│       └── +page.svelte  # Reading list
+└── lib/
+    └── components/
+        ├── Definition.svelte
+        └── DNA.svelte
 ```
 
-You can preview the production build with `npm run preview`.
+## Documentation
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- `HUMAN.md` — Getting started guide for developers
+- `CLAUDE.md` — Instructions for Claude Code AI assistant
