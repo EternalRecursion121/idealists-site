@@ -1,91 +1,51 @@
 <script lang="ts">
     const PHI = 1.618033988749;
 
-    type Variant = 'dense' | 'taper' | 'filled' | 'pull';
-    let { variant = 'dense', size = 30, rotation = 0 }: { variant?: Variant; size?: number; rotation?: number } = $props();
+    let { size = 27, rotation = 0 }: { size?: number; rotation?: number } = $props();
 
-    // Generate path data for each variant
-    function generatePaths(variant: Variant): { paths: string[]; dots: { cx: number; cy: number; r: number }[] } {
+    type Segment = { x1: number; y1: number; x2: number; y2: number; strokeWidth: number };
+
+    // Generate 16 spiral curves with taper (thin inner, thick outer)
+    function generatePaths(): { segments: Segment[]; dots: { cx: number; cy: number; r: number }[] } {
         const cx = 50, cy = 50;
-        const paths: string[] = [];
+        const segments: Segment[] = [];
         const dots: { cx: number; cy: number; r: number }[] = [];
 
-        if (variant === 'dense') {
-            // 12 lines with φ lengths
-            for (let i = 0; i < 12; i++) {
-                const angle = i * Math.PI / 6 + 0.1;
-                const maxR = i % 2 === 0 ? 42 : 42 / PHI;
-                let d = '';
-                for (let r = maxR; r > 8; r -= 3) {
-                    const a = angle + (maxR - r) * 0.016;
-                    const x = cx + Math.cos(a) * r;
-                    const y = cy + Math.sin(a) * r;
-                    d += d ? ` L ${x.toFixed(1)} ${y.toFixed(1)}` : `M ${x.toFixed(1)} ${y.toFixed(1)}`;
-                }
-                paths.push(d);
+        const innerR = 8;
+
+        for (let i = 0; i < 16; i++) {
+            const baseAngle = i * Math.PI / 8 + 0.08;
+            const maxR = i % 2 === 0 ? 42 : 42 / PHI;
+
+            // Generate points along the spiral from inner to outer
+            const points: { x: number; y: number }[] = [];
+            for (let r = innerR; r <= maxR; r += 1.5) {
+                const a = baseAngle + (maxR - r) * 0.014;
+                points.push({
+                    x: cx + Math.cos(a) * r,
+                    y: cy + Math.sin(a) * r
+                });
             }
-        } else if (variant === 'taper') {
-            // 8 lines with varying stroke (we'll use multiple paths)
-            for (let i = 0; i < 8; i++) {
-                const angle = i * Math.PI / 4 + 0.1;
-                const maxR = i % 2 === 0 ? 42 : 42 / PHI;
-                let d = '';
-                for (let r = maxR; r > 8; r -= 2.5) {
-                    const a = angle + (maxR - r) * 0.018;
-                    const x = cx + Math.cos(a) * r;
-                    const y = cy + Math.sin(a) * r;
-                    d += d ? ` L ${x.toFixed(1)} ${y.toFixed(1)}` : `M ${x.toFixed(1)} ${y.toFixed(1)}`;
-                }
-                paths.push(d);
-            }
-        } else if (variant === 'filled') {
-            // 16 lines, very dense
-            for (let i = 0; i < 16; i++) {
-                const angle = i * Math.PI / 8 + 0.08;
-                const maxR = i % 2 === 0 ? 42 : 42 / PHI;
-                let d = '';
-                for (let r = maxR; r > 8; r -= 3) {
-                    const a = angle + (maxR - r) * 0.014;
-                    const x = cx + Math.cos(a) * r;
-                    const y = cy + Math.sin(a) * r;
-                    d += d ? ` L ${x.toFixed(1)} ${y.toFixed(1)}` : `M ${x.toFixed(1)} ${y.toFixed(1)}`;
-                }
-                paths.push(d);
-            }
-        } else if (variant === 'pull') {
-            // 8 lines with stronger curve toward center
-            for (let i = 0; i < 8; i++) {
-                const angle = i * Math.PI / 4 + 0.1;
-                const maxR = i % 2 === 0 ? 42 : 42 / PHI;
-                let d = '';
-                for (let r = maxR; r > 6; r -= 2) {
-                    const curveStrength = 0.012 + (1 - r/maxR) * 0.025;
-                    const a = angle + (maxR - r) * curveStrength;
-                    const x = cx + Math.cos(a) * r;
-                    const y = cy + Math.sin(a) * r;
-                    d += d ? ` L ${x.toFixed(1)} ${y.toFixed(1)}` : `M ${x.toFixed(1)} ${y.toFixed(1)}`;
-                }
-                paths.push(d);
+
+            // Draw with taper (thin at inner, thick at outer)
+            for (let j = 0; j < points.length - 1; j++) {
+                const t = j / Math.max(1, points.length - 1);
+                const strokeWidth = 0.2 + t * 1.3;
+                segments.push({
+                    x1: points[j].x, y1: points[j].y,
+                    x2: points[j + 1].x, y2: points[j + 1].y,
+                    strokeWidth
+                });
             }
         }
 
         // Center dot
-        dots.push({ cx, cy, r: variant === 'pull' ? 30 : 6 });
+        dots.push({ cx, cy, r: 5 });
 
-        return { paths, dots };
+        return { segments, dots };
     }
 
-    let pathData = $derived(generatePaths(variant));
-
-    function getStrokeWidth(variant: Variant, index: number, total: number): number {
-        if (variant === 'taper') {
-            // Varying weights for taper
-            return 1.2 + (index % 2) * 0.5;
-        }
-        if (variant === 'filled') return 0.9;
-        if (variant === 'dense') return 1.1;
-        return 1.2;
-    }
+    let pathData = $derived(generatePaths());
 </script>
 
 <svg
@@ -95,12 +55,14 @@
     style="transform: translateY(-0.2em) rotate({rotation}deg)"
     class="logo"
 >
-    {#each pathData.paths as path, i (i)}
-        <path
-            d={path}
-            fill="none"
+    {#each pathData.segments as seg, i (i)}
+        <line
+            x1={seg.x1}
+            y1={seg.y1}
+            x2={seg.x2}
+            y2={seg.y2}
             stroke="currentColor"
-            stroke-width={getStrokeWidth(variant, i, pathData.paths.length)}
+            stroke-width={seg.strokeWidth}
             stroke-linecap="round"
         />
     {/each}

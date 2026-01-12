@@ -1,16 +1,18 @@
 <script lang="ts">
 	import './layout.css';
+	import Constellation from '$lib/components/Constellation.svelte';
 	let { children } = $props();
 
-	let theme = $state('cream');
+	let theme = $state('night');
 
 	const themes = {
-		cream: { bg: '#E9E2D2', text: '#1B367E', accent: '#3F812A' },
-		navy: { bg: '#1B367E', text: '#F6E9CD', accent: '#96E8B3' },
-		mint: { bg: '#b8e8c8', text: '#1B367E', accent: '#1B367E' },
-		lavender: { bg: '#C3BBFF', text: '#1B367E', accent: '#1B367E' },
-		forest: { bg: '#3F812A', text: '#F6E9CD', accent: '#96E8B3' },
-		crimson: { bg: '#2a0a0a', text: '#e8d0d0', accent: '#6b3030' }
+		night: { bg: '#0a0e1a', text: '#e8eaf0', accent: '#7eb8da', heading: '#f0d890', network: '#3a5a8a' },
+		cream: { bg: '#E9E2D2', text: '#1B367E', accent: '#3F812A', heading: '#7d0202', network: '#1B367E' },
+		navy: { bg: '#1B367E', text: '#F6E9CD', accent: '#96E8B3', heading: '#FFD166', network: '#F6E9CD' },
+		mint: { bg: '#b8e8c8', text: '#1B367E', accent: '#1B367E', heading: '#1a4d1a', network: '#1B367E' },
+		lavender: { bg: '#C3BBFF', text: '#1B367E', accent: '#1B367E', heading: '#4A2C6A', network: '#1B367E' },
+		forest: { bg: '#3F812A', text: '#F6E9CD', accent: '#96E8B3', heading: '#FFF8DC', network: '#F6E9CD' },
+		crimson: { bg: '#2a0a0a', text: '#e8d0d0', accent: '#6b3030', heading: '#c45050', network: '#e8d0d0' }
 	};
 
 	function cycleTheme() {
@@ -33,15 +35,20 @@
 
 <div 
 	class="app"
-	style="--bg: {themes[theme].bg}; --text: {themes[theme].text}; --accent: {themes[theme].accent};"
-><!-- 
-	<button class="theme-toggle" onclick={cycleTheme}>
+	style="--bg: {themes[theme].bg}; --text: {themes[theme].text}; --accent: {themes[theme].accent}; --heading: {themes[theme].heading}; --network: {themes[theme].network};"
+>
+	<Constellation />
+	<!-- <button class="theme-toggle" onclick={cycleTheme}>
 		{theme}
 	</button> -->
 	{@render children()}
 </div>
 
 <style>
+	:global(html) {
+		font-size: 16px;
+	}
+
 	:global(html, body) {
 		margin: 0;
 		padding: 0;
@@ -50,10 +57,20 @@
 	.app {
 		font-family: 'Source Code Pro', monospace;
 		min-height: 100vh;
-		padding: 2rem;
+		padding: 1rem;
 		background: var(--bg);
 		color: var(--text);
 		transition: background 0.3s, color 0.3s;
+	}
+
+	@media (min-width: 640px) {
+		:global(html) {
+			font-size: 20px;
+		}
+
+		.app {
+			padding: 2rem;
+		}
 	}
 
 	.theme-toggle {

@@ -38,23 +38,37 @@
 
     let currentIndex = $state(0);
     let measureEl: HTMLElement | null = null;
+    let descMeasureEl: HTMLElement | null = null;
     let maxHeight = $state(0);
+    let maxDescHeight = $state(0);
 
     function cycleHeader() {
         currentIndex = (currentIndex + 1) % headerOptions.length;
     }
 
     onMount(() => {
-        if (!measureEl) return;
-        const elements = measureEl.querySelectorAll<HTMLElement>('.measure-item');
-        const heights = Array.from(elements, el => Math.ceil(el.getBoundingClientRect().height));
-        maxHeight = heights.length ? Math.max(...heights) : 0;
+        if (measureEl) {
+            const elements = measureEl.querySelectorAll<HTMLElement>('.measure-item');
+            const heights = Array.from(elements, el => Math.ceil(el.getBoundingClientRect().height));
+            maxHeight = heights.length ? Math.max(...heights) : 0;
+        }
+        if (descMeasureEl) {
+            const descElements = descMeasureEl.querySelectorAll<HTMLElement>('.measure-desc');
+            const descHeights = Array.from(descElements, el => Math.ceil(el.getBoundingClientRect().height));
+            maxDescHeight = descHeights.length ? Math.max(...descHeights) : 0;
+        }
     });
 </script>
 
-<div bind:this={measureEl} class="header-measure">
+<div bind:this={measureEl} class="offscreen-measure">
     {#each headerOptions as option, i (i)}
         <h2 class="measure-item text-sm uppercase tracking-wide opacity-60 mb-6">our {option}</h2>
+    {/each}
+</div>
+
+<div bind:this={descMeasureEl} class="offscreen-measure">
+    {#each items as item (item.title)}
+        <p class="measure-desc opacity-80">{item.description}</p>
     {/each}
 </div>
 
@@ -70,7 +84,7 @@
         {#each items as item (item.title)}
             <li>
                 <h3 class="font-semibold mb-1">{item.title}</h3>
-                <p class="opacity-80">{item.description}</p>
+                <p class="opacity-80" style={`min-height: ${maxDescHeight}px`}>{item.description}</p>
             </li>
         {/each}
     </ul>
@@ -100,7 +114,7 @@
         text-decoration-color: #7d0202;
     }
 
-    .header-measure {
+    .offscreen-measure {
         position: absolute;
         visibility: hidden;
         pointer-events: none;

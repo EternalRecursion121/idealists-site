@@ -1,6 +1,7 @@
 <script lang="ts">
     import DNA from '$lib/components/DNA.svelte';
     import Definition from '$lib/components/Definition.svelte';
+    import Logo from '$lib/components/Logo.svelte';
 
     // Star rotation physics
     let starRotation = $state(0);
@@ -34,26 +35,25 @@
     <title>The Idealists Collective</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-6 py-16">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16">
 
     <div class="word-header mb-6">
         <div class="ideal-title">
             <span>THE IDEALISTS C<span
-                class="star"
-                style="transform: rotate({starRotation}deg)"
+                class="logo-wrapper"
                 onmouseenter={() => isHovering = true}
                 onmouseleave={() => isHovering = false}
-            >✺</span>LLECTIVE</span>
+            ><Logo size={48} rotation={starRotation} /></span>LLECTIVE</span>
         </div>
     </div>
 
     <section>
-        <p class="opacity-80" style="color: #18440B">we are the SF counterculture. we are embracing the new world of infinite software. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: #BE0000">idealists</i>.</p>
+        <p class="opacity-80">we are embracing the new world of infinite software. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
         <br>
-        <p style="text-align: center; color: #235613;">✺✺✺✺✺</p>
+        <p style="text-align: center; opacity: 0.6; color: var(--heading)">✺✺✺✺✺</p>
         <br>
     </section>
-    
+
     <!-- Definition hero -->
     <Definition />
 
@@ -69,7 +69,6 @@
     <a href="#" class="text-lg italic font-semibold mb-2">join us ✺</a>
 </div>
 
-
 <style>
     .word-header {
         display: flex;
@@ -81,17 +80,28 @@
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
-        font-size: 3rem;
+        font-size: 2rem;
         font-weight: 600;
         letter-spacing: -0.02em;
-        color: #7d0202;
+        color: var(--heading);
     }
 
-    .star {
+    .logo-wrapper {
         display: inline-block;
-        font-size: 1.3em;
-        transform-origin: 50% 55%;
         cursor: pointer;
         user-select: none;
+        vertical-align: middle;
+        margin: 0 -0.1em;
+    }
+
+    @media (min-width: 640px) {
+        .ideal-title {
+            font-size: 3rem;
+        }
+
+        .logo-wrapper :global(svg) {
+            width: 72px;
+            height: 72px;
+        }
     }
 </style>

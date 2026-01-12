@@ -76,7 +76,13 @@
 
 <style>
     .definition-hero {
-        min-height: 200px;
+        min-height: 150px;
+    }
+
+    @media (min-width: 640px) {
+        .definition-hero {
+            min-height: 200px;
+        }
     }
 
     .word-header {
@@ -86,9 +92,15 @@
     }
 
     .word {
-        font-size: 2.5rem;
+        font-size: 1.75rem;
         font-weight: 600;
         letter-spacing: -0.02em;
+    }
+
+    @media (min-width: 640px) {
+        .word {
+            font-size: 2.5rem;
+        }
     }
 
     .pronunciation {
