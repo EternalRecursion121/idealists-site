@@ -24,6 +24,7 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
-		"diff": "^8.0.3"
+		"diff": "^8.0.3",
+		"image-size": "^2.0.2"
 	}
 }
