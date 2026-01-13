@@ -1,0 +1,187 @@
+import { diffLines } from 'diff';
+import { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN } from '$env/static/private';
+import type { Revision, RevisionWithDiff, DiffResult, DiffLine } from '$lib/types/writing';
+
+const WRITINGS_DIR = 'src/lib/writings';
+
+const headers: HeadersInit = {
+	'Accept': 'application/vnd.github.v3+json',
+	'User-Agent': 'idealists-site',
+	...(GITHUB_TOKEN ? { 'Authorization': `Bearer ${GITHUB_TOKEN}` } : {})
+};
+
+export async function getWritingSlugs(): Promise<string[]> {
+	try {
+		const res = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${WRITINGS_DIR}`,
+			{ headers }
+		);
+
+		if (!res.ok) return [];
+
+		const contents = await res.json();
+		return contents
+			.filter((item: { type: string }) => item.type === 'dir')
+			.map((item: { name: string }) => item.name);
+	} catch {
+		return [];
+	}
+}
+
+export function getWritingPath(slug: string): string {
+	return `${WRITINGS_DIR}/${slug}/content.md`;
+}
+
+export async function getFileHistory(filePath: string): Promise<Revision[]> {
+	try {
+		const res = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?path=${encodeURIComponent(filePath)}`,
+			{ headers }
+		);
+
+		if (!res.ok) return [];
+
+		const commits = await res.json();
+
+		return commits.map((commit: {
+			sha: string;
+			commit: {
+				author: { name: string; date: string };
+				message: string;
+			};
+		}) => ({
+			hash: commit.sha,
+			shortHash: commit.sha.slice(0, 7),
+			date: commit.commit.author.date,
+			author: commit.commit.author.name,
+			message: commit.commit.message.split('\n')[0] // First line only
+		}));
+	} catch {
+		return [];
+	}
+}
+
+export async function getFileAtCommit(hash: string, filePath: string): Promise<string | null> {
+	try {
+		const res = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(filePath)}?ref=${hash}`,
+			{ headers }
+		);
+
+		if (!res.ok) return null;
+
+		const data = await res.json();
+
+		// Content is base64 encoded
+		if (data.content && data.encoding === 'base64') {
+			return atob(data.content.replace(/\n/g, ''));
+		}
+
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+export function computeDiff(oldContent: string, newContent: string): DiffResult {
+	const changes = diffLines(oldContent, newContent);
+
+	const lines: DiffLine[] = [];
+	let oldLineNumber = 1;
+	let newLineNumber = 1;
+	let additions = 0;
+	let deletions = 0;
+
+	for (const change of changes) {
+		const changeLines = change.value.split('\n');
+		if (changeLines[changeLines.length - 1] === '') {
+			changeLines.pop();
+		}
+
+		for (const line of changeLines) {
+			if (change.added) {
+				lines.push({
+					type: 'add',
+					content: line,
+					newLineNumber: newLineNumber++
+				});
+				additions++;
+			} else if (change.removed) {
+				lines.push({
+					type: 'remove',
+					content: line,
+					oldLineNumber: oldLineNumber++
+				});
+				deletions++;
+			} else {
+				lines.push({
+					type: 'context',
+					content: line,
+					oldLineNumber: oldLineNumber++,
+					newLineNumber: newLineNumber++
+				});
+			}
+		}
+	}
+
+	return { lines, additions, deletions };
+}
+
+export async function getWritingWithRevisions(slug: string): Promise<RevisionWithDiff[]> {
+	const filePath = getWritingPath(slug);
+	const history = await getFileHistory(filePath);
+
+	if (history.length === 0) {
+		return [];
+	}
+
+	const revisions: RevisionWithDiff[] = [];
+
+	// Fetch content for all revisions
+	const contents: (string | null)[] = await Promise.all(
+		history.map((rev) => getFileAtCommit(rev.hash, filePath))
+	);
+
+	// Process from oldest to newest for diff computation
+	for (let i = history.length - 1; i >= 0; i--) {
+		const revision = history[i];
+		const content = contents[i];
+
+		if (content === null) continue;
+
+		const prevContent = i < history.length - 1 ? contents[i + 1] : '';
+		const diff = prevContent !== null ? computeDiff(prevContent || '', content) : undefined;
+
+		revisions.unshift({
+			...revision,
+			content,
+			diff
+		});
+	}
+
+	return revisions;
+}
+
+export function extractFrontmatter(content: string): { title?: string; description?: string; author?: string; body: string } {
+	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+
+	if (!frontmatterMatch) {
+		const headingMatch = content.match(/^#\s+(.+)$/m);
+		return {
+			title: headingMatch?.[1],
+			body: content
+		};
+	}
+
+	const [, frontmatter, body] = frontmatterMatch;
+	const titleMatch = frontmatter.match(/^title:\s*["']?(.+?)["']?\s*$/m);
+	const descMatch = frontmatter.match(/^description:\s*["']?(.+?)["']?\s*$/m);
+	const authorMatch = frontmatter.match(/^author:\s*["']?(.+?)["']?\s*$/m);
+
+	return {
+		title: titleMatch?.[1],
+		description: descMatch?.[1],
+		author: authorMatch?.[1],
+		body: body.trim()
+	};
+}

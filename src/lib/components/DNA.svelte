@@ -188,7 +188,9 @@
         margin: 0;
         padding: 0 0 1rem 0;
         max-width: 50ch;
-        font-size: 0.8rem;
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        line-height: 1.5;
         color: var(--text);
     }
 </style>

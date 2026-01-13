@@ -48,9 +48,7 @@
     </div>
 
     <section>
-        <p class="opacity-80 text-lg">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
-        <br>
-        <p style="text-align: center; opacity: 0.6; color: var(--heading)">✺✺✺✺✺</p>
+        <p class="intro-text">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
         <br>
     </section>
 
@@ -60,7 +58,7 @@
     <!-- DNA -->
     <DNA />
 
-    <section class="mt-16 flex gap-6 justify-center">
+    <section class="nav-footer mt-16 flex gap-6 justify-center">
         <a href="/writings" class="opacity-80 hover:opacity-100">← writings</a>
         <span class="opacity-50">•</span>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog" class="opacity-80 hover:opacity-100 italic">join us</a>
@@ -98,6 +96,13 @@
         white-space: nowrap;
     }
 
+    .intro-text {
+        font-family: var(--font-mono);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        opacity: 0.85;
+    }
+
     @media (min-width: 640px) {
         .ideal-title {
             font-size: 3rem;
@@ -107,5 +112,9 @@
             width: 72px;
             height: 72px;
         }
+    }
+
+    .nav-footer {
+        font-size: 0.875rem;
     }
 </style>

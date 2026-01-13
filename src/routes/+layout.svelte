@@ -55,7 +55,8 @@
 	}
 
 	.app {
-		font-family: 'Source Code Pro', monospace;
+		--font-mono: 'Source Code Pro', monospace;
+		font-family: var(--font-mono);
 		min-height: 100vh;
 		padding: 1rem;
 		background: transparent;

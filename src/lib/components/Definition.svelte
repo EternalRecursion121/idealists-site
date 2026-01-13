@@ -12,13 +12,43 @@
     let visible = $state(true);
     let measureEl: HTMLElement | null = null;
     let maxHeight = $state(0);
+    let touchStartX = 0;
+    let touchEndX = 0;
 
     function cycleDefinition() {
         visible = false;
         setTimeout(() => {
             currentIndex = (currentIndex + 1) % definitions.length;
             visible = true;
-        }, 1000);
+        }, 300);
+    }
+
+    function goToDefinition(index: number) {
+        visible = false;
+        setTimeout(() => {
+            currentIndex = index;
+            visible = true;
+        }, 300);
+    }
+
+    function handleTouchStart(e: TouchEvent) {
+        touchStartX = e.touches[0].clientX;
+    }
+
+    function handleTouchEnd(e: TouchEvent) {
+        touchEndX = e.changedTouches[0].clientX;
+        const diff = touchStartX - touchEndX;
+        const threshold = 50;
+
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                // Swipe left - next
+                goToDefinition((currentIndex + 1) % definitions.length);
+            } else {
+                // Swipe right - previous
+                goToDefinition((currentIndex - 1 + definitions.length) % definitions.length);
+            }
+        }
     }
 
     $effect(() => {
@@ -44,7 +74,11 @@
     {/each}
 </div>
 
-<section class="definition-hero mb-20">
+<section
+    class="definition-hero mb-20"
+    ontouchstart={handleTouchStart}
+    ontouchend={handleTouchEnd}
+>
     <div class="word-header mb-6">
         <div class="flex items-baseline gap-3 flex-wrap">
             <span class="word">idealist</span>
@@ -121,6 +155,7 @@
 
     .definition-text {
         display: block;
+        font-family: var(--font-mono);
         font-size: 1.25rem;
         line-height: 1.5;
         max-width: 50ch;
@@ -130,7 +165,6 @@
         background: none;
         border: none;
         color: inherit;
-        font-family: inherit;
         text-align: left;
         padding: 0;
         transition: opacity 0.3s ease;
