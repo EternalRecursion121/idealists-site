@@ -1,6 +1,6 @@
 ---
 title: What is this?
-description: (this referring to the idealists collective)
+description:  An Introduction to the Idealists Collective
 author: Samuel Ratnam
 ---
 
