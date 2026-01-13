@@ -44,6 +44,12 @@
                     <p class="text-sm opacity-60 mb-2">Henry Desroches</p>
                 </a>
             </li>
+            <li>
+                <a href="https://www.inkandswitch.com/essay/malleable-software/" target="_blank" rel="noopener" class="block group">
+                    <h2 class="font-semibold mb-1 group-hover:opacity-70">Malleable Software</h2>
+                    <p class="text-sm opacity-60 mb-2">Ink & Switch</p>
+                </a>
+            </li>
         </ul>
     </section>
 
