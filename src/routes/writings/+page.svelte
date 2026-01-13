@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { WritingMetadata } from '$lib/types/writing';
+	import BottomNav from '$lib/components/BottomNav.svelte';
 
 	interface Props {
 		data: {
@@ -23,7 +24,7 @@
 	<title>Writings — The Idealists Collective</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16 min-h-screen flex flex-col">
 	<nav class="mb-8 sm:mb-12">
 		<a href="/" class="opacity-50 hover:opacity-100">← back</a>
 	</nav>
@@ -56,4 +57,6 @@
 			</ul>
 		{/if}
 	</section>
+
+	<BottomNav current="writings" />
 </div>

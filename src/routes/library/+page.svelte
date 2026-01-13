@@ -1,19 +1,19 @@
+<script lang="ts">
+	import BottomNav from '$lib/components/BottomNav.svelte';
+</script>
+
 <svelte:head>
     <title>Library — The Idealists Collective</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16">
-    <nav class="mb-8 sm:mb-12">
-        <a href="/" class="opacity-50 hover:opacity-100">← back</a>
-    </nav>
-
-    <header class="mb-8 sm:mb-12">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16 min-h-screen flex flex-col">
+    <header class="mb-8 sm:mb-12 text-center">
         <h1 class="text-2xl sm:text-3xl font-semibold mb-4">library</h1>
-        <p class="opacity-70">readings, videos, and manifestos that have influenced us</p>
+        <p class="opacity-70 max-w-xs mx-auto">readings, videos, and manifestos that have influenced us</p>
     </header>
 
-    <section>
-        <ul class="space-y-8">
+    <section class="text-center">
+        <ul class="space-y-8 inline-block">
             <li>
                 <a href="https://monoskop.org/images/e/e3/Beer_Stafford_Designing_Freedom.pdf" target="_blank" rel="noopener" class="block group">
                     <h2 class="font-semibold mb-1 group-hover:opacity-70">Designing Freedom</h2>
@@ -46,5 +46,7 @@
             </li>
         </ul>
     </section>
+
+	<BottomNav current="library" />
 </div>
 

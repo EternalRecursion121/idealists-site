@@ -1,0 +1,46 @@
+<script lang="ts">
+	type Page = 'home' | 'writings' | 'vibes' | 'library';
+
+	const ring: Page[] = ['writings', 'home', 'library', 'vibes'];
+	const paths: Record<Page, string> = {
+		home: '/',
+		writings: '/writings',
+		vibes: '/vibes',
+		library: '/library'
+	};
+
+	interface Props {
+		current: Page;
+	}
+
+	let { current }: Props = $props();
+
+	const idx = ring.indexOf(current);
+	const prev = ring[(idx - 1 + ring.length) % ring.length];
+	const next = ring[(idx + 1) % ring.length];
+</script>
+
+<nav class="nav-footer">
+	<a href={paths[prev]} class="opacity-80 hover:opacity-100">← {prev}</a>
+	<span class="opacity-50">•</span>
+	<a
+		href="https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog"
+		class="opacity-80 hover:opacity-100 italic"
+	>
+		join us
+	</a>
+	<span class="opacity-50">•</span>
+	<a href={paths[next]} class="opacity-80 hover:opacity-100">{next} →</a>
+</nav>
+
+<style>
+	.nav-footer {
+		display: flex;
+		gap: 1.5rem;
+		justify-content: center;
+		font-size: 0.875rem;
+		margin-top: auto;
+		padding-top: 4rem;
+		padding-bottom: 2rem;
+	}
+</style>

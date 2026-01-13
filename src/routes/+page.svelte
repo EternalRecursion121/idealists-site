@@ -2,6 +2,7 @@
     import DNA from '$lib/components/DNA.svelte';
     import Definition from '$lib/components/Definition.svelte';
     import Logo from '$lib/components/Logo.svelte';
+    import BottomNav from '$lib/components/BottomNav.svelte';
 
     // Star rotation physics
     let starRotation = $state(0);
@@ -35,7 +36,7 @@
     <title>The Idealists Collective</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16 min-h-screen flex flex-col">
 
     <div class="word-header mb-6">
         <div class="ideal-title">
@@ -58,13 +59,7 @@
     <!-- DNA -->
     <DNA />
 
-    <section class="nav-footer mt-16 flex gap-6 justify-center">
-        <a href="/writings" class="opacity-80 hover:opacity-100">← writings</a>
-        <span class="opacity-50">•</span>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog" class="opacity-80 hover:opacity-100 italic">join us</a>
-        <span class="opacity-50">•</span>
-        <a href="/library" class="opacity-80 hover:opacity-100">library →</a>
-    </section>
+    <BottomNav current="home" />
 </div>
 
 <style>
@@ -114,7 +109,4 @@
         }
     }
 
-    .nav-footer {
-        font-size: 0.875rem;
-    }
 </style>
