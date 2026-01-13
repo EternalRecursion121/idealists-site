@@ -22,13 +22,13 @@ export async function load({ params, setHeaders }) {
 	}
 
 	const currentContent = revisions[0].content;
-	const { title, description, author, body } = extractFrontmatter(currentContent);
+	const { title, description, authors, body } = extractFrontmatter(currentContent);
 
 	const metadata: WritingMetadata = {
 		slug,
 		title: title || slug.replace(/-/g, ' '),
 		description,
-		author,
+		authors,
 		createdAt: revisions[revisions.length - 1].date,
 		updatedAt: revisions[0].date,
 		revisionCount: revisions.length

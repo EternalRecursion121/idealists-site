@@ -162,7 +162,7 @@ export async function getWritingWithRevisions(slug: string): Promise<RevisionWit
 	return revisions;
 }
 
-export function extractFrontmatter(content: string): { title?: string; description?: string; author?: string; body: string } {
+export function extractFrontmatter(content: string): { title?: string; description?: string; authors?: string[]; body: string } {
 	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 
 	if (!frontmatterMatch) {
@@ -176,12 +176,32 @@ export function extractFrontmatter(content: string): { title?: string; descripti
 	const [, frontmatter, body] = frontmatterMatch;
 	const titleMatch = frontmatter.match(/^title:\s*["']?(.+?)["']?\s*$/m);
 	const descMatch = frontmatter.match(/^description:\s*["']?(.+?)["']?\s*$/m);
-	const authorMatch = frontmatter.match(/^author:\s*["']?(.+?)["']?\s*$/m);
+
+	// Parse authors - supports multiple formats:
+	// 1. Single author: author: Name
+	// 2. Comma-separated: authors: Name1, Name2
+	// 3. YAML array: authors:\n  - Name1\n  - Name2
+	let authors: string[] | undefined;
+
+	// Try YAML array format first
+	const yamlArrayMatch = frontmatter.match(/^authors:\s*\n((?:\s+-\s*.+\n?)+)/m);
+	if (yamlArrayMatch) {
+		authors = yamlArrayMatch[1]
+			.split('\n')
+			.map(line => line.replace(/^\s*-\s*/, '').trim())
+			.filter(Boolean);
+	} else {
+		// Try single line (authors: or author:)
+		const authorsMatch = frontmatter.match(/^authors?:\s*["']?(.+?)["']?\s*$/m);
+		if (authorsMatch) {
+			authors = authorsMatch[1].split(/,\s*/).map(a => a.trim()).filter(Boolean);
+		}
+	}
 
 	return {
 		title: titleMatch?.[1],
 		description: descMatch?.[1],
-		author: authorMatch?.[1],
+		authors: authors?.length ? authors : undefined,
 		body: body.trim()
 	};
 }

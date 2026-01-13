@@ -2,7 +2,7 @@ export interface WritingMetadata {
 	slug: string;
 	title: string;
 	description?: string;
-	author?: string;
+	authors?: string[];
 	createdAt: string; // ISO 8601
 	updatedAt: string; // ISO 8601
 	revisionCount: number;

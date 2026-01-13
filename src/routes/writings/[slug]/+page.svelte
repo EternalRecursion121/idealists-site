@@ -44,8 +44,8 @@
 			<p class="opacity-70 mb-4">{data.writing.metadata.description}</p>
 		{/if}
 		<div class="text-sm opacity-50">
-			{#if data.writing.metadata.author}
-				<span>{data.writing.metadata.author}</span>
+			{#if data.writing.metadata.authors?.length}
+				<span>{data.writing.metadata.authors.join(' & ')}</span>
 				<span class="mx-2">•</span>
 			{/if}
 			<span>
