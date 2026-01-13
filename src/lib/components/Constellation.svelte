@@ -150,7 +150,7 @@
 		width: 100vw;
 		height: 100vh;
 		pointer-events: none;
-		z-index: 0;
+		z-index: -1;
 		color: var(--network, var(--text, #005a42));
 	}
 

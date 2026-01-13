@@ -39,16 +39,16 @@
 
     <div class="word-header mb-6">
         <div class="ideal-title">
-            <span>THE IDEALISTS C<span
+            <span>THE IDEALISTS <span class="nowrap">C<span
                 class="logo-wrapper"
                 onmouseenter={() => isHovering = true}
                 onmouseleave={() => isHovering = false}
-            ><Logo size={48} rotation={starRotation} /></span>LLECTIVE</span>
+            ><Logo size={48} rotation={starRotation} /></span>LLECTIVE</span></span>
         </div>
     </div>
 
     <section>
-        <p class="opacity-80">we are embracing the new world of infinite software. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
+        <p class="opacity-80 text-lg">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
         <br>
         <p style="text-align: center; opacity: 0.6; color: var(--heading)">✺✺✺✺✺</p>
         <br>
@@ -60,13 +60,13 @@
     <!-- DNA -->
     <DNA />
 
-    <section class="mt-16">
-        <a href="/library" class="opacity-60 hover:opacity-100">library →</a>
+    <section class="mt-16 flex gap-6 justify-center">
+        <a href="/writings" class="opacity-80 hover:opacity-100">← writings</a>
+        <span class="opacity-50">•</span>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog" class="opacity-80 hover:opacity-100 italic">join us</a>
+        <span class="opacity-50">•</span>
+        <a href="/library" class="opacity-80 hover:opacity-100">library →</a>
     </section>
-</div>
-
-<div class="text-center mt-16">
-    <a href="#" class="text-lg italic font-semibold mb-2">join us ✺</a>
 </div>
 
 <style>
@@ -92,6 +92,10 @@
         user-select: none;
         vertical-align: middle;
         margin: 0 -0.1em;
+    }
+
+    .nowrap {
+        white-space: nowrap;
     }
 
     @media (min-width: 640px) {

@@ -8,7 +8,7 @@
 	const themes = {
 		night: { bg: '#0a0e1a', text: '#e8eaf0', accent: '#7eb8da', heading: '#f0d890', network: '#3a5a8a' },
 		cream: { bg: '#E9E2D2', text: '#1B367E', accent: '#3F812A', heading: '#7d0202', network: '#1B367E' },
-		navy: { bg: '#1B367E', text: '#F6E9CD', accent: '#96E8B3', heading: '#FFD166', network: '#F6E9CD' },
+		navy: { bg: '#1B367E', text: '#e0ecfa', accent: '#96E8B3', heading: '#FFD166', network: '#F6E9CD' },
 		mint: { bg: '#b8e8c8', text: '#1B367E', accent: '#1B367E', heading: '#1a4d1a', network: '#1B367E' },
 		lavender: { bg: '#C3BBFF', text: '#1B367E', accent: '#1B367E', heading: '#4A2C6A', network: '#1B367E' },
 		forest: { bg: '#3F812A', text: '#F6E9CD', accent: '#96E8B3', heading: '#FFF8DC', network: '#F6E9CD' },
@@ -58,9 +58,9 @@
 		font-family: 'Source Code Pro', monospace;
 		min-height: 100vh;
 		padding: 1rem;
-		background: var(--bg);
+		background: transparent;
 		color: var(--text);
-		transition: background 0.3s, color 0.3s;
+		transition: color 0.3s;
 	}
 
 	@media (min-width: 640px) {
