@@ -4,4 +4,4 @@ description: An Introduction to the Idealists Collective
 author: Samuel Ratnam
 ---
 
-test 2
+to be entirely honest, I don't quite know what this is.
