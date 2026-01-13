@@ -23,7 +23,7 @@
             description: "we create with whimsy and joy. what is life without fun?"
         },
         {
-            title: "living",
+            title: "alive",
             description: "dynamic systems over static entities. things that grow, adapt, merge, and die when they need to."
         },
         {
