@@ -16,6 +16,10 @@
 </svelte:head>
 
 <div class="vibes-page">
+	<p class="text-sm opacity-60 mb-4">
+		inspired by <a href="https://www.xavicf.com/vibes" target="_blank" rel="noopener" class="underline hover:opacity-100">Xavi</a>
+	</p>
+
 	<ScatteredGallery images={data.images} />
 
 	<BottomNav current="vibes" />
