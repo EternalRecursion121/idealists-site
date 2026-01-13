@@ -86,12 +86,20 @@
 </div>
 
 <script module lang="ts">
+	import { marked } from 'marked';
+
+	// Configure marked to open links in new tabs
+	marked.use({
+		renderer: {
+			link({ href, title, text }) {
+				const titleAttr = title ? ` title="${title}"` : '';
+				return `<a href="${href}"${titleAttr} target="_blank" rel="noopener">${text}</a>`;
+			}
+		}
+	});
+
 	function renderMarkdown(text: string): string {
-		// Basic markdown rendering - paragraphs and line breaks
-		return text
-			.split(/\n\n+/)
-			.map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
-			.join('');
+		return marked(text) as string;
 	}
 </script>
 
@@ -153,5 +161,29 @@
 
 	.writing-content :global(p:last-child) {
 		margin-bottom: 0;
+	}
+
+	.writing-content :global(a) {
+		color: var(--accent);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.writing-content :global(a:hover) {
+		opacity: 0.7;
+	}
+
+	.writing-content :global(ul) {
+		margin-bottom: 1.25rem;
+		padding-left: 1.5rem;
+	}
+
+	.writing-content :global(li) {
+		margin-bottom: 0.5rem;
+	}
+
+	.writing-content :global(strong) {
+		font-weight: 600;
+		color: var(--heading);
 	}
 </style>
