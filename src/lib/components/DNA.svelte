@@ -6,7 +6,8 @@
         "dna",
         "architecture",
         "principles",
-        "demands"
+        "demands",
+        "core"
     ];
 
     const items = [
