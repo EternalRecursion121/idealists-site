@@ -37,7 +37,7 @@
 			>
 				<span class="point-dot"></span>
 				<span class="point-label">
-					<span class="point-date">{formatDate(revision.date)}</span>
+					<span class="point-date">{formatDate(revision.date)} at {formatTime(revision.date)}</span>
 					<span class="point-message">{revision.message}</span>
 				</span>
 			</button>
