@@ -19,6 +19,7 @@
 		"but there are so many of them!",
 		"there not only exist demons in your phone, but all around the world, at every level of abstraction.",
 		"the systems that are supposed to nurture us are instead eating us.",
+		"and day by day the demons are getting ever larger.",
 		"we believe that the world need not be made of demons.",
 		"the world could be made of gasping waterfalls!",
 		"or flocks of frolicking llamas!",
@@ -150,7 +151,7 @@ we are a collective. this literally means we are made up of people. you there, i
 			</p>
 
 			<p>
-				we're not a newsletter. we're not a startup. we're a collective — which means
+				we're a collective — which means
 				we're only as interesting as the people in it and what they make.
 			</p>
 
