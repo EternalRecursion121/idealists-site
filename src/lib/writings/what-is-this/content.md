@@ -17,4 +17,4 @@ The aim of the idealists collective is to empower people to imagine, and build o
 - **cooperative** - we cannot succeed alone. nor would we want to.
 - **love** - don't compromise on your integrity. don't sell your soul. do everything with love.
 
-If any of this [resonates](https://resonantcomputing.org/) with you, [join](https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog) our collective. We'd love to have you.
+If any of this [resonates](https://resonantcomputing.org/) with you, [join](/join) our collective. We'd love to have you.
