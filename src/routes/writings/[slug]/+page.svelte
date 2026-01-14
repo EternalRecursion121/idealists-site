@@ -12,6 +12,7 @@
 	let { data }: Props = $props();
 
 	let currentRevisionIndex = $state(0);
+	let historyExpanded = $state(false);
 
 	let currentRevision = $derived(data.writing.revisions[currentRevisionIndex]);
 	let isLatest = $derived(currentRevisionIndex === 0);
@@ -67,12 +68,20 @@
 
 	{#if data.writing.revisions.length > 1}
 		<div class="timeline-section">
-			<span class="opacity-60 text-sm">revision history</span>
-			<TimelineSlider
-				revisions={data.writing.revisions}
-				currentIndex={currentRevisionIndex}
-				onSelect={(i) => currentRevisionIndex = i}
-			/>
+			<button
+				class="history-toggle"
+				onclick={() => historyExpanded = !historyExpanded}
+			>
+				<span>revision history ({data.writing.revisions.length})</span>
+				<span class="toggle-icon">{historyExpanded ? '−' : '+'}</span>
+			</button>
+			{#if historyExpanded}
+				<TimelineSlider
+					revisions={data.writing.revisions}
+					currentIndex={currentRevisionIndex}
+					onSelect={(i) => currentRevisionIndex = i}
+				/>
+			{/if}
 		</div>
 	{/if}
 
@@ -135,6 +144,32 @@
 		margin-top: 3rem;
 		padding-top: 1.5rem;
 		border-top: 1px solid var(--accent);
+	}
+
+	.history-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		background: none;
+		border: none;
+		color: inherit;
+		font-family: inherit;
+		font-size: 0.875rem;
+		opacity: 0.6;
+		cursor: pointer;
+		padding: 0;
+		text-align: left;
+	}
+
+	.history-toggle:hover {
+		opacity: 1;
+	}
+
+	.toggle-icon {
+		color: var(--accent);
+		font-size: 1.25rem;
+		font-weight: 300;
 	}
 
 	.writing-content {
