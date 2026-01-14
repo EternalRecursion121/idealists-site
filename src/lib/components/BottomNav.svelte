@@ -36,11 +36,18 @@
 <style>
 	.nav-footer {
 		display: flex;
-		gap: 1.5rem;
+		gap: 1rem;
 		justify-content: center;
+		flex-wrap: wrap;
 		font-size: 0.875rem;
 		margin-top: auto;
 		padding-top: 4rem;
 		padding-bottom: 2rem;
+	}
+
+	@media (min-width: 640px) {
+		.nav-footer {
+			gap: 1.5rem;
+		}
 	}
 </style>

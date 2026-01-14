@@ -156,7 +156,7 @@
     .definition-text {
         display: block;
         font-family: var(--font-mono);
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         line-height: 1.5;
         max-width: 50ch;
         margin-bottom: 1.5rem;
@@ -168,6 +168,12 @@
         text-align: left;
         padding: 0;
         transition: opacity 0.3s ease;
+    }
+
+    @media (min-width: 640px) {
+        .definition-text {
+            font-size: 1.25rem;
+        }
     }
     
     .definition-text:hover {
@@ -207,6 +213,13 @@
 
     .dot.active {
         opacity: 0.8;
+    }
+
+    /* Hide dots on mobile - swipe works instead */
+    @media (max-width: 640px) {
+        .definition-dots {
+            display: none;
+        }
     }
 
     .definition-measure {

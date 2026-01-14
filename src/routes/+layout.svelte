@@ -46,7 +46,7 @@
 
 <style>
 	:global(html) {
-		font-size: 16px;
+		font-size: 14px;
 	}
 
 	:global(html, body) {
@@ -66,7 +66,7 @@
 
 	@media (min-width: 640px) {
 		:global(html) {
-			font-size: 20px;
+			font-size: 17px;
 		}
 
 		.app {

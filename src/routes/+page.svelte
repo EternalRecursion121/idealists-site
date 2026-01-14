@@ -36,9 +36,9 @@
     <title>The Idealists Collective</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16 min-h-screen flex flex-col">
+<div class="page-container">
 
-    <div class="word-header mb-6">
+    <div class="word-header">
         <div class="ideal-title">
             <span>THE IDEALISTS <span class="nowrap">C<span
                 class="logo-wrapper"
@@ -48,9 +48,8 @@
         </div>
     </div>
 
-    <section>
+    <section class="intro-section">
         <p class="intro-text">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
-        <br>
     </section>
 
     <!-- Definition hero -->
@@ -63,10 +62,20 @@
 </div>
 
 <style>
+    .page-container {
+        max-width: 48rem;
+        margin: 0 auto;
+        padding: 1rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
     .word-header {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        margin-bottom: 1.5rem;
     }
 
     .ideal-title {
@@ -91,6 +100,10 @@
         white-space: nowrap;
     }
 
+    .intro-section {
+        margin-bottom: 1.5rem;
+    }
+
     .intro-text {
         font-family: var(--font-mono);
         font-size: 1.1rem;
@@ -98,7 +111,29 @@
         opacity: 0.85;
     }
 
+    @media (max-width: 640px) {
+        .intro-text {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .ideal-title {
+            font-size: 1.5rem;
+        }
+
+        .logo-wrapper :global(svg) {
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+    /* Desktop */
     @media (min-width: 640px) {
+        .page-container {
+            padding: 2rem 1.5rem;
+        }
+
         .ideal-title {
             font-size: 3rem;
         }
