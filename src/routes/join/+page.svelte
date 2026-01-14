@@ -14,13 +14,13 @@
 
 	<section class="content space-y-6 mb-12">
 		<p>
-			we're a small group of people who think the future is worth fighting for.
+			we're a group of people who think the future is worth fighting for.
 			we have a discord server. we talk about ideas, share works-in-progress, and
 			create things together.
 		</p>
 
 		<p>
-			we care about beauty, meaning, imagining a better future — and actually building it out. we care about
+			we are here to imagine and build out the world we want to live in, through philosophy, art and technology. we care about
 			technology that empowers rather than extracts. tools you control. software that
 			respects your attention. systems that are alive — that grow, adapt, and serve the
 			people using them.
@@ -50,7 +50,7 @@
 			rel="noopener"
 			class="cta-button"
 		>
-			fill out the form →
+			fill out the form
 		</a>
 	</div>
 
@@ -73,17 +73,17 @@
 
 	.cta-button {
 		display: inline-block;
-		padding: 0.5rem 1.25rem;
-		border: 1px solid var(--accent);
 		color: var(--accent);
 		font-size: 0.875rem;
-		letter-spacing: 0.02em;
-		transition: all 0.2s ease;
+		letter-spacing: 0.03em;
+		text-decoration: underline;
+		text-underline-offset: 0.25em;
+		opacity: 0.9;
+		transition: opacity 0.2s ease;
 	}
 
 	.cta-button:hover {
-		background: var(--accent);
-		color: var(--bg);
+		opacity: 1;
 	}
 
 	@media (min-width: 640px) {
