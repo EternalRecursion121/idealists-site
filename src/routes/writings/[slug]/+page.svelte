@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
+	import BottomNav from '$lib/components/BottomNav.svelte';
 	import type { WritingWithHistory } from '$lib/types/writing';
 
 	interface Props {
@@ -89,13 +90,7 @@
 		</div>
 	{/if}
 
-	<nav class="mt-16 flex gap-6 justify-center">
-		<a href="/writings" class="opacity-50 hover:opacity-100">← writings</a>
-		<span class="opacity-50">•</span>
-		<a href="https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog" class="opacity-50 hover:opacity-100 italic">join us</a>
-		<span class="opacity-50">•</span>
-		<a href="/" class="opacity-50 hover:opacity-100">home →</a>
-	</nav>
+	<BottomNav current="writings" />
 </div>
 
 <script module lang="ts">
