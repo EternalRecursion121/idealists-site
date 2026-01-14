@@ -23,10 +23,7 @@
 <nav class="nav-footer">
 	<a href={paths[prev]} class="opacity-80 hover:opacity-100">← {prev}</a>
 	<span class="opacity-50">•</span>
-	<a
-		href="https://docs.google.com/forms/d/e/1FAIpQLSeFt80kKtQ81aPR5SscPl99C0br4gPZOG6wo91yVD4Gnu42rg/viewform?usp=dialog"
-		class="opacity-80 hover:opacity-100 italic"
-	>
+	<a href="/join" class="tracking-wide text-[var(--accent)] opacity-[0.85] hover:opacity-100">
 		join us
 	</a>
 	<span class="opacity-50">•</span>
