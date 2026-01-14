@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import type { WritingWithHistory } from '$lib/types/writing';
 
@@ -70,17 +71,20 @@
 		<div class="timeline-section">
 			<button
 				class="history-toggle"
+				class:history-expanded={historyExpanded}
 				onclick={() => historyExpanded = !historyExpanded}
 			>
 				<span>revision history ({data.writing.revisions.length})</span>
 				<span class="toggle-icon">{historyExpanded ? '−' : '+'}</span>
 			</button>
 			{#if historyExpanded}
-				<TimelineSlider
-					revisions={data.writing.revisions}
-					currentIndex={currentRevisionIndex}
-					onSelect={(i) => currentRevisionIndex = i}
-				/>
+				<div transition:slide={{ duration: 300 }}>
+					<TimelineSlider
+						revisions={data.writing.revisions}
+						currentIndex={currentRevisionIndex}
+						onSelect={(i) => currentRevisionIndex = i}
+					/>
+				</div>
 			{/if}
 		</div>
 	{/if}
@@ -141,9 +145,32 @@
 	}
 
 	.timeline-section {
+		position: relative;
 		margin-top: 3rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid var(--accent);
+		padding-left: 1rem;
+		max-width: 65ch;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.timeline-section::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: var(--accent);
+		opacity: 0.15;
+		transition: opacity 0.2s ease;
+	}
+
+	.timeline-section:hover::before {
+		opacity: 0.4;
+	}
+
+	.timeline-section:has(.history-expanded)::before {
+		opacity: 1;
 	}
 
 	.history-toggle {
@@ -156,20 +183,37 @@
 		color: inherit;
 		font-family: inherit;
 		font-size: 0.875rem;
-		opacity: 0.6;
 		cursor: pointer;
-		padding: 0;
+		padding: 0.6rem 0;
 		text-align: left;
+		transition: transform 0.15s ease;
 	}
 
 	.history-toggle:hover {
-		opacity: 1;
+		color: var(--accent);
+		transform: translateX(4px);
+	}
+
+	.history-toggle.history-expanded {
+		color: var(--accent);
+		font-style: italic;
 	}
 
 	.toggle-icon {
 		color: var(--accent);
-		font-size: 1.25rem;
+		font-size: 1rem;
 		font-weight: 300;
+		opacity: 0.5;
+		transition: opacity 0.2s ease, transform 0.2s ease;
+	}
+
+	.history-toggle:hover .toggle-icon {
+		opacity: 1;
+	}
+
+	.history-toggle.history-expanded .toggle-icon {
+		opacity: 1;
+		transform: rotate(45deg);
 	}
 
 	.writing-content {

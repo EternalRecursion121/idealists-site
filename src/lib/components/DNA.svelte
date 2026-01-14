@@ -138,11 +138,29 @@
     }
 
     .dna-item {
-        border-bottom: 1px solid var(--accent);
+        position: relative;
+        padding-left: 1rem;
+        margin-bottom: 0.25rem;
     }
 
-    .dna-item:first-child {
-        border-top: 1px solid var(--accent);
+    .dna-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        bottom: 0.5rem;
+        width: 2px;
+        background: var(--accent);
+        opacity: 0.15;
+        transition: opacity 0.2s ease;
+    }
+
+    .dna-item:hover::before {
+        opacity: 0.4;
+    }
+
+    .dna-item:has(.expanded)::before {
+        opacity: 1;
     }
 
     .dna-title {
@@ -150,7 +168,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.75rem 0;
+        padding: 0.6rem 0;
         background: none;
         border: none;
         color: inherit;
@@ -159,20 +177,34 @@
         font-weight: 600;
         cursor: pointer;
         text-align: left;
+        transition: transform 0.15s ease;
     }
 
     .dna-title:hover {
         color: var(--accent);
+        transform: translateX(4px);
     }
 
     .dna-title.expanded .title-text {
         font-style: italic;
+        color: var(--accent);
     }
 
     .indicator {
         font-weight: 300;
-        font-size: 1.25rem;
+        font-size: 1rem;
         color: var(--accent);
+        opacity: 0.5;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .dna-title:hover .indicator {
+        opacity: 1;
+    }
+
+    .dna-title.expanded .indicator {
+        opacity: 1;
+        transform: rotate(45deg);
     }
 
     .dna-desc {

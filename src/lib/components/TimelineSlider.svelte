@@ -109,10 +109,13 @@
 		gap: 0.1rem;
 		font-size: 0.75rem;
 		opacity: 0.6;
-		transition: opacity 0.2s ease;
+		transition: opacity 0.2s ease, transform 0.15s ease;
 	}
 
-	.timeline-point:hover .point-label,
+	.timeline-point:hover .point-label {
+		opacity: 1;
+	}
+
 	.timeline-point.active .point-label {
 		opacity: 1;
 	}
@@ -120,10 +123,21 @@
 	.point-date {
 		color: var(--accent);
 		font-weight: 500;
+		transition: font-style 0.15s ease;
+	}
+
+	.timeline-point.active .point-date {
+		font-style: italic;
 	}
 
 	.point-message {
 		color: var(--text);
 		opacity: 0.8;
+		transition: color 0.15s ease, opacity 0.15s ease;
+	}
+
+	.timeline-point.active .point-message {
+		color: var(--accent);
+		opacity: 1;
 	}
 </style>
