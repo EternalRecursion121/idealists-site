@@ -9,76 +9,89 @@
     ];
 
     let currentIndex = $state(0);
-    let visible = $state(true);
-    let measureEl: HTMLElement | null = null;
+    let dragOffset = $state(0);
+    let isDragging = $state(false);
+    let containerEl: HTMLElement | null = null;
     let maxHeight = $state(0);
-    let touchStartX = 0;
-    let touchEndX = 0;
 
-    function cycleDefinition() {
-        visible = false;
-        setTimeout(() => {
-            currentIndex = (currentIndex + 1) % definitions.length;
-            visible = true;
-        }, 300);
-    }
+    let startX = 0;
+    let startY = 0;
+    let isHorizontalDrag = $state<boolean | null>(null);
 
     function goToDefinition(index: number) {
-        visible = false;
-        setTimeout(() => {
-            currentIndex = index;
-            visible = true;
-        }, 300);
+        currentIndex = Math.max(0, Math.min(definitions.length - 1, index));
+        dragOffset = 0;
     }
 
-    function handleTouchStart(e: TouchEvent) {
-        touchStartX = e.touches[0].clientX;
+    function handlePointerDown(e: PointerEvent) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        isDragging = true;
+        isHorizontalDrag = null;
+        startX = e.clientX;
+        startY = e.clientY;
+        dragOffset = 0;
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
     }
 
-    function handleTouchEnd(e: TouchEvent) {
-        touchEndX = e.changedTouches[0].clientX;
-        const diff = touchStartX - touchEndX;
-        const threshold = 50;
+    function handlePointerMove(e: PointerEvent) {
+        if (!isDragging) return;
 
-        if (Math.abs(diff) > threshold) {
-            if (diff > 0) {
-                // Swipe left - next
-                goToDefinition((currentIndex + 1) % definitions.length);
-            } else {
-                // Swipe right - previous
-                goToDefinition((currentIndex - 1 + definitions.length) % definitions.length);
-            }
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        // Determine drag direction on first significant movement
+        if (isHorizontalDrag === null && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+            isHorizontalDrag = Math.abs(deltaX) > Math.abs(deltaY);
+        }
+
+        // Only handle horizontal drags
+        if (isHorizontalDrag) {
+            e.preventDefault();
+            dragOffset = deltaX;
         }
     }
 
+    function handlePointerUp(e: PointerEvent) {
+        if (!isDragging) return;
+        isDragging = false;
+
+        if (!isHorizontalDrag) {
+            dragOffset = 0;
+            return;
+        }
+
+        const threshold = 50;
+
+        if (dragOffset < -threshold && currentIndex < definitions.length - 1) {
+            goToDefinition(currentIndex + 1);
+        } else if (dragOffset > threshold && currentIndex > 0) {
+            goToDefinition(currentIndex - 1);
+        } else {
+            dragOffset = 0;
+        }
+
+        isHorizontalDrag = null;
+    }
+
+    // Auto-cycle
     $effect(() => {
-        const delay = currentIndex === 3 ? 7000 : 5000; // hold longer on "you?"
-        const timeout = setTimeout(() => cycleDefinition(), delay);
+        if (isDragging) return;
+        const delay = currentIndex === 3 ? 7000 : 5000;
+        const timeout = setTimeout(() => {
+            goToDefinition((currentIndex + 1) % definitions.length);
+        }, delay);
         return () => clearTimeout(timeout);
     });
 
     onMount(() => {
-        if (!measureEl) return;
-        const items = measureEl.querySelectorAll<HTMLElement>('.measure-item');
+        if (!containerEl) return;
+        const items = containerEl.querySelectorAll<HTMLElement>('.slide');
         const heights = Array.from(items, el => Math.ceil(el.getBoundingClientRect().height));
         maxHeight = heights.length ? Math.max(...heights) : 0;
     });
 </script>
 
-<div bind:this={measureEl} class="definition-measure">
-    {#each definitions as def, i (i)}
-        <div class="definition-text measure-item">
-            <span class="definition-number">{i + 1}.</span>
-            {def}
-        </div>
-    {/each}
-</div>
-
-<section
-    class="definition-hero mb-20"
-    ontouchstart={handleTouchStart}
-    ontouchend={handleTouchEnd}
->
+<section class="definition-hero mb-20">
     <div class="word-header mb-6">
         <div class="flex items-baseline gap-3 flex-wrap">
             <span class="word">idealist</span>
@@ -86,22 +99,39 @@
         </div>
         <span class="pronunciation">/ʌɪˈdɪəlɪst/</span>
     </div>
-    <button 
-        class="definition-text"
-        style={`min-height: ${maxHeight}px`}
-        class:fade-out={!visible}
-        onclick={() => cycleDefinition()}
+
+    <div
+        class="carousel"
+        bind:this={containerEl}
+        onpointerdown={handlePointerDown}
+        onpointermove={handlePointerMove}
+        onpointerup={handlePointerUp}
+        onpointercancel={handlePointerUp}
+        style="height: {maxHeight || 'auto'}px"
     >
-        <span class="definition-number">{currentIndex + 1}.</span>
-        {definitions[currentIndex]}
-    </button>
-    
+        <div
+            class="carousel-track"
+            class:dragging={isDragging && isHorizontalDrag}
+            style="transform: translateX(calc(-{currentIndex * 100}% + {dragOffset}px))"
+        >
+            {#each definitions as def, i (i)}
+                <button
+                    class="slide"
+                    onclick={() => !isDragging && goToDefinition((currentIndex + 1) % definitions.length)}
+                >
+                    <span class="definition-number">{i + 1}.</span>
+                    {def}
+                </button>
+            {/each}
+        </div>
+    </div>
+
     <div class="definition-dots">
         {#each definitions as _, i (i)}
-            <button 
+            <button
                 class="dot"
                 class:active={i === currentIndex}
-                onclick={() => { currentIndex = i; visible = true; }}
+                onclick={() => goToDefinition(i)}
                 aria-label="Definition {i + 1}"
             ></button>
         {/each}
@@ -153,13 +183,32 @@
         opacity: 0.4;
     }
 
-    .definition-text {
-        display: block;
+    .carousel {
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        touch-action: pan-y pinch-zoom;
+        cursor: grab;
+    }
+
+    .carousel:active {
+        cursor: grabbing;
+    }
+
+    .carousel-track {
+        display: flex;
+        transition: transform 0.3s ease-out;
+    }
+
+    .carousel-track.dragging {
+        transition: none;
+    }
+
+    .slide {
+        flex: 0 0 100%;
         font-family: var(--font-mono);
         font-size: 1.1rem;
         line-height: 1.5;
         max-width: 50ch;
-        margin-bottom: 1.5rem;
         opacity: 0.85;
         cursor: pointer;
         background: none;
@@ -167,23 +216,19 @@
         color: inherit;
         text-align: left;
         padding: 0;
-        transition: opacity 0.3s ease;
+        user-select: none;
     }
 
     @media (min-width: 640px) {
-        .definition-text {
+        .slide {
             font-size: 1.25rem;
         }
     }
-    
-    .definition-text:hover {
+
+    .slide:hover {
         opacity: 1;
     }
 
-    .definition-text.fade-out {
-        opacity: 0;
-    }
-    
     .definition-number {
         opacity: 0.5;
         margin-right: 0.25rem;
@@ -214,20 +259,4 @@
     .dot.active {
         opacity: 0.8;
     }
-
-    /* Hide dots on mobile - swipe works instead */
-    @media (max-width: 640px) {
-        .definition-dots {
-            display: none;
-        }
-    }
-
-    .definition-measure {
-        position: absolute;
-        visibility: hidden;
-        pointer-events: none;
-        height: 0;
-        overflow: hidden;
-    }
 </style>
-
