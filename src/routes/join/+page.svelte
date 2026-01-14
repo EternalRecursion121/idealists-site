@@ -151,8 +151,7 @@ we are a collective. this literally means we are made up of people. you there, i
 			</p>
 
 			<p>
-				we're a collective — which means
-				we're only as interesting as the people in it and what they make.
+				we're a collective — we exist through the people that make it up and what we create together.
 			</p>
 
 			<p class="opacity-70 text-s text-center mb-3">
