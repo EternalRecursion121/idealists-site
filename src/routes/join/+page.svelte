@@ -2,7 +2,7 @@
 	import BottomNav from '$lib/components/BottomNav.svelte';
 	import { onMount } from 'svelte';
 
-	type LlamaPhase = 'hidden' | 'entering' | 'speaking' | 'exiting' | 'corner';
+	type LlamaPhase = 'hidden' | 'appearing' | 'entering' | 'speaking' | 'exiting' | 'corner';
 
 	let llamaPhase = $state<LlamaPhase>('hidden');
 	let messageIndex = $state(0);
@@ -57,10 +57,16 @@ we are a collective. this literally means we are made up of people. you there, i
 
 	onMount(() => {
 		const enterTimeout = setTimeout(() => {
-			llamaPhase = 'entering';
-			setTimeout(() => {
-				llamaPhase = 'speaking';
-			}, 1000);
+			llamaPhase = 'appearing';
+			// Small delay to ensure DOM renders with initial state before transitioning
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					llamaPhase = 'entering';
+					setTimeout(() => {
+						llamaPhase = 'speaking';
+					}, 1000);
+				});
+			});
 		}, 3000);
 
 		return () => clearTimeout(enterTimeout);
@@ -98,6 +104,7 @@ we are a collective. this literally means we are made up of people. you there, i
 	{#if llamaPhase !== 'hidden'}
 		<div
 			class="llama-overlay"
+			class:appearing={llamaPhase === 'appearing'}
 			class:entering={llamaPhase === 'entering'}
 			class:speaking={llamaPhase === 'speaking'}
 			class:exiting={llamaPhase === 'exiting'}
@@ -235,18 +242,21 @@ we are a collective. this literally means we are made up of people. you there, i
 		flex-direction: column;
 		align-items: center;
 		pointer-events: auto;
-		transform: translateX(-100vw);
-		transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		transform: scale(0) rotate(-720deg);
+		opacity: 0;
+		transition: transform 1s ease-out, opacity 0.5s ease;
 	}
 
 	.llama-overlay.entering .llama-wrapper,
 	.llama-overlay.speaking .llama-wrapper {
-		transform: translateX(0);
+		transform: scale(1) rotate(0deg);
+		opacity: 1;
 	}
 
 	.llama-overlay.exiting .llama-wrapper {
-		transform: translateX(0) scale(0.3) rotate(720deg);
-		transition: transform 1s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+		transform: scale(0) rotate(720deg);
+		opacity: 0;
+		transition: transform 1s ease-in, opacity 1s ease-in;
 	}
 
 	.llama-overlay.corner .llama-wrapper {
