@@ -171,7 +171,7 @@ we are a collective. this literally means we are made up of people. you there, i
 			rel="noopener"
 			class="cta-button"
 		>
-			fill out the form
+			join
 		</a>
 	</div>
 
