@@ -159,7 +159,7 @@ we are a collective. this literally means we are made up of people. you there, i
 			</p>
 
 			{#if llamaPhase === 'speaking' && messageIndex === 0}
-				<p class="llama-hint">ps. you might want to click the llama</p>
+				<p class="llama-hint">p.s. you might want to click the llama</p>
 			{/if}
 		{/if}
 	</section>
