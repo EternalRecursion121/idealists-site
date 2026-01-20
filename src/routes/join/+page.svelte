@@ -138,8 +138,7 @@ we are a collective. this literally means we are made up of people. you there, i
 			{/each}
 		{:else}
 			<p>
-				we're a group of people who think the future is worth fighting for.
-				we have a discord server. we talk about ideas, share works-in-progress, and
+				we're a group of people who think the future is worth fighting for. we talk about ideas, share works-in-progress, and
 				create things together.
 			</p>
 
