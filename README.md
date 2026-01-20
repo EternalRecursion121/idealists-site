@@ -1,46 +1,34 @@
 # The Idealists Collective
 
-A website for a collective embracing the new world of infinite software, with a direction towards utopia.
+Website for a collective of philosophers, artists, and technologists building toward utopia.
 
-## Tech Stack
-
-- [Svelte 5](https://svelte.dev/) with runes
-- [SvelteKit](https://kit.svelte.dev/)
-- [Tailwind CSS v4](https://tailwindcss.com/)
-- TypeScript
-
-## Quick Start
+## Getting Started
 
 ```sh
 npm install
 npm run dev
 ```
 
-## Scripts
+## Stack
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build |
-| `npm run preview` | Preview production build |
-| `npm run check` | Type-check the codebase |
+- **Svelte 5** with runes
+- **SvelteKit** with adapter-auto
+- **Tailwind CSS v4**
+- **TypeScript**
 
-## Project Structure
+## Pages
 
+- `/` — Homepage with animated star logo, cycling definitions, and DNA principles
+- `/writings` — Essays with git-tracked revision history
+- `/vibes` — Scattered image gallery
+- `/library` — Reading list
+- `/join` — Membership page with animated llama
+
+## Commands
+
+```sh
+npm run dev          # Start development server
+npm run build        # Production build
+npm run preview      # Preview production build
+npm run check        # Type-check with svelte-check
 ```
-src/
-├── routes/
-│   ├── +layout.svelte    # Root layout with theming
-│   ├── +page.svelte      # Homepage
-│   └── library/
-│       └── +page.svelte  # Reading list
-└── lib/
-    └── components/
-        ├── Definition.svelte
-        └── DNA.svelte
-```
-
-## Documentation
-
-- `HUMAN.md` — Getting started guide for developers
-- `CLAUDE.md` — Instructions for Claude Code AI assistant
