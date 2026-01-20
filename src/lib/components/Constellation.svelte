@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+	const pages = ['/', '/writings', '/vibes', '/library', '/join', '/projects', '/members'];
 
 	let svg: SVGSVGElement;
 	let paths: string[] = $state([]);
-	let nodes: { id: number; x: number; y: number; baseX: number; baseY: number; size: number; opacity: number; fadeDirection: 'in' | 'out' | 'stable' }[] = $state([]);
+	let nodes: { id: number; x: number; y: number; baseX: number; baseY: number; size: number; opacity: number; fadeDirection: 'in' | 'out' | 'stable'; destination: string }[] = $state([]);
 	let time = $state(0);
 	let nextNodeId = $state(0);
 
@@ -72,7 +75,8 @@
 		const size = Math.random() < 0.15 ? 2.5 + Math.random() * 1.5 : 1 + Math.random() * 1;
 
 		const id = nextNodeId++;
-		return { id, x: baseX, y: baseY, baseX, baseY, size, opacity: 0, fadeDirection: 'in' };
+		const destination = pages[Math.floor(Math.random() * pages.length)];
+		return { id, x: baseX, y: baseY, baseX, baseY, size, opacity: 0, fadeDirection: 'in', destination };
 	}
 
 	function refreshNode() {
@@ -185,6 +189,7 @@
 			stroke="currentColor"
 			stroke-width="0.5"
 			opacity={LINE_OPACITY}
+			style="pointer-events: none"
 		/>
 	{/each}
 
@@ -196,6 +201,10 @@
 			fill="currentColor"
 			opacity={LINE_OPACITY * 1.5 * node.opacity}
 			class="node"
+			role="link"
+			tabindex="-1"
+			onclick={() => goto(node.destination)}
+			onkeydown={(e) => e.key === 'Enter' && goto(node.destination)}
 		/>
 	{/each}
 </svg>
@@ -207,12 +216,13 @@
 		left: 0;
 		width: 100vw;
 		height: 100vh;
-		pointer-events: none;
 		z-index: -1;
 		color: var(--network, var(--text, #005a42));
 	}
 
 	.node {
 		transition: opacity 0.5s ease;
+		pointer-events: auto;
+		cursor: default;
 	}
 </style>

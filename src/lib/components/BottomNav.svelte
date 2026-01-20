@@ -1,12 +1,14 @@
 <script lang="ts">
-	type Page = 'home' | 'writings' | 'vibes' | 'library';
+	type Page = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
 
-	const ring: Page[] = ['writings', 'home', 'library', 'vibes'];
+	const ring: Page[] = ['writings', 'projects', 'home', 'library', 'members', 'vibes'];
 	const paths: Record<Page, string> = {
 		home: '/',
 		writings: '/writings',
 		vibes: '/vibes',
-		library: '/library'
+		library: '/library',
+		projects: '/projects',
+		members: '/members'
 	};
 
 	interface Props {

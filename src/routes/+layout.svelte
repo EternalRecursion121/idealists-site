@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import Constellation from '$lib/components/Constellation.svelte';
+	import FloatingLlama from '$lib/components/FloatingLlama.svelte';
 	let { children } = $props();
 
 	let theme = $state('night');
@@ -38,6 +39,7 @@
 	style="--bg: {themes[theme].bg}; --text: {themes[theme].text}; --accent: {themes[theme].accent}; --heading: {themes[theme].heading}; --network: {themes[theme].network};"
 >
 	<Constellation />
+	<FloatingLlama />
 	<!-- <button class="theme-toggle" onclick={cycleTheme}>
 		{theme}
 	</button> -->

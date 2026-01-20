@@ -143,7 +143,11 @@
                 {#each definitions as def, i (i)}
                     <div class="slide">
                         <span class="definition-number">{i + 1}.</span>
-                        {def}
+                        {#if def === 'you?'}
+                            <a href="/join" class="you-link">{def}</a>
+                        {:else}
+                            {def}
+                        {/if}
                     </div>
                 {/each}
             </div>
@@ -158,7 +162,11 @@
                 onclick={() => cycleDefinition()}
             >
                 <span class="definition-number">{currentIndex + 1}.</span>
-                {definitions[currentIndex]}
+                {#if definitions[currentIndex] === 'you?'}
+                    <a href="/join" class="you-link" onclick={(e) => e.stopPropagation()}>{definitions[currentIndex]}</a>
+                {:else}
+                    {definitions[currentIndex]}
+                {/if}
             </button>
         </div>
     {/if}
@@ -340,5 +348,14 @@
         .measure-item {
             font-size: 1.25rem;
         }
+    }
+
+    .you-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .you-link:hover {
+        color: var(--accent);
     }
 </style>
