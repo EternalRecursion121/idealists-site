@@ -261,7 +261,8 @@ we are a collective. this literally means we are made up of people. you there, i
 
 	.llama-overlay.corner .llama-wrapper {
 		transform: translate(0.5rem, 0.5rem) scale(1);
-		transition: transform 0.5s ease-out;
+		opacity: 1;
+		transition: transform 0.5s ease-out, opacity 0.3s ease-out;
 	}
 
 	.llama-image {
