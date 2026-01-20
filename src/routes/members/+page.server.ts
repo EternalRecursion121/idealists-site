@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import membersRaw from '$lib/data/members.csv?raw';
 
 export interface Member {
 	name: string;
@@ -16,10 +15,7 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 export async function load() {
-	const csvPath = resolve('src/lib/data/members.csv');
-	const content = readFileSync(csvPath, 'utf-8');
-
-	const lines = content.trim().split('\n').slice(1); // Skip header
+	const lines = membersRaw.trim().split('\n').slice(1); // Skip header
 	const members: Member[] = lines
 		.filter(line => line.trim())
 		.map(line => {
