@@ -1,4 +1,8 @@
 {
+  "ark.jpeg": [
+    1200,
+    1600
+  ],
   "ccru.png": [
     1148,
     1454
@@ -11,9 +15,17 @@
     1061,
     1472
   ],
+  "isthmus2.jpg": [
+    1122,
+    1122
+  ],
   "mould.png": [
     1062,
     878
+  ],
+  "optimal transport.png": [
+    640,
+    479
   ],
   "pendulum.png": [
     962,
