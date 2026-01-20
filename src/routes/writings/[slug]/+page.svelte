@@ -247,9 +247,14 @@
 		opacity: 0.7;
 	}
 
-	.writing-content :global(ul) {
+	.writing-content :global(ul),
+	.writing-content :global(ol) {
 		margin-bottom: 1.25rem;
 		padding-left: 1.5rem;
+	}
+
+	.writing-content :global(ol) {
+		list-style-type: decimal;
 	}
 
 	.writing-content :global(li) {
