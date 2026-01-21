@@ -201,16 +201,19 @@ we are a collective. this literally means we are made up of people. you there, i
 	.cta-button {
 		display: inline-block;
 		color: var(--accent);
-		font-size: 0.875rem;
-		letter-spacing: 0.03em;
-		text-decoration: underline;
-		text-underline-offset: 0.25em;
-		opacity: 0.9;
-		transition: opacity 0.2s ease;
+		font-size: 1.1rem;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		padding: 0.75rem 2rem;
+		border: 2px solid var(--accent);
+		text-decoration: none;
+		transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 	}
 
 	.cta-button:hover {
-		opacity: 1;
+		background: var(--accent);
+		color: var(--bg);
+		transform: translateY(-2px);
 	}
 
 	@media (min-width: 640px) {
