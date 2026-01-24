@@ -30,4 +30,4 @@ not all art cannot be communicated through words alone. jazz musicians implicitl
 jazz coded software is not built with utility in mind. there is no set purpose or goal to your creations. there are no metrics by which you will be judged. it is software created for its own sake.
 
 
-3. break the rules
+c. break the rules
