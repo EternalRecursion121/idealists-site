@@ -106,9 +106,11 @@ export async function getFileAtCommit(hash: string, filePath: string): Promise<s
 
 			const data = await res.json();
 
-			// Content is base64 encoded
+			// Content is base64 encoded - decode properly for UTF-8
 			if (data.content && data.encoding === 'base64') {
-				return atob(data.content.replace(/\n/g, ''));
+				const binary = atob(data.content.replace(/\n/g, ''));
+				const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+				return new TextDecoder('utf-8').decode(bytes);
 			}
 		} catch {
 			continue;

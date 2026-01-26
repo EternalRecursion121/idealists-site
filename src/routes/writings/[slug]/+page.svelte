@@ -95,6 +95,7 @@
 
 <script module lang="ts">
 	import { marked } from 'marked';
+	import markedFootnote from 'marked-footnote';
 
 	const styles = [
      'font-size: 1.8rem; font-weight: 600; color: var(--heading); margin: 2rem 0 1rem 0; letter-spacing: -0.02em;',
@@ -106,6 +107,8 @@
 ];
 
 	// Configure marked to open links in new tabs
+	marked.use(markedFootnote());
+
 	marked.use({
 		renderer: {
 			link({ href, title, text }) {
@@ -115,12 +118,12 @@
 			strong({ text }) {
 			return `<strong class="fancy-bold">${text}</strong>`;
 			},
-			
+
 			heading({ text, depth }) {
 			const slug = text.toLowerCase().replace(/\s+/g, '-');
 			return `<h${depth} style="${styles[depth]}" id="${slug}">${text}</h${depth}>`;
 			},
-			
+
 			em({ text }) {
 			return `<em class="italic">${text}</em>`;
 			},
@@ -245,7 +248,7 @@
 		margin-bottom: 1.25rem;
 	}
 
-	.writing-content :global(p:first-child::first-letter) {
+	.writing-content > :global(p:first-child::first-letter) {
 		float: left;
 		font-size: 3.5rem;
 		line-height: 0.8;
@@ -285,5 +288,41 @@
 	.writing-content :global(strong) {
 		font-weight: 600;
 		color: var(--heading);
+	}
+
+	/* Footnote inline references */
+	.writing-content :global([data-footnote-ref]) {
+		font-size: 0.75em;
+		vertical-align: super;
+		text-decoration: none;
+		color: var(--accent);
+	}
+
+	.writing-content :global([data-footnote-ref]:hover) {
+		text-decoration: underline;
+	}
+
+	/* Footnotes section */
+	.writing-content :global(section[data-footnotes]) {
+		margin-top: 3rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--accent);
+		opacity: 0.7;
+		font-size: 0.85em;
+	}
+
+	.writing-content :global(section[data-footnotes] ol) {
+		padding-left: 1.25rem;
+	}
+
+	.writing-content :global(section[data-footnotes] li) {
+		margin-bottom: 0.75rem;
+	}
+
+	/* Back-to-reference link */
+	.writing-content :global([data-footnote-backref]) {
+		text-decoration: none;
+		margin-left: 0.25rem;
+		color: var(--accent);
 	}
 </style>
