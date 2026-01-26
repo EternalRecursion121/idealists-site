@@ -5,7 +5,7 @@ author: Atharva
 ---
 
 
-One of my worries about AI, is that it will take away the joy of the details. I enjoy doing work. I enjoy having a deep, gears-ey understanding of what''s going on. Of understanding what each individual line of code is doing; of drafting and redrafting an essay to its bones; of spending an entire afternoon muddling through a math proof. It's deeply satisfying to get under the hood & see what makes the system tick.
+One of my worries about AI, is that it will take away the joy of the details. I enjoy doing work. I enjoy having a deep, gears-ey understanding of what's going on. Of understanding what each individual line of code is doing; of drafting and redrafting an essay to its bones; of spending an entire afternoon muddling through a math proof. It's deeply satisfying to get under the hood & see what makes the system tick.
 
 You lose this joy if an LLM does this work for you. You type out some text on the screen. Hit enter. And a blinking caret starts weaving up an answer. It's deeply clinical and sterilized. You're no longer in the muck of it all; you wave your hands and it all works out. There is no resistance, there is no challenge to overcome; you're in minecraft and playing on creative mode.
 
