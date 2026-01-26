@@ -4,6 +4,13 @@ import type { Revision, RevisionWithDiff, DiffResult, DiffLine } from '$lib/type
 
 const WRITINGS_DIR = 'src/lib/writings';
 
+// Map current paths to their previous paths (for tracking renames)
+const PATH_RENAMES: Record<string, string[]> = {
+	'src/lib/writings/i-want-to-write-code-like-im-playing-jazz/content.md': [
+		'src/lib/writings/i want to write code like im playing jazz/content.md'
+	]
+};
+
 const headers: HeadersInit = {
 	'Accept': 'application/vnd.github.v3+json',
 	'User-Agent': 'idealists-site',
@@ -32,7 +39,7 @@ export function getWritingPath(slug: string): string {
 	return `${WRITINGS_DIR}/${slug}/content.md`;
 }
 
-export async function getFileHistory(filePath: string): Promise<Revision[]> {
+async function getFileHistoryForPath(filePath: string): Promise<Revision[]> {
 	try {
 		const res = await fetch(
 			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?path=${encodeURIComponent(filePath)}`,
@@ -61,26 +68,54 @@ export async function getFileHistory(filePath: string): Promise<Revision[]> {
 	}
 }
 
-export async function getFileAtCommit(hash: string, filePath: string): Promise<string | null> {
-	try {
-		const res = await fetch(
-			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(filePath)}?ref=${hash}`,
-			{ headers }
-		);
+export async function getFileHistory(filePath: string): Promise<Revision[]> {
+	// Get all paths to check (current + any previous paths from renames)
+	const allPaths = [filePath, ...(PATH_RENAMES[filePath] || [])];
 
-		if (!res.ok) return null;
+	// Fetch history for all paths in parallel
+	const histories = await Promise.all(allPaths.map(getFileHistoryForPath));
 
-		const data = await res.json();
+	// Merge and dedupe by commit hash, sort by date descending
+	const seen = new Set<string>();
+	const merged: Revision[] = [];
 
-		// Content is base64 encoded
-		if (data.content && data.encoding === 'base64') {
-			return atob(data.content.replace(/\n/g, ''));
+	for (const history of histories) {
+		for (const rev of history) {
+			if (!seen.has(rev.hash)) {
+				seen.add(rev.hash);
+				merged.push(rev);
+			}
 		}
-
-		return null;
-	} catch {
-		return null;
 	}
+
+	return merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export async function getFileAtCommit(hash: string, filePath: string): Promise<string | null> {
+	// Get all paths to try (current + any previous paths from renames)
+	const allPaths = [filePath, ...(PATH_RENAMES[filePath] || [])];
+
+	for (const path of allPaths) {
+		try {
+			const res = await fetch(
+				`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(path)}?ref=${hash}`,
+				{ headers }
+			);
+
+			if (!res.ok) continue;
+
+			const data = await res.json();
+
+			// Content is base64 encoded
+			if (data.content && data.encoding === 'base64') {
+				return atob(data.content.replace(/\n/g, ''));
+			}
+		} catch {
+			continue;
+		}
+	}
+
+	return null;
 }
 
 export function computeDiff(oldContent: string, newContent: string): DiffResult {
