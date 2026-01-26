@@ -1,7 +1,7 @@
 ---
 title: we shouldn't be content with low bandwidth communication
 description: we are having sex and waging war down the same channel built to cite academic articles
-author: meg, and?
+author: meg, ?
 ---
 
 ## (mandatory initial anecdote)
@@ -30,6 +30,7 @@ i'd like to counter this with the idea of telemetry.
 so far i've been arguing that the amount of information we can send to others is extremely limited. but in fact, there *are* many streams of data passing from you to the platforms you use. button presses and comments are the few channels we are conscious of, but in reality there are many more that we never knowingly experience. the length of time you linger over a post, the times of day you are most online, the emails you open, the links you follow, *the subconscious choices you make*. this information is always passing from you to the platform, and used to fine-tune the content-serving algorithms written into everything we use. this adds up to be an immense amount of data, excessively large, all taken and used against us.
 
 the evidence for the success of this subconscious multithreaded communication can be seen in algorithmic recommendations. these systems understand us better than we understand ourselves; what would the outcome be if we could use this derived understanding for ourselves? multithreaded communication is wholly possible, just out of the hands of the individual.
+
 ## making this a little more formal
 one example of how communication is hindered is through the expressivity of the platforms we use. pls forgive me but i have a little linear algebra model for how i consider this to work:
 let $v =$ vector of the raw concept/information you want to transmit,
@@ -37,6 +38,7 @@ $M =$ the matrix representing the medium through which you are conveying this (r
 $T =$ the matrix representing the conceptual tooling you are using (the way you structure the problem, the actions you are presented with after this. for example, the tooling i have used here is linear algebra, something i feel to be quite expressive!!),
 $l =$ the vector representing the lived experience of anyone observing the concept/information you are transmitting.
 we can then construct the formula $MTv = l$. ordering matters here [i'll say more probably at some point]
+
 ## our future -!
 i think a small part of this problem stems from the existence that the internet started with. we are now having sex and [waging war](https://www.washingtonpost.com/technology/2022/03/01/social-media-ukraine-russia/) down the same channels built to cite academic articles. to use online space to its full potential, we need to stop treating our platforms as a product and more as a substrate: a medium we [live on top of](https://alarmingdevelopment.org/?p=1842), [consume](https://ponder.org.uk/post/2025-06-03-substrates-vision/), [reshape](https://www.humprog.org/~stephen/research/papers/kell25substratus.pdf).
 
