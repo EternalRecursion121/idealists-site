@@ -96,13 +96,34 @@
 <script module lang="ts">
 	import { marked } from 'marked';
 
+	const styles = [
+     'font-size: 1.8rem; font-weight: 600; color: var(--heading); margin: 2rem 0 1rem 0; letter-spacing: -0.02em;',
+     'font-size: 1.4rem; font-weight: 600; color: var(--heading); margin: 1.5rem 0 0.75rem 0; letter-spacing: -0.01em;',
+     'font-size: 1.15rem; font-weight: 600; color: var(--heading); margin: 1.25rem 0 0.5rem 0;',
+     'font-size: 1rem; font-weight: 600; color: var(--accent); margin: 1rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em;',
+     'font-size: 0.9rem; font-weight: 500; color: var(--accent); margin: 0.75rem 0 0.25rem 0;',
+    'font-size: 0.85rem; font-weight: 500; color: var(--text); opacity: 0.7; margin: 0.5rem 0 0.25rem 0;'
+];
+
 	// Configure marked to open links in new tabs
 	marked.use({
 		renderer: {
 			link({ href, title, text }) {
 				const titleAttr = title ? ` title="${title}"` : '';
 				return `<a href="${href}"${titleAttr} target="_blank" rel="noopener">${text}</a>`;
-			}
+			},
+			strong({ text }) {
+			return `<strong class="fancy-bold">${text}</strong>`;
+			},
+			
+			heading({ text, depth }) {
+			const slug = text.toLowerCase().replace(/\s+/g, '-');
+			return `<h${depth} style="${styles[depth]}" id="${slug}">${text}</h${depth}>`;
+			},
+			
+			em({ text }) {
+			return `<em class="italic">${text}</em>`;
+			},
 		}
 	});
 
