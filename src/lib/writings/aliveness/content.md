@@ -38,6 +38,7 @@ Things that are undead:
 - leaves blown by the wind
 
 **Getting Real and staying Alive**
+
 *(like 80% of this is just extra unimportant word-fluff. feel free to prune.)*
 At ASPR (a rat-camp in Taiwan), one of the participants, [Uzay](https://www.uzpg.me/) had a liking for aggressively spreading a meme, leading to small but growing groups of people mutually hyping each other up and chanting "**Get real!**", as the positive feedback loop created a bundle of extreme liveliness.
 This is one way of making people more real. But what does it mean for someone to "get real"?
