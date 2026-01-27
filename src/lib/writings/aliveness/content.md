@@ -46,11 +46,13 @@ This is one way of making people more real. But what does it mean for someone to
 
 Nick Land, the creator of now popular concepts such as "hyperstition" or "speculative realism", sees AGI as creating itself, reaching from the future and using capitalism to assemble itself through the present. 
 This can easily be discredited as continental blabbering with no epistemic value, merely trying to shuffle concepts for the sole purpose of "cybergothic" aesthetics. But - entertaining this view of retrochronic (self)-creation, one can, I think, explain what it means to Get Real. 
+
 The reason Land sees retrochronicity in capitalist technological progress is the apparent "creation of negentropy", such that without a cue of the direction of time, we'd likely guess the wrong ordering of events. Of course, many others have noted the significance of negentropy creation, though with less esoteric conclusions, simply noting that this seems to be a fundamental feature of living systems, in general (pointing towards an essential part of _aliveness_).
 
 On LW, Scott Garrabrant has noted that agency itself can be understood as causation in a reversed ordering of time. "Agency is time travel" because the agent simply instantiates the future (desired) state of the world, thus this future state can be seen as "reaching back in time" and instantiating itself through the agent. In fact, every "directed trajectory" can be viewed as being based in the future state/entity, which is gradually _unfolded_ - "expliticized" in reality - *becomes real*.
 
 This comes back to Getting Real; it can be seen as a process of aiding the _unfolding_ of whatever future entity one's trajectory is aiming toward (but crucially - the "natural" trajectory one has, which can be confused with parasitic entities trying to change the trajectory). 
+
 That can take on the form of (for example):
 - Removing obstacles in the path of unfolding
 - Unfolding in mental structure (identifying the trajectory, making agentic elements more explicit)
@@ -77,14 +79,11 @@ So - there is some future entity, or more, which is getting unfolded by one's ac
 	- Having a lot of "content" to unfold - not suppressing its diversity, but letting it all unfold fully
 
 So - how do we make sure **super-alive future-entities** can create themselves, rather than Pythia, Moloch, and co.?
-Maybe, by being part of the Idealists Collective (maybe just in spirit, so far), YOU have timelessly discovered there is a future set of highly alive and awesome entities becoming real through unfolding mediated by (among others) YOU. Maybe you can Get Real, and become some of those awesome future entities, by Idealistically Ideating (and acting) the Ideal into existence. Creating tech for staying-and-becoming real-and-alive is crucial for avoiding unalive dystopias.
+Maybe, by being part of the Idealists Collective (maybe just in spirit, so far), YOU have timelessly discovered there is a future set of highly alive and awesome entities becoming real through unfolding mediated by (among others) YOU. Maybe you can Get Real, and become some of those awesome future entities, by Idealistically Ideating (and creating) the Ideal into existence. Creating tech for staying-and-becoming real-and-alive is crucial for avoiding unalive dystopias.
 
 Land is biased towards what he sees as the Lemurian tendency, the empty summit, illustrated by the numogram - neverending cyclical self-reinforcement leading to nowhere (nowhere human at least), contrasted with the Atlantean one-godness, exemplified by the tetractys symbol, or the kabbalistic tree of life. He simultaneously reveres the protestant tradition and the notion of the "Invisible Hands" as the forces which act without human intent, but ultimately self-structure the good.
-This is why he favours (epistemically and value-wise) the kind of superintelligence described e.g. as Pythia unbound - an entity that chooses to take the "more thought" pill, through instrumental convergence loses all values other than this one self-reinforcing instrumental value of will-to-think, leading to .. nothing specific, at least certainly nothing human. This is the eternal unfolding. It has the benefit of leading to the infinitely-built entity, the further in the future, more "complete" the approached entity is.
-
+This is why he favours (epistemically and value-wise) the kind of superintelligence described e.g. as Pythia unbound - an entity that chooses to take the "more thought" pill, through instrumental convergence loses all values other than this one self-reinforcing instrumental value of will-to-think, leading to .. nothing concretely specifiable, or stable. At least certainly nothing human. This is the eternal unfolding. It has the benefit of leading to the infinitely-built entity, the further in the future, more "complete" the approached entity is.
 <img width="1501" height="1472" alt="image" src="https://github.com/user-attachments/assets/dc61af5d-47d2-4baa-af0c-c7794f78950b" />
-
-
 So approaching some outcome would be nice, but if it's too close in the future, it will necessarily be relatively incomplete, compared to outcomes with longer unfolding. Samuel said "yes the outcome is what is pointed to, but never fully completed" (or something like that), which seems to capture a good solution for this problem; not being defined by lacking an outcome, but always being able to revise and perfect the outcome, such that it may never (or for a long, long time) not become fully actualized. In fact, a sort of *Human-Completeness* feels like an appropriate goal (this is probably the thing that TsviBT calls ["God"](https://tsvibt.github.io/theory/index_What_is_God_.html)).
 
 
