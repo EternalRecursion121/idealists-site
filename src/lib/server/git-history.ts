@@ -1,11 +1,8 @@
 import { diffLines } from 'diff';
 import { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN } from '$env/static/private';
 import type { Revision, RevisionWithDiff, DiffResult, DiffLine } from '$lib/types/writing';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
 
 const WRITINGS_DIR = 'src/lib/writings';
-const LOCAL_WRITINGS_PATH = '/var/www/arg/idealists-site/src/lib/writings';
 
 // Map current paths to their previous paths (for tracking renames)
 const PATH_RENAMES: Record<string, string[]> = {
@@ -209,16 +206,25 @@ export function getAnnotationsPath(slug: string): string {
 	return `${WRITINGS_DIR}/${slug}/annotations.md`;
 }
 
-export function getLocalAnnotationsPath(slug: string): string {
-	return join(LOCAL_WRITINGS_PATH, slug, 'annotations.md');
-}
-
 export async function getAnnotations(slug: string): Promise<string | null> {
-	// Read from local filesystem instead of GitHub API
-	const localPath = getLocalAnnotationsPath(slug);
+	// Read from GitHub API (works on Vercel where there's no local filesystem)
+	const path = getAnnotationsPath(slug);
 	try {
-		if (existsSync(localPath)) {
-			return readFileSync(localPath, 'utf-8');
+		const res = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`,
+			{ headers }
+		);
+
+		if (!res.ok) {
+			if (res.status === 404) return null; // File doesn't exist yet
+			return null;
+		}
+
+		const data = await res.json();
+		if (data.content && data.encoding === 'base64') {
+			const binary = atob(data.content.replace(/\n/g, ''));
+			const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+			return new TextDecoder('utf-8').decode(bytes);
 		}
 	} catch {
 		return null;
@@ -226,10 +232,68 @@ export async function getAnnotations(slug: string): Promise<string | null> {
 	return null;
 }
 
-export function saveAnnotations(slug: string, markdown: string): boolean {
-	const localPath = getLocalAnnotationsPath(slug);
+export async function isCollaborator(username: string): Promise<boolean> {
 	try {
-		writeFileSync(localPath, markdown, 'utf-8');
+		const res = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/collaborators/${username}`,
+			{ headers }
+		);
+		return res.status === 204; // 204 = is a collaborator
+	} catch {
+		return false;
+	}
+}
+
+export async function saveAnnotations(
+	slug: string,
+	markdown: string,
+	author: { name: string; email: string }
+): Promise<boolean> {
+	// Commit via GitHub API using the server's PAT, with user as author
+	const path = getAnnotationsPath(slug);
+	const content = Buffer.from(markdown, 'utf-8').toString('base64');
+
+	try {
+		// First get the current file's SHA (needed for updates)
+		let sha: string | undefined;
+		const existingRes = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`,
+			{ headers }
+		);
+
+		if (existingRes.ok) {
+			const existing = await existingRes.json();
+			sha = existing.sha;
+		}
+
+		// Commit the file with user as author
+		const commitRes = await fetch(
+			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`,
+			{
+				method: 'PUT',
+				headers: {
+					...headers,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					message: `Add annotation to ${slug}`,
+					content,
+					sha,
+					branch: 'main',
+					author: {
+						name: author.name,
+						email: author.email
+					}
+				})
+			}
+		);
+
+		if (!commitRes.ok) {
+			const error = await commitRes.json();
+			console.error('GitHub commit failed:', error);
+			return false;
+		}
+
 		return true;
 	} catch (e) {
 		console.error('Failed to save annotations:', e);

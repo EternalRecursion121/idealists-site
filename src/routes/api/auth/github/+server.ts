@@ -4,7 +4,7 @@ import { GITHUB_CLIENT_ID } from '$env/static/private';
 import type { RequestHandler } from './$types';
 
 const CLIENT_ID = GITHUB_CLIENT_ID;
-const SCOPES = 'repo user:email'; // repo access for committing, user:email for identity
+const SCOPES = 'user:email'; // minimal scope - just need identity, server PAT handles commits
 
 export const GET: RequestHandler = async ({ url }) => {
 	const callbackUrl = `${url.origin}/api/auth/github/callback`;

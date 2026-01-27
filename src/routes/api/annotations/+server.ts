@@ -1,16 +1,30 @@
 import { json } from '@sveltejs/kit';
-import { saveAnnotations, getAnnotations } from '$lib/server/git-history';
+import { saveAnnotations, getAnnotations, isCollaborator } from '$lib/server/git-history';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { slug, markdown } = await request.json();
+		const { slug, markdown, user } = await request.json();
 
 		if (!slug || typeof markdown !== 'string') {
 			return json({ error: 'Missing slug or markdown' }, { status: 400 });
 		}
 
-		const success = saveAnnotations(slug, markdown);
+		if (!user || !user.login || !user.name) {
+			return json({ error: 'Missing user info' }, { status: 400 });
+		}
+
+		// Verify user is a collaborator on the repo
+		const hasAccess = await isCollaborator(user.login);
+		if (!hasAccess) {
+			return json({ error: 'Not a collaborator on this repo' }, { status: 403 });
+		}
+
+		// Save with user as author
+		const success = await saveAnnotations(slug, markdown, {
+			name: user.name || user.login,
+			email: user.email || `${user.id}+${user.login}@users.noreply.github.com`
+		});
 
 		if (success) {
 			return json({ success: true });
