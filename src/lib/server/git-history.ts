@@ -1,8 +1,11 @@
 import { diffLines } from 'diff';
 import { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN } from '$env/static/private';
 import type { Revision, RevisionWithDiff, DiffResult, DiffLine } from '$lib/types/writing';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 const WRITINGS_DIR = 'src/lib/writings';
+const LOCAL_WRITINGS_PATH = '/var/www/arg/idealists-site/src/lib/writings';
 
 // Map current paths to their previous paths (for tracking renames)
 const PATH_RENAMES: Record<string, string[]> = {
@@ -200,6 +203,38 @@ export async function getWritingWithRevisions(slug: string): Promise<RevisionWit
 	}
 
 	return revisions;
+}
+
+export function getAnnotationsPath(slug: string): string {
+	return `${WRITINGS_DIR}/${slug}/annotations.md`;
+}
+
+export function getLocalAnnotationsPath(slug: string): string {
+	return join(LOCAL_WRITINGS_PATH, slug, 'annotations.md');
+}
+
+export async function getAnnotations(slug: string): Promise<string | null> {
+	// Read from local filesystem instead of GitHub API
+	const localPath = getLocalAnnotationsPath(slug);
+	try {
+		if (existsSync(localPath)) {
+			return readFileSync(localPath, 'utf-8');
+		}
+	} catch {
+		return null;
+	}
+	return null;
+}
+
+export function saveAnnotations(slug: string, markdown: string): boolean {
+	const localPath = getLocalAnnotationsPath(slug);
+	try {
+		writeFileSync(localPath, markdown, 'utf-8');
+		return true;
+	} catch (e) {
+		console.error('Failed to save annotations:', e);
+		return false;
+	}
 }
 
 export function extractFrontmatter(content: string): { title?: string; description?: string; authors?: string[]; body: string } {

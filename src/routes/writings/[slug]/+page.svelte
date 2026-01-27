@@ -2,12 +2,14 @@
 	import { slide } from 'svelte/transition';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import BottomNav from '$lib/components/BottomNav.svelte';
+	import AnnotationLayer from '$lib/annotations/components/AnnotationLayer.svelte';
 	import type { WritingWithHistory } from '$lib/types/writing';
 
 	interface Props {
 		data: {
 			writing: WritingWithHistory;
 			nextSlug: string;
+			annotationsMarkdown: string | null;
 		};
 	}
 
@@ -92,6 +94,8 @@
 
 	<BottomNav current="writings" />
 </div>
+
+<AnnotationLayer slug={data.writing.metadata.slug} annotationsMarkdown={data.annotationsMarkdown} useGitHub={true} />
 
 <script module lang="ts">
 	import { marked } from 'marked';
