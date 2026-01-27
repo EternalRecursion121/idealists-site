@@ -14,15 +14,29 @@ function shuffle<T>(array: T[]): T[] {
 	return shuffled;
 }
 
+function parseCSVLine(line: string): [string, string] | null {
+	// Handle quoted fields (e.g., "Name, Jr.",url)
+	const match = line.match(/^"([^"]+)"|^([^,]+)/);
+	if (!match) return null;
+
+	const name = (match[1] || match[2]).trim();
+	const rest = line.slice(match[0].length).replace(/^,\s*/, '');
+	const url = rest.replace(/^"([^"]+)"/, '$1').trim();
+
+	return name && url ? [name, url] : null;
+}
+
 export async function load() {
 	const lines = membersRaw.trim().split('\n').slice(1); // Skip header
 	const members: Member[] = lines
 		.filter(line => line.trim())
 		.map(line => {
-			const [name, url] = line.split(',').map(s => s.trim());
+			const parsed = parseCSVLine(line);
+			if (!parsed) return null;
+			const [name, url] = parsed;
 			return { name, url };
 		})
-		.filter(m => m.name); // Filter out empty entries
+		.filter((m): m is Member => m !== null);
 
 	return { members: shuffle(members) };
 }

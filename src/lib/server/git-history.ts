@@ -30,7 +30,8 @@ export async function getWritingSlugs(): Promise<string[]> {
 		return contents
 			.filter((item: { type: string }) => item.type === 'dir')
 			.map((item: { name: string }) => item.name);
-	} catch {
+	} catch (error) {
+		console.error('Failed to fetch writing slugs:', error);
 		return [];
 	}
 }
@@ -63,7 +64,8 @@ async function getFileHistoryForPath(filePath: string): Promise<Revision[]> {
 			author: commit.commit.author.name,
 			message: commit.commit.message.split('\n')[0] // First line only
 		}));
-	} catch {
+	} catch (error) {
+		console.error('Failed to fetch file history for path:', filePath, error);
 		return [];
 	}
 }
@@ -112,7 +114,8 @@ export async function getFileAtCommit(hash: string, filePath: string): Promise<s
 				const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
 				return new TextDecoder('utf-8').decode(bytes);
 			}
-		} catch {
+		} catch (error) {
+			console.error('Failed to fetch file at commit:', hash, path, error);
 			continue;
 		}
 	}
