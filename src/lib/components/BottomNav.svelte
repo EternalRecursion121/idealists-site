@@ -1,7 +1,7 @@
 <script lang="ts">
 	type Page = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
 
-	const ring: Page[] = ['writings', 'projects', 'home', 'library', 'members', 'vibes'];
+	const ring: Page[] = ['projects', 'writings', 'home', 'library', 'members', 'vibes'];
 	const paths: Record<Page, string> = {
 		home: '/',
 		writings: '/writings',
