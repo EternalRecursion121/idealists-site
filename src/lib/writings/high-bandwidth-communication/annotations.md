@@ -16,3 +16,13 @@ yet self expression can become a lot more through these? is it the interface tha
 test!
 
 ---
+
+## "incredibly long time"
+> prefix: "ail in sequence would take an "
+> suffix: ".
+lossy compression is the nor"
+
+### @xi · Jan 27, 2026
+kid named long time
+
+---
