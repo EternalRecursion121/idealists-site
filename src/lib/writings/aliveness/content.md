@@ -4,16 +4,15 @@ description:  On life, death and the undead
 author: Samuel Ratnam and Lou Pfau
 ---
 
-> Act of Attentiveness
-> Sarah McCann
+> **Act of Attentiveness** — *Sarah McCann*
 >
-> The potato reaches out its eyes
-> towards the light spilt
+> The potato reaches out its eyes<br>
+> towards the light spilt<br>
 > under the pantry swing.
 >
 > Evolution works from desire.
 >
-> Begging down the street
+> Begging down the street<br>
 > at dawn. As any monk.
 
 'Aliveness' is a concept that I use often, though I'm still not quite sure what I mean. Here is an attempt to sketch it out more fully.

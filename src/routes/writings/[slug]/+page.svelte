@@ -277,12 +277,46 @@
 		padding-left: 1.5rem;
 	}
 
+	.writing-content :global(ul) {
+		list-style-type: none;
+		padding-left: 0;
+	}
+
+	.writing-content :global(ul li) {
+		position: relative;
+		padding-left: 1.25rem;
+	}
+
+	.writing-content :global(ul li::before) {
+		content: '—';
+		position: absolute;
+		left: 0;
+		color: var(--accent);
+		opacity: 0.6;
+	}
+
 	.writing-content :global(ol) {
 		list-style-type: decimal;
 	}
 
 	.writing-content :global(li) {
 		margin-bottom: 0.5rem;
+	}
+
+	.writing-content :global(blockquote) {
+		margin: 1.5rem 0;
+		padding: 1rem 1.5rem;
+		border-left: 2px solid var(--accent);
+		font-style: italic;
+		opacity: 0.85;
+	}
+
+	.writing-content :global(blockquote p) {
+		margin-bottom: 0.5rem;
+	}
+
+	.writing-content :global(blockquote p:last-child) {
+		margin-bottom: 0;
 	}
 
 	.writing-content :global(strong) {
