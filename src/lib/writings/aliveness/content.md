@@ -40,6 +40,7 @@ Things that are undead:
 **Getting Real and staying Alive**
 
 *(like 80% of this is just extra unimportant word-fluff. feel free to prune.)*
+
 At ASPR (a rat-camp in Taiwan), one of the participants, [Uzay](https://www.uzpg.me/) had a liking for aggressively spreading a meme, leading to small but growing groups of people mutually hyping each other up and chanting "**Get real!**", as the positive feedback loop created a bundle of extreme liveliness.
 This is one way of making people more real. But what does it mean for someone to "get real"?
 
@@ -80,8 +81,11 @@ Maybe, by being part of the Idealists Collective (maybe just in spirit, so far),
 
 Land is biased towards what he sees as the Lemurian tendency, the empty summit, illustrated by the numogram - neverending cyclical self-reinforcement leading to nowhere (nowhere human at least), contrasted with the Atlantean one-godness, exemplified by the tetractys symbol, or the kabbalistic tree of life. He simultaneously reveres the protestant tradition and the notion of the "Invisible Hands" as the forces which act without human intent, but ultimately self-structure the good.
 This is why he favours (epistemically and value-wise) the kind of superintelligence described e.g. as Pythia unbound - an entity that chooses to take the "more thought" pill, through instrumental convergence loses all values other than this one self-reinforcing instrumental value of will-to-think, leading to .. nothing specific, at least certainly nothing human. This is the eternal unfolding. It has the benefit of leading to the infinitely-built entity, the further in the future, more "complete" the approached entity is.
-![[Pasted image 20260127181125.png]]
-So approaching some outcome would be nice, but if it's too close in the future, it will necessarily be relatively incomplete, compared to outcomes with longer unfolding. Samuel said "yes the outcome is what is pointed to, but never fully completed" (or something like that), which seems to capture a good solution for this problem; not being defined by lacking an outcome, but always being able to revise and perfect the outcome, such that it may never (or for a long, long time) not become fully actualized. In fact, a sort of *Human-Completeness* feels like an appropriate goal (this is probably the thing that TsviBT calls "God").
+
+<img width="1501" height="1472" alt="image" src="https://github.com/user-attachments/assets/dc61af5d-47d2-4baa-af0c-c7794f78950b" />
 
 
-What might a collective ideal future-entity be? https://tsvibt.github.io/theory/index_What_is_God_.html, unfolding as expliticizing https://tsvibt.blogspot.com/2023/03/explicitness.html, what to do when a memeplex wants to eat you https://tsvibt.blogspot.com/2024/09/the-moral-obligation-not-to-be-eaten.html, agency as time travel https://www.lesswrong.com/posts/gEKHX8WKrXGM4roRC/saving-time
+So approaching some outcome would be nice, but if it's too close in the future, it will necessarily be relatively incomplete, compared to outcomes with longer unfolding. Samuel said "yes the outcome is what is pointed to, but never fully completed" (or something like that), which seems to capture a good solution for this problem; not being defined by lacking an outcome, but always being able to revise and perfect the outcome, such that it may never (or for a long, long time) not become fully actualized. In fact, a sort of *Human-Completeness* feels like an appropriate goal (this is probably the thing that TsviBT calls ["God"](https://tsvibt.github.io/theory/index_What_is_God_.html)).
+
+
+unfolding as expliticizing https://tsvibt.blogspot.com/2023/03/explicitness.html, what to do when a memeplex wants to eat you https://tsvibt.blogspot.com/2024/09/the-moral-obligation-not-to-be-eaten.html, agency as time travel https://www.lesswrong.com/posts/gEKHX8WKrXGM4roRC/saving-time
