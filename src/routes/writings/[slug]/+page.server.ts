@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getWritingSlugs, getWritingPath, getWritingWithRevisions, extractFrontmatter, getFileHistory } from '$lib/server/git-history';
+import { getWritingSlugs, getWritingPath, getWritingWithRevisions, extractFrontmatter, getFileHistory, getAnnotations } from '$lib/server/git-history';
 import type { WritingMetadata, WritingWithHistory } from '$lib/types/writing';
 
 export async function load({ params, setHeaders }) {
@@ -58,5 +58,8 @@ export async function load({ params, setHeaders }) {
 		? allWritings[currentIndex - 1].slug
 		: allWritings[allWritings.length - 1].slug;
 
-	return { writing, nextSlug };
+	// Fetch annotations markdown
+	const annotationsMarkdown = await getAnnotations(slug);
+
+	return { writing, nextSlug, annotationsMarkdown };
 }
