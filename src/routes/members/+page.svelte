@@ -23,17 +23,21 @@
 
 	<section class="text-center">
 		<ul class="space-y-4 inline-block">
-			{#each data.members as member}
+			{#each data.members as member (member.name)}
 				<li>
-					<a
-						href={member.url}
-						target="_blank"
-						rel="noopener"
-						class="inline-flex items-center gap-2 hover:opacity-70"
-					>
+					{#if member.url}
+						<a
+							href={member.url}
+							target="_blank"
+							rel="noopener"
+							class="inline-flex items-center gap-2 hover:opacity-70"
+						>
+							<span>{member.name}</span>
+							<span class="text-xs opacity-50">↗</span>
+						</a>
+					{:else}
 						<span>{member.name}</span>
-						<span class="text-xs opacity-50">↗</span>
-					</a>
+					{/if}
 				</li>
 			{/each}
 			<li>
