@@ -8,6 +8,21 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	interface Window {
+		MathJax?: {
+			typesetPromise?: (elements?: Element[]) => Promise<void>;
+			startup?: {
+				promise?: Promise<void>;
+				defaultReady: () => void;
+				ready?: () => void;
+			};
+			tex?: {
+				inlineMath?: string[][];
+				displayMath?: string[][];
+			};
+		};
+	}
 }
 
 export {};

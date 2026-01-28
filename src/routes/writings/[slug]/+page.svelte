@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import BottomNav from '$lib/components/BottomNav.svelte';
 	import AnnotationLayer from '$lib/annotations/components/AnnotationLayer.svelte';
@@ -17,9 +18,46 @@
 
 	let currentRevisionIndex = $state(0);
 	let historyExpanded = $state(false);
+	let mathJaxReady = $state(false);
 
 	let currentRevision = $derived(data.writing.revisions[currentRevisionIndex]);
 	let isLatest = $derived(currentRevisionIndex === 0);
+
+	// Load MathJax dynamically
+	onMount(() => {
+		if (window.MathJax) {
+			mathJaxReady = true;
+			return;
+		}
+
+		(window as Window).MathJax = {
+			tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+			startup: {
+				ready: () => {
+					window.MathJax!.startup!.defaultReady();
+					mathJaxReady = true;
+				}
+			}
+		} as Window['MathJax'];
+
+		const script = document.createElement('script');
+		script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+		script.async = true;
+		document.head.appendChild(script);
+	});
+
+	// Re-typeset MathJax when revision changes or MathJax becomes ready
+	$effect(() => {
+		if (!mathJaxReady) return;
+		currentRevision; // track dependency
+
+		// Small delay to ensure DOM is updated
+		const timeout = setTimeout(() => {
+			window.MathJax?.typesetPromise?.();
+		}, 50);
+
+		return () => clearTimeout(timeout);
+	});
 
 	// Extract body without frontmatter for display
 	function getBody(content: string): string {
@@ -98,7 +136,7 @@
 <AnnotationLayer slug={data.writing.metadata.slug} annotationsMarkdown={data.annotationsMarkdown} useGitHub={true} />
 
 <script module lang="ts">
-	import { marked } from 'marked';
+	import { marked, type TokenizerExtension, type RendererExtension } from 'marked';
 	import markedFootnote from 'marked-footnote';
 
 	const styles = [
@@ -108,10 +146,42 @@
      'font-size: 1rem; font-weight: 600; color: var(--accent); margin: 1rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em;',
      'font-size: 0.9rem; font-weight: 500; color: var(--accent); margin: 0.75rem 0 0.25rem 0;',
     'font-size: 0.85rem; font-weight: 500; color: var(--text); opacity: 0.7; margin: 0.5rem 0 0.25rem 0;'
-];
+	];
 
-	// Configure marked to open links in new tabs
+	// Math extension for marked - preserves LaTeX for MathJax processing
+	const mathBlock: TokenizerExtension & RendererExtension = {
+		name: 'mathBlock',
+		level: 'block',
+		start(src) { return src.match(/\$\$/)?.index; },
+		tokenizer(src) {
+			const match = src.match(/^\$\$([\s\S]+?)\$\$/);
+			if (match) {
+				return { type: 'mathBlock', raw: match[0], text: match[1].trim() };
+			}
+		},
+		renderer(token) {
+			return `<div class="math-block">\\[${token.text}\\]</div>`;
+		}
+	};
+
+	const mathInline: TokenizerExtension & RendererExtension = {
+		name: 'mathInline',
+		level: 'inline',
+		start(src) { return src.match(/\$/)?.index; },
+		tokenizer(src) {
+			const match = src.match(/^\$([^\$\n]+?)\$/);
+			if (match) {
+				return { type: 'mathInline', raw: match[0], text: match[1] };
+			}
+		},
+		renderer(token) {
+			return `<span class="math-inline">\\(${token.text}\\)</span>`;
+		}
+	};
+
+	// Configure marked
 	marked.use(markedFootnote());
+	marked.use({ extensions: [mathBlock, mathInline] });
 
 	marked.use({
 		renderer: {
@@ -120,16 +190,14 @@
 				return `<a href="${href}"${titleAttr} target="_blank" rel="noopener">${text}</a>`;
 			},
 			strong({ text }) {
-			return `<strong class="fancy-bold">${text}</strong>`;
+				return `<strong class="fancy-bold">${text}</strong>`;
 			},
-
 			heading({ text, depth }) {
-			const slug = text.toLowerCase().replace(/\s+/g, '-');
-			return `<h${depth} style="${styles[depth]}" id="${slug}">${text}</h${depth}>`;
+				const slug = text.toLowerCase().replace(/\s+/g, '-');
+				return `<h${depth} style="${styles[depth]}" id="${slug}">${text}</h${depth}>`;
 			},
-
 			em({ text }) {
-			return `<em class="italic">${text}</em>`;
+				return `<em class="italic">${text}</em>`;
 			},
 		}
 	});
@@ -362,5 +430,15 @@
 		text-decoration: none;
 		margin-left: 0.25rem;
 		color: var(--accent);
+	}
+
+	/* Math blocks */
+	.writing-content :global(.math-block) {
+		margin: 1.5rem 0;
+		overflow-x: auto;
+	}
+
+	.writing-content :global(.math-inline) {
+		display: inline;
 	}
 </style>
