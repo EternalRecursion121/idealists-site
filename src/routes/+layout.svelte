@@ -7,7 +7,7 @@
 
 	const themes = {
 		dawn: { bg: '#FFF8F3', text: '#3D2C29', accent: '#C94A35', heading: '#C08050', network: '#F0B8A8' },
-		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', network: '#181428' },
+		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', network: '#2a2040' },
 
 		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', network: '#2d2535' },
 		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', network: '#1e352a' }
