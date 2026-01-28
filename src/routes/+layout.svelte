@@ -7,14 +7,18 @@
 
 	const themes = {
 		dawn: { bg: '#FFF8F3', text: '#3D2C29', accent: '#C94A35', heading: '#C08050', network: '#F0B8A8' },
-		night: { bg: '#0a0e1a', text: '#e8eaf0', accent: '#7eb8da', heading: '#f0d890', network: '#3a5a8a' }
+		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', network: '#181428' },
+
+		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', network: '#2d2535' },
+		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', network: '#1e352a' }
 	};
 
-	type ThemeName = 'dawn' | 'night';
+	type ThemeName = 'dawn' | 'night' | 'twilight' | 'forest';
+	const themeOrder: ThemeName[] = ['dawn', 'twilight', 'night', 'forest'];
 
 	function getSystemPreference(): ThemeName {
 		if (browser && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-			return 'night';
+			return 'twilight';
 		}
 		return 'dawn';
 	}
@@ -22,15 +26,17 @@
 	function getSavedTheme(): ThemeName | null {
 		if (browser) {
 			const saved = localStorage.getItem('theme');
-			if (saved === 'dawn' || saved === 'night') return saved;
+			if (saved === 'dawn' || saved === 'night' || saved === 'twilight' || saved === 'forest') return saved;
 		}
 		return null;
 	}
 
 	let theme = $state<ThemeName>(getSavedTheme() ?? getSystemPreference());
 
-	function toggleTheme() {
-		theme = theme === 'dawn' ? 'night' : 'dawn';
+	function cycleTheme() {
+		const currentIndex = themeOrder.indexOf(theme);
+		const nextIndex = (currentIndex + 1) % themeOrder.length;
+		theme = themeOrder[nextIndex];
 		if (browser) {
 			localStorage.setItem('theme', theme);
 		}
@@ -66,8 +72,9 @@
 >
 	<Constellation />
 	<FloatingLlama />
-	<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
+	<button class="theme-toggle" onclick={cycleTheme} aria-label="Cycle theme">
 		{#if theme === 'dawn'}
+			<!-- Sun -->
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 				<circle cx="12" cy="12" r="5"/>
 				<line x1="12" y1="1" x2="12" y2="3"/>
@@ -79,9 +86,23 @@
 				<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
 				<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
 			</svg>
-		{:else}
+		{:else if theme === 'night'}
+			<!-- Moon -->
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 				<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+			</svg>
+		{:else if theme === 'twilight'}
+			<!-- Twilight sparkle -->
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+				<path d="M12 2 L14 10 L12 12 L10 10 Z"/>
+				<path d="M12 22 L10 14 L12 12 L14 14 Z"/>
+				<path d="M2 12 L10 10 L12 12 L10 14 Z"/>
+				<path d="M22 12 L14 14 L12 12 L14 10 Z"/>
+			</svg>
+		{:else}
+			<!-- Forest tree -->
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+				<path d="M12 2 L6 10 L9 10 L5 16 L10.5 16 L10.5 20 L13.5 20 L13.5 16 L19 16 L15 10 L18 10 Z"/>
 			</svg>
 		{/if}
 	</button>
