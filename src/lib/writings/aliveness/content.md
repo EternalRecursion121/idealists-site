@@ -31,14 +31,11 @@ Scott Garrabrant has [noted](https://www.lesswrong.com/posts/gEKHX8WKrXGM4roRC/s
 This comes back to Getting Real; it can be seen as a process of aiding the _unfolding_ of whatever future entity one's trajectory is aiming toward (but crucially - the "natural" trajectory one has, which can be confused with parasitic entities trying to change the trajectory). 
 
 That can take on the form of (for example):
-- Removing obstacles in the path of unfolding
-- Unfolding in mental structure (identifying the trajectory, making agentic elements more explicit)
-- Accelerating unfolding
-- Making the unfolding run more smoothly/aesthetically
-- **Stop living in inherited/parasitic patterns** and actually manifest what's trying to unfold
-- **Move from abstract/potential to concrete/actual** - not just thinking about things but making them exist
-- **Distinguish between what's authentically you/the-situation vs. what's overlay/parasite/attractor-capture**
-- **Participate in reality-creation** rather than being a passive vessel for competing memes
+- **Clearing the path** — removing obstacles that block unfolding
+- **Clarifying the trajectory** — making what you're becoming more explicit to yourself
+- **Moving from potential to actual** — not just thinking about things but making them exist
+- **Distinguishing signal from noise** — separating what's authentically yours from inherited patterns and parasitic attractors
+- **Participating in reality-creation** — actively shaping the world rather than being a passive vessel for competing memes
 
 So - there is some future entity, or more, which is getting unfolded by one's actions in the present. This poses two questions; *What is this entity (how can it be determined)?* and *What should it be?*
 - What it is, is in one view simply whatever one decides right now - it is fully in one's hands. 
