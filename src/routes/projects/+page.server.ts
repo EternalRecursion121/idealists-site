@@ -22,7 +22,7 @@ const projects: Project[] = [
 	{
 		name: "I'm Bored",
 		url: 'https://github.com/EternalRecursion121/im-bored',
-		description: 'A content aggregation app where you control the algorithm. Content flows through a DAG of Sources and Transforms that you configure and visualize—RSS feeds, YouTube, Todoist, mixed and filtered however you want.'
+		description: "An app to replace Instagram, TikTok, and YouTube as your default place to go when you're bored. An algorithm you control, pulling from whatever sources you like, that you can customize endlessly. Content flows through a visual DAG of Sources and Transforms—mixed and filtered however you want."
 	},
 	{
 		name: 'Non-Linear Writing Interface',
