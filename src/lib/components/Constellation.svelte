@@ -181,9 +181,6 @@
 				}
 			}
 
-			// Store display opacity for rendering
-			(star as any).displayOpacity = Math.max(0, Math.min(1, displayOpacity));
-
 			// Apply drift for certain themes
 			if (config.driftAmount > 0 && star.opacity > 0.1) {
 				if (theme === 'forest') {
@@ -325,5 +322,6 @@
 
 	.star {
 		will-change: opacity, transform;
+		opacity: 40%;
 	}
 </style>

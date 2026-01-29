@@ -162,6 +162,14 @@
 	:global(html, body) {
 		margin: 0;
 		padding: 0;
+		/* Hide scrollbar for all browsers */
+		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none; /* IE and Edge */
+	}
+
+	:global(html::-webkit-scrollbar),
+	:global(body::-webkit-scrollbar) {
+		display: none; /* Chrome, Safari, Opera */
 	}
 
 	.app {

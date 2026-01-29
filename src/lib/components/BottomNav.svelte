@@ -22,7 +22,7 @@
 	const next = ring[(idx + 1) % ring.length];
 </script>
 
-<nav class="nav-footer">
+<nav class="nav-header">
 	<a href={paths[prev]} class="opacity-80 hover:opacity-100">← {prev}</a>
 	<span class="opacity-50">•</span>
 	<a href="/join" class="tracking-wide text-[var(--accent)] opacity-[0.85] hover:opacity-100">
@@ -33,19 +33,19 @@
 </nav>
 
 <style>
-	.nav-footer {
+	.nav-header {
+		position: fixed;
+		top: 1rem;
+		left: 1rem;
 		display: flex;
 		gap: 1rem;
-		justify-content: center;
 		flex-wrap: wrap;
 		font-size: 0.875rem;
-		margin-top: auto;
-		padding-top: 4rem;
-		padding-bottom: 2rem;
+		z-index: 10;
 	}
 
 	@media (min-width: 640px) {
-		.nav-footer {
+		.nav-header {
 			gap: 1.5rem;
 		}
 	}
