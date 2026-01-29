@@ -1,228 +1,329 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 
-	const pages = ['/', '/writings', '/vibes', '/library', '/join', '/projects', '/members'];
+	type BaseThemeName = 'dawn' | 'night' | 'twilight' | 'forest';
+	let { theme }: { theme: BaseThemeName } = $props();
 
 	let svg: SVGSVGElement;
-	let paths: string[] = $state([]);
-	let nodes: { id: number; x: number; y: number; baseX: number; baseY: number; size: number; opacity: number; fadeDirection: 'in' | 'out' | 'stable'; destination: string }[] = $state([]);
+	let stars: {
+		id: number;
+		x: number;
+		y: number;
+		targetX: number;
+		targetY: number;
+		baseX: number;
+		baseY: number;
+		size: number;
+		targetSize: number;
+		opacity: number;
+		targetOpacity: number;
+		twinklePhase: number;
+		twinkleSpeed: number;
+		isSunlight: boolean;
+		isDiamond: boolean;
+	}[] = $state([]);
+
 	let time = $state(0);
-	let nextNodeId = $state(0);
-
-	const NODE_COUNT = 45;
-	const CONNECTION_DISTANCE = 180;
-	const LINE_OPACITY = 0.3;
-	const DRIFT_AMOUNT = 12;
-	const DRIFT_SPEED = 0.00002;
-	const REFRESH_INTERVAL = 4000; // Add/remove a node every 6 seconds
-	const FADE_DURATION = 2000; // 2 second fade
-
-	let clusters: { x: number; y: number; strength: number }[] = [];
 	let screenWidth = 0;
 	let screenHeight = 0;
 
-	function generateNetwork(width: number, height: number) {
+	const STAR_COUNT = 120;
+	const SUNLIGHT_RATIO = 0.25; // 25% golden sunlight sparkles in dawn mode
+	const DIAMOND_RATIO = 0.3; // 30% diamond-shaped stars
+
+	// Theme-specific configuration
+	const themeConfig: Record<BaseThemeName, {
+		twinkleSpeed: number;
+		driftAmount: number;
+		minOpacity: number;
+		maxOpacity: number;
+		visible: boolean;
+	}> = {
+		night: {
+			twinkleSpeed: 0,
+			driftAmount: 0,
+			minOpacity: 0,
+			maxOpacity: 0,
+			visible: false
+		},
+		twilight: {
+			twinkleSpeed: 0.004,
+			driftAmount: 0,
+			minOpacity: 0.2,
+			maxOpacity: 1,
+			visible: true
+		},
+		forest: {
+			twinkleSpeed: 0.0015,
+			driftAmount: 15,
+			minOpacity: 0.2,
+			maxOpacity: 1,
+			visible: true
+		},
+		dawn: {
+			twinkleSpeed: 0.008,
+			driftAmount: 6,
+			minOpacity: 0.1,
+			maxOpacity: 1,
+			visible: true
+		}
+	};
+
+	function getStarSize(theme: BaseThemeName, isSunlight: boolean, isDiamond: boolean): number {
+		if (theme === 'forest') {
+			// Fireflies - larger, more varied
+			return 1.5 + Math.random() * 2;
+		} else if (theme === 'dawn') {
+			if (isSunlight) {
+				// Sunlight sparkles - larger and more prominent
+				return 1.2 + Math.random() * 2;
+			}
+			// Water - smaller, subtler
+			return 0.5 + Math.random() * 1.2;
+		} else {
+			// Regular stars
+			const base = isDiamond ? 1.2 : 0.8;
+			const variance = isDiamond ? 1.2 : 1.5;
+			const size = base + Math.random() * variance;
+			return Math.random() > 0.95 ? size + 1 : size;
+		}
+	}
+
+	function generateStars(width: number, height: number) {
 		screenWidth = width;
 		screenHeight = height;
-		const newNodes: typeof nodes = [];
 
-		// Create 3-5 cluster centers
-		const clusterCount = 3 + Math.floor(Math.random() * 3);
-		clusters = [];
+		const newStars: typeof stars = [];
 
-		for (let i = 0; i < clusterCount; i++) {
-			clusters.push({
-				x: width * (0.15 + Math.random() * 0.7),
-				y: height * (0.15 + Math.random() * 0.7),
-				strength: 0.3 + Math.random() * 0.5
+		for (let i = 0; i < STAR_COUNT; i++) {
+			const x = Math.random() * width;
+			const y = Math.random() * height;
+			const isSunlight = Math.random() < SUNLIGHT_RATIO;
+			const isDiamond = Math.random() < DIAMOND_RATIO;
+			const size = getStarSize(theme, isSunlight, isDiamond);
+			const config = themeConfig[theme];
+
+			newStars.push({
+				id: i,
+				x,
+				y,
+				targetX: x,
+				targetY: y,
+				baseX: x,
+				baseY: y,
+				size,
+				targetSize: size,
+				opacity: config.visible ? Math.random() * 0.8 + 0.2 : 0,
+				targetOpacity: config.visible ? 1 : 0,
+				twinklePhase: Math.random() * Math.PI * 2,
+				twinkleSpeed: config.twinkleSpeed * (0.8 + Math.random() * 0.4),
+				isSunlight,
+				isDiamond
 			});
 		}
 
-		// Generate nodes with cluster-influenced positions
-		for (let i = 0; i < NODE_COUNT; i++) {
-			newNodes.push(createNode());
+		stars = newStars;
+	}
+
+	function updateStarTargets() {
+		const config = themeConfig[theme];
+
+		for (const star of stars) {
+			// Update target size based on theme
+			star.targetSize = getStarSize(theme, star.isSunlight, star.isDiamond);
+
+			// Update target opacity based on theme
+			star.targetOpacity = config.visible ? 1 : 0;
+
+			// Update twinkle speed based on theme
+			star.twinkleSpeed = config.twinkleSpeed * (0.8 + Math.random() * 0.4);
 		}
-
-		nodes = newNodes;
-		updatePositions();
 	}
 
-	function createNode(): typeof nodes[0] {
-		// Pick a cluster to gravitate toward (or none)
-		const clusterIndex = Math.floor(Math.random() * (clusters.length + 2));
+	function updateStars() {
+		const config = themeConfig[theme];
 
-		let baseX: number, baseY: number;
+		for (const star of stars) {
+			// Smoothly interpolate size
+			const sizeDiff = star.targetSize - star.size;
+			star.size += sizeDiff * 0.05; // 5% per frame
 
-		if (clusterIndex < clusters.length) {
-			// Near a cluster
-			const cluster = clusters[clusterIndex];
-			const angle = Math.random() * Math.PI * 2;
-			const dist = Math.random() * 150 + 30;
-			baseX = cluster.x + Math.cos(angle) * dist * cluster.strength;
-			baseY = cluster.y + Math.sin(angle) * dist * cluster.strength;
-		} else {
-			// Scattered freely
-			baseX = screenWidth * (0.05 + Math.random() * 0.9);
-			baseY = screenHeight * (0.05 + Math.random() * 0.9);
-		}
+			// Smoothly interpolate opacity (base level)
+			const opacityDiff = star.targetOpacity - star.opacity;
+			star.opacity += opacityDiff * 0.08; // 8% per frame for quicker transitions
 
-		// Keep in bounds with padding
-		baseX = Math.max(40, Math.min(screenWidth - 40, baseX));
-		baseY = Math.max(40, Math.min(screenHeight - 40, baseY));
+			// Update twinkle phase
+			star.twinklePhase += star.twinkleSpeed;
 
-		// Vary node sizes - some larger "hub" nodes
-		const size = Math.random() < 0.15 ? 2.5 + Math.random() * 1.5 : 1 + Math.random() * 1;
-
-		const id = nextNodeId++;
-		const destination = pages[Math.floor(Math.random() * pages.length)];
-		return { id, x: baseX, y: baseY, baseX, baseY, size, opacity: 0, fadeDirection: 'in', destination };
-	}
-
-	function refreshNode() {
-		if (nodes.length === 0) return;
-
-		// Pick a random stable node to fade out
-		const stableNodes = nodes.filter(n => n.fadeDirection === 'stable');
-		if (stableNodes.length === 0) return;
-
-		const nodeToRemove = stableNodes[Math.floor(Math.random() * stableNodes.length)];
-		nodeToRemove.fadeDirection = 'out';
-
-		// Add a new node that fades in
-		const newNode = createNode();
-		nodes = [...nodes, newNode];
-	}
-
-	const FADE_STEP = 50 / FADE_DURATION; // Amount to change opacity per 50ms tick
-
-	function updatePositions() {
-		// Apply slow sinusoidal drift and update fade state for each node
-		const nodesToKeep: typeof nodes = [];
-
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			// Each node drifts with a unique phase based on its id
-			const phase = node.id * 0.7;
-			node.x = node.baseX + Math.sin(time + phase) * DRIFT_AMOUNT;
-			node.y = node.baseY + Math.cos(time * 0.7 + phase) * DRIFT_AMOUNT;
-
-			// Handle fading
-			if (node.fadeDirection === 'in') {
-				node.opacity = Math.min(1, node.opacity + FADE_STEP);
-				if (node.opacity >= 1) {
-					node.fadeDirection = 'stable';
-				}
-			} else if (node.fadeDirection === 'out') {
-				node.opacity = Math.max(0, node.opacity - FADE_STEP);
-				if (node.opacity <= 0) {
-					continue; // Remove this node
+			// Calculate displayed opacity from twinkle - MORE DRAMATIC
+			let displayOpacity = star.opacity;
+			if (config.visible && star.opacity > 0.1) {
+				if (theme === 'forest') {
+					// Fireflies: smooth pulsing glow
+					const pulse = Math.sin(star.twinklePhase);
+					displayOpacity = star.opacity * (0.3 + pulse * 0.7);
+				} else if (theme === 'dawn') {
+					// Water sparkles: quick bright flashes
+					const pulse = Math.sin(star.twinklePhase);
+					if (star.isSunlight) {
+						// Sunlight: very bright dramatic flashes
+						displayOpacity = star.opacity * (pulse > 0.5 ? 0.95 + Math.random() * 0.05 : 0.2 + pulse * 0.5);
+					} else {
+						// Water: subtler rippling effect
+						displayOpacity = star.opacity * (pulse > 0.65 ? 0.8 + Math.random() * 0.2 : 0.15 + pulse * 0.4);
+					}
+				} else if (theme === 'twilight') {
+					// Twilight stars: dramatic twinkling
+					const twinkle = Math.sin(star.twinklePhase);
+					const flutter = Math.sin(star.twinklePhase * 3.1) * 0.2;
+					// Much more dramatic range: 0.1 to 1.0
+					displayOpacity = star.opacity * Math.max(0.1, 0.3 + (twinkle * 0.5 + 0.5) * 0.7 + flutter);
 				}
 			}
-			nodesToKeep.push(node);
-		}
 
-		nodes = nodesToKeep;
+			// Store display opacity for rendering
+			(star as any).displayOpacity = Math.max(0, Math.min(1, displayOpacity));
 
-		// Regenerate paths based on new positions (only for visible nodes)
-		const newPaths: string[] = [];
-		for (let i = 0; i < nodes.length; i++) {
-			for (let j = i + 1; j < nodes.length; j++) {
-				const dx = nodes[j].x - nodes[i].x;
-				const dy = nodes[j].y - nodes[i].y;
-				const dist = Math.sqrt(dx * dx + dy * dy);
-
-				if (dist < CONNECTION_DISTANCE) {
-					const midX = (nodes[i].x + nodes[j].x) / 2;
-					const midY = (nodes[i].y + nodes[j].y) / 2;
-					const perpX = -dy / dist * 8;
-					const perpY = dx / dist * 8;
-
-					newPaths.push(
-						`M ${nodes[i].x.toFixed(1)} ${nodes[i].y.toFixed(1)} Q ${(midX + perpX).toFixed(1)} ${(midY + perpY).toFixed(1)} ${nodes[j].x.toFixed(1)} ${nodes[j].y.toFixed(1)}`
-					);
+			// Apply drift for certain themes
+			if (config.driftAmount > 0 && star.opacity > 0.1) {
+				if (theme === 'forest') {
+					// Fireflies: organic floating movement
+					star.x = star.baseX + Math.sin(time * 0.3 + star.id * 0.7) * config.driftAmount;
+					star.y = star.baseY + Math.cos(time * 0.2 + star.id * 0.5) * config.driftAmount * 1.5;
+				} else if (theme === 'dawn') {
+					// Water sparkles: gentle wave-like shimmer
+					star.x = star.baseX + Math.sin(time * 0.4 + star.id) * config.driftAmount;
+					star.y = star.baseY + Math.sin(time * 0.6 + star.id * 0.4) * (config.driftAmount * 0.4);
 				}
+			} else {
+				// Smoothly return to base position
+				const dx = star.baseX - star.x;
+				const dy = star.baseY - star.y;
+				star.x += dx * 0.05;
+				star.y += dy * 0.05;
 			}
 		}
-		paths = newPaths;
+
+		time += 0.016; // ~60fps worth of time
 	}
+
+	// Generate diamond star path (4-pointed concave star)
+	function getDiamondPath(x: number, y: number, size: number): string {
+		const outerRadius = size;
+		const innerRadius = size * 0.4;
+
+		// 4 points at cardinal directions
+		const points = [];
+		for (let i = 0; i < 4; i++) {
+			const angle = (i * Math.PI / 2) - Math.PI / 2; // Start at top
+			// Outer point
+			points.push({
+				x: x + Math.cos(angle) * outerRadius,
+				y: y + Math.sin(angle) * outerRadius
+			});
+			// Inner point (between outer points)
+			const innerAngle = angle + Math.PI / 4;
+			points.push({
+				x: x + Math.cos(innerAngle) * innerRadius,
+				y: y + Math.sin(innerAngle) * innerRadius
+			});
+		}
+
+		// Build path
+		let path = `M ${points[0].x} ${points[0].y}`;
+		for (let i = 1; i < points.length; i++) {
+			path += ` L ${points[i].x} ${points[i].y}`;
+		}
+		path += ' Z';
+
+		return path;
+	}
+
+	let animationInterval: ReturnType<typeof setInterval> | null = null;
 
 	onMount(() => {
-		generateNetwork(window.innerWidth, window.innerHeight);
+		generateStars(window.innerWidth, window.innerHeight);
 
-		// Set initial nodes to fully visible
-		for (const node of nodes) {
-			node.opacity = 1;
-			node.fadeDirection = 'stable';
-		}
+		animationInterval = setInterval(updateStars, 16); // ~60fps
 
-		// Very slow update interval (every 50ms = 20fps, plenty smooth for slow drift)
-		const driftInterval = setInterval(() => {
-			time += DRIFT_SPEED * 50;
-			updatePositions();
-		}, 50);
+		const handleResize = () => {
+			const oldWidth = screenWidth;
+			const oldHeight = screenHeight;
+			screenWidth = window.innerWidth;
+			screenHeight = window.innerHeight;
 
-		// Periodically add/remove a node
-		const refreshInterval = setInterval(refreshNode, REFRESH_INTERVAL);
-
-		const handleResize = () => generateNetwork(window.innerWidth, window.innerHeight);
+			// Reposition stars proportionally
+			if (oldWidth && oldHeight) {
+				for (const star of stars) {
+					star.x = (star.x / oldWidth) * screenWidth;
+					star.y = (star.y / oldHeight) * screenHeight;
+					star.baseX = (star.baseX / oldWidth) * screenWidth;
+					star.baseY = (star.baseY / oldHeight) * screenHeight;
+					star.targetX = star.x;
+					star.targetY = star.y;
+				}
+			}
+		};
 		window.addEventListener('resize', handleResize);
 
 		return () => {
-			clearInterval(driftInterval);
-			clearInterval(refreshInterval);
+			if (animationInterval) clearInterval(animationInterval);
 			window.removeEventListener('resize', handleResize);
 		};
+	});
+
+	// Update star targets when theme changes
+	$effect(() => {
+		// Track theme dependency
+		theme;
+
+		if (stars.length > 0) {
+			updateStarTargets();
+		}
 	});
 </script>
 
 <svg
 	bind:this={svg}
-	class="network-bg"
+	class="stars-bg"
 	viewBox="0 0 {typeof window !== 'undefined' ? window.innerWidth : 1920} {typeof window !== 'undefined' ? window.innerHeight : 1080}"
 	preserveAspectRatio="xMidYMid slice"
 >
-	{#each paths as path, i (i)}
-		<path
-			d={path}
-			fill="none"
-			stroke="currentColor"
-			stroke-width="0.5"
-			opacity={LINE_OPACITY}
-			style="pointer-events: none"
-		/>
-	{/each}
-
-	{#each nodes as node (node.id)}
-		<circle
-			cx={node.x}
-			cy={node.y}
-			r={node.size}
-			fill="currentColor"
-			opacity={LINE_OPACITY * 1.5 * node.opacity}
-			class="node"
-			role="link"
-			tabindex="-1"
-			onclick={() => goto(node.destination)}
-			onkeydown={(e) => e.key === 'Enter' && goto(node.destination)}
-		/>
+	{#each stars as star (star.id)}
+		{#if star.isDiamond}
+			<path
+				d={getDiamondPath(star.x, star.y, star.size)}
+				fill={theme === 'dawn' && star.isSunlight ? 'var(--star-alt)' : 'currentColor'}
+				opacity={(star as any).displayOpacity || star.opacity}
+				class="star"
+			/>
+		{:else}
+			<circle
+				cx={star.x}
+				cy={star.y}
+				r={star.size}
+				fill={theme === 'dawn' && star.isSunlight ? 'var(--star-alt)' : 'currentColor'}
+				opacity={(star as any).displayOpacity || star.opacity}
+				class="star"
+			/>
+		{/if}
 	{/each}
 </svg>
 
 <style>
-	.network-bg {
+	.stars-bg {
 		position: fixed;
 		top: 0;
 		left: 0;
 		width: 100vw;
 		height: 100vh;
 		z-index: -1;
-		color: var(--network, var(--text, #005a42));
+		color: var(--star, #ffffff);
+		pointer-events: none;
+		transition: color 0.8s ease;
 	}
 
-	.node {
-		transition: opacity 0.5s ease;
-		pointer-events: auto;
-		cursor: default;
+	.star {
+		will-change: opacity, transform;
 	}
 </style>

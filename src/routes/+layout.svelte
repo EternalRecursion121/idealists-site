@@ -7,10 +7,10 @@
 	let { children } = $props();
 
 	const themes = {
-		dawn: { bg: '#FFF8F3', text: '#3D2C29', accent: '#C94A35', heading: '#C08050', network: '#F0B8A8' },
-		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', network: '#2a2040' },
-		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', network: '#2d2535' },
-		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', network: '#1e352a' }
+		dawn: { bg: '#0A3D62', text: '#E8F4F8', accent: '#FF9A3C', heading: '#FFD89C', star: '#5BA3D0', starAlt: '#FFD700' },
+		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', star: '#000000', starAlt: '#000000' },
+		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', star: '#e8e8ff', starAlt: '#e8e8ff' },
+		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', star: '#b8ff7a', starAlt: '#b8ff7a' }
 	};
 
 	type ThemeName = 'dawn' | 'night' | 'twilight' | 'forest' | 'auto';
@@ -103,9 +103,9 @@
 
 <div
 	class="app"
-	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --network: {currentColors.network};"
+	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --star: {currentColors.star}; --star-alt: {currentColors.starAlt};"
 >
-	<Constellation />
+	<Constellation theme={theme === 'auto' ? autoThemeName : theme} />
 	<FloatingLlama />
 	<div class="theme-toggle-wrap">
 		<span class="theme-tooltip">{themeDescriptions[theme]}</span>
