@@ -25,16 +25,16 @@
 </svelte:head>
 
 <div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16 min-h-screen flex flex-col">
-	<header class="mb-8 sm:mb-12 text-center">
+	<header class="mb-8 sm:mb-12">
 		<h1 class="text-2xl sm:text-3xl font-semibold mb-4">writings</h1>
-		<p class="opacity-70 max-w-xs mx-auto text-sm">essays and thoughts from the collective</p>
+		<p class="opacity-70 text-sm">essays and thoughts from the collective</p>
 	</header>
 
-	<section class="text-center">
+	<section>
 		{#if data.writings.length === 0}
 			<p class="opacity-60 italic">coming soon</p>
 		{:else}
-			<ul class="space-y-6 inline-block">
+			<ul class="space-y-6">
 				{#each data.writings as writing (writing.slug)}
 					<li>
 						<a href="/writings/{writing.slug}" class="block group">
@@ -42,7 +42,7 @@
 							{#if writing.description}
 								<p class="text-sm opacity-60 mb-2">{writing.description}</p>
 							{/if}
-							<div class="text-xs opacity-40 flex gap-3 justify-center">
+							<div class="text-xs opacity-40 flex gap-3">
 								<span>{formatDate(writing.updatedAt)}</span>
 								<span>•</span>
 								<span>{writing.revisionCount} revision{writing.revisionCount !== 1 ? 's' : ''}</span>

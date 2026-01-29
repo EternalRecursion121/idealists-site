@@ -212,6 +212,7 @@
 
     .word {
         font-size: 1.75rem;
+        font-family: var(--font-mono);
         font-weight: 600;
         letter-spacing: -0.02em;
     }
@@ -241,7 +242,7 @@
     /* Desktop: fade transition */
     .definition-text {
         display: block;
-        font-family: var(--font-mono);
+        font-family: var(--font-serif);
         font-size: 1.1rem;
         line-height: 1.5;
         max-width: 50ch;
@@ -289,7 +290,7 @@
     .slide {
         flex: 0 0 100%;
         width: 100%;
-        font-family: var(--font-mono);
+        font-family: var(--font-serif);
         font-size: 1.1rem;
         line-height: 1.5;
         opacity: 0.85;
@@ -338,7 +339,7 @@
     }
 
     .measure-item {
-        font-family: var(--font-mono);
+        font-family: var(--font-serif);
         font-size: 1.1rem;
         line-height: 1.5;
         max-width: 50ch;

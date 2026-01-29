@@ -123,12 +123,24 @@
         font-style: italic;
     }
 
+    .caps-header-button h2 {
+        font-family: var(--font-sans);
+        font-weight: bold;
+        letter-spacing: .2em;
+    }
+
     .offscreen-measure {
         position: absolute;
         visibility: hidden;
         pointer-events: none;
         height: 0;
         overflow: hidden;
+    }
+
+    .offscreen-measure h2 {
+        font-family: var(--font-sans);
+        font-weight: bold;
+
     }
 
     .dna-list {
@@ -221,7 +233,7 @@
         margin: 0;
         padding: 0 0 1rem 0;
         max-width: 50ch;
-        font-family: var(--font-mono);
+        font-family: var(--font-serif);
         font-size: 0.95rem;
         line-height: 1.5;
         color: var(--text);

@@ -98,7 +98,7 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet" />
 </svelte:head>
 
 <div
@@ -165,8 +165,10 @@
 	}
 
 	.app {
+		--font-serif: 'EB Garamond', serif;
+		--font-sans: 'Manrope', sans-serif;
 		--font-mono: 'Source Code Pro', monospace;
-		font-family: var(--font-mono);
+		font-family: var(--font-serif);
 		min-height: 100vh;
 		padding: 1rem;
 		background: transparent;

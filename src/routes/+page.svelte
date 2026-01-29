@@ -82,9 +82,10 @@
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        font-family: var(--font-sans);
+        font-weight: bold;
         font-size: 2rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
+        letter-spacing: .05em;
         color: var(--heading);
     }
 
@@ -105,7 +106,7 @@
     }
 
     .intro-text {
-        font-family: var(--font-mono);
+        font-family: var(--font-serif);
         font-size: 1.1rem;
         line-height: 1.6;
         opacity: 0.85;
