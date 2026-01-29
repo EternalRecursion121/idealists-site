@@ -47,7 +47,7 @@
 			visible: false
 		},
 		twilight: {
-			twinkleSpeed: 0.004,
+			twinkleSpeed: 0.006,
 			driftAmount: 0,
 			minOpacity: 0.2,
 			maxOpacity: 1,
@@ -173,11 +173,11 @@
 						displayOpacity = star.opacity * (pulse > 0.65 ? 0.8 + Math.random() * 0.2 : 0.15 + pulse * 0.4);
 					}
 				} else if (theme === 'twilight') {
-					// Twilight stars: dramatic twinkling
+					// Twilight stars: very dramatic twinkling
 					const twinkle = Math.sin(star.twinklePhase);
-					const flutter = Math.sin(star.twinklePhase * 3.1) * 0.2;
-					// Much more dramatic range: 0.1 to 1.0
-					displayOpacity = star.opacity * Math.max(0.1, 0.3 + (twinkle * 0.5 + 0.5) * 0.7 + flutter);
+					const flutter = Math.sin(star.twinklePhase * 3.1) * 0.25;
+					// Very dramatic range: 0.05 to 1.0
+					displayOpacity = star.opacity * Math.max(0.05, 0.2 + (twinkle * 0.5 + 0.5) * 0.8 + flutter);
 				}
 			}
 

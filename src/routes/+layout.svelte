@@ -9,7 +9,7 @@
 	const themes = {
 		dawn: { bg: '#0A3D62', text: '#E8F4F8', accent: '#FF9A3C', heading: '#FFD89C', star: '#5BA3D0', starAlt: '#FFD700' },
 		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', star: '#000000', starAlt: '#000000' },
-		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', star: '#e8e8ff', starAlt: '#e8e8ff' },
+		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', star: '#ffe8a0', starAlt: '#ffe8a0' },
 		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', star: '#b8ff7a', starAlt: '#b8ff7a' }
 	};
 

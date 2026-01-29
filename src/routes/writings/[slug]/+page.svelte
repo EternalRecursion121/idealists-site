@@ -308,7 +308,7 @@
 	}
 
 	.writing-content {
-		font-size: 0.85rem;
+		font-size: 1rem;
 		line-height: 1.7;
 		opacity: 0.85;
 		max-width: 65ch;

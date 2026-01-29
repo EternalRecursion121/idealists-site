@@ -34,7 +34,7 @@
 		{#if data.writings.length === 0}
 			<p class="opacity-60 italic">coming soon</p>
 		{:else}
-			<ul class="space-y-6">
+			<ul class="space-y-8">
 				{#each data.writings as writing (writing.slug)}
 					<li>
 						<a href="/writings/{writing.slug}" class="block group">
