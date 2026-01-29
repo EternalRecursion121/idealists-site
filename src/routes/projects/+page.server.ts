@@ -15,6 +15,16 @@ function shuffle<T>(array: T[]): T[] {
 
 const projects: Project[] = [
 	{
+		name: 'Web Decompiler',
+		url: null,
+		description: "A tool for grabbing every atomic action available from a website—API calls, HTTP requests, source code—to give people more autonomy over what they do on the web. Browse Instagram without their algorithm, read news sites without enabling cookies, run frequent actions through the terminal, redesign a site's UI just because you can."
+	},
+	{
+		name: "I'm Bored",
+		url: 'https://github.com/EternalRecursion121/im-bored',
+		description: 'A content aggregation app where you control the algorithm. Content flows through a DAG of Sources and Transforms that you configure and visualize—RSS feeds, YouTube, Todoist, mixed and filtered however you want.'
+	},
+	{
 		name: 'Non-Linear Writing Interface',
 		url: 'https://github.com/EternalRecursion121/non-linear-writing-interface',
 		description: 'A keyboard-native, node-based writing application for crafting branching narratives. Explore multiple story directions simultaneously through branching and parallelization, visualizing narrative structure as a directed acyclic graph.'
