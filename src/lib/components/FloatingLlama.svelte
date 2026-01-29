@@ -100,22 +100,26 @@
 		onclick={handleClick}
 		aria-label="Mysterious llama"
 	>
-		🦙
+		<img src="/Llama Grande.png" alt="Llama" />
 	</button>
 {/if}
 
 <style>
 	.llama {
 		position: fixed;
-		font-size: 2.5rem;
-		opacity: 0.4;
 		z-index: 1000;
 		cursor: pointer;
 		background: none;
 		border: none;
 		padding: 0;
-		transition: opacity 0.3s;
+		transition: opacity 0.3s, filter 0.3s;
+		opacity: 0.4;
 		filter: grayscale(0.5);
+	}
+
+	.llama img {
+		width: 80px;
+		height: auto;
 	}
 
 	.llama:hover {
