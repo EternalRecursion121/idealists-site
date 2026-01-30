@@ -16,14 +16,14 @@
 
 	// Derive current page from URL for BottomNav
 	type PageType = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
-	let current = $derived<PageType>(() => {
+	let current: PageType = $derived.by(() => {
 		const path = $page.url.pathname;
 		if (path === '/library') return 'library';
 		if (path === '/projects') return 'projects';
 		if (path === '/members') return 'members';
 		if (path.startsWith('/writings')) return 'writings';
 		return 'home';
-	}());
+	});
 </script>
 
 <div class="page-layout" class:centered>
