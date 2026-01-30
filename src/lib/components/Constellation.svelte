@@ -12,7 +12,7 @@
 	let gridWidth = 0;
 	let gridHeight = 0;
 
-	// Brian's Brain states: 0 = off, 1 = on, 2 = dying
+	// Brian's Brain states: 0 = off, 1 = on, 2 = dying, 3 = dormant
 	let grid: Uint8Array;
 	let nextGrid: Uint8Array;
 
@@ -23,31 +23,69 @@
 	let mouseGridY = -1;
 
 	// Theme colors - very subtle so text remains readable
-	const themeColors: Record<BaseThemeName, { on: string; dying: string }> = {
+	const themeColors: Record<BaseThemeName, { on: string; dying: string; dormant: string }> = {
 		dawn: {
 			on: 'rgba(255, 176, 136, 0.35)',
-			dying: 'rgba(255, 220, 180, 0.18)'
+			dying: 'rgba(255, 220, 180, 0.18)',
+			dormant: 'rgba(255, 176, 136, 0.35)'
 		},
 		night: {
 			on: 'rgba(140, 130, 200, 0.18)',
-			dying: 'rgba(100, 90, 160, 0.08)'
+			dying: 'rgba(100, 90, 160, 0.08)',
+			dormant: 'rgba(140, 130, 200, 0.18)'
 		},
 		twilight: {
 			on: 'rgba(199, 146, 146, 0.18)',
-			dying: 'rgba(180, 160, 200, 0.08)'
+			dying: 'rgba(180, 160, 200, 0.08)',
+			dormant: 'rgba(199, 146, 146, 0.18)'
 		},
 		forest: {
 			on: 'rgba(144, 224, 96, 0.18)',
-			dying: 'rgba(100, 180, 70, 0.08)'
+			dying: 'rgba(100, 180, 70, 0.08)',
+			dormant: 'rgba(144, 224, 96, 0.18)'
 		}
 	};
+
+	// Cluster positions (relative 0-1 coordinates)
+	const clusterPositions = [
+		{ x: 0.12, y: 0.15 },
+		{ x: 0.88, y: 0.12 },
+		{ x: 0.08, y: 0.5 },
+		{ x: 0.92, y: 0.45 },
+		{ x: 0.15, y: 0.85 },
+		{ x: 0.85, y: 0.82 },
+		{ x: 0.5, y: 0.3 },
+		{ x: 0.35, y: 0.65 },
+		{ x: 0.7, y: 0.6 },
+	];
 
 	function initGrid(width: number, height: number) {
 		gridWidth = Math.ceil(width / CELL_SIZE);
 		gridHeight = Math.ceil(height / CELL_SIZE);
 		grid = new Uint8Array(gridWidth * gridHeight);
 		nextGrid = new Uint8Array(gridWidth * gridHeight);
-		// Start with empty grid - cells only appear on click
+
+		// Place dormant clusters
+		for (const pos of clusterPositions) {
+			placeDormantCluster(pos.x, pos.y);
+		}
+	}
+
+	function placeDormantCluster(relX: number, relY: number) {
+		const centerX = Math.floor(relX * gridWidth);
+		const centerY = Math.floor(relY * gridHeight);
+		const clusterSize = 5;
+		const cellCount = 15;
+
+		for (let i = 0; i < cellCount; i++) {
+			const angle = Math.random() * Math.PI * 2;
+			const dist = Math.random() * clusterSize;
+			const x = Math.floor(centerX + Math.cos(angle) * dist);
+			const y = Math.floor(centerY + Math.sin(angle) * dist);
+			if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+				grid[y * gridWidth + x] = 3; // Dormant
+			}
+		}
 	}
 
 	function countOnNeighbors(x: number, y: number): number {
@@ -63,11 +101,33 @@
 		return count;
 	}
 
+	function hasActiveNeighbor(x: number, y: number): boolean {
+		for (let dy = -1; dy <= 1; dy++) {
+			for (let dx = -1; dx <= 1; dx++) {
+				if (dx === 0 && dy === 0) continue;
+				const nx = (x + dx + gridWidth) % gridWidth;
+				const ny = (y + dy + gridHeight) % gridHeight;
+				if (grid[ny * gridWidth + nx] === 1) return true;
+			}
+		}
+		return false;
+	}
+
 	function updateGrid() {
 		for (let y = 0; y < gridHeight; y++) {
 			for (let x = 0; x < gridWidth; x++) {
 				const idx = y * gridWidth + x;
 				const state = grid[idx];
+
+				// Dormant cells activate when they have an active neighbor
+				if (state === 3) {
+					if (hasActiveNeighbor(x, y)) {
+						nextGrid[idx] = 1; // Wake up!
+					} else {
+						nextGrid[idx] = 3; // Stay dormant
+					}
+					continue;
+				}
 
 				// Brian's Brain rules:
 				// OFF (0) -> ON (1) if exactly 2 neighbors are ON
@@ -102,11 +162,16 @@
 				const state = grid[y * gridWidth + x];
 				if (state === 0) continue;
 
-				ctx.fillStyle = state === 1 ? colors.on : colors.dying;
+				if (state === 3) {
+					ctx.fillStyle = colors.dormant;
+				} else {
+					ctx.fillStyle = state === 1 ? colors.on : colors.dying;
+				}
+
 				ctx.beginPath();
 				const cx = x * CELL_SIZE + CELL_SIZE / 2;
 				const cy = y * CELL_SIZE + CELL_SIZE / 2;
-				const radius = state === 1 ? CELL_SIZE * 0.35 : CELL_SIZE * 0.25;
+				const radius = state === 1 ? CELL_SIZE * 0.35 : (state === 3 ? CELL_SIZE * 0.3 : CELL_SIZE * 0.25);
 				ctx.arc(cx, cy, radius, 0, Math.PI * 2);
 				ctx.fill();
 			}
