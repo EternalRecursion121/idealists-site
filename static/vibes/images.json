@@ -1,4 +1,8 @@
 {
+  "9pm.jpeg": [
+    638,
+    360
+  ],
   "ark.jpeg": [
     1200,
     1600
@@ -7,17 +11,93 @@
     1080,
     1440
   ],
+  "cat.jpeg": [
+    720,
+    360
+  ],
   "ccru.png": [
     1148,
     1454
+  ],
+  "change.jpg": [
+    2225,
+    1868
+  ],
+  "city.jpg": [
+    736,
+    1472
+  ],
+  "clippy.jpeg": [
+    928,
+    844
+  ],
+  "clycle.jpg": [
+    1024,
+    768
+  ],
+  "context.jpeg": [
+    804,
+    976
+  ],
+  "curious.jpeg": [
+    977,
+    654
+  ],
+  "dancing.png": [
+    201,
+    251
+  ],
+  "dark.jpeg": [
+    801,
+    980
+  ],
+  "dog.jpeg": [
+    538,
+    360
+  ],
+  "dolphin.jpeg": [
+    938,
+    837
+  ],
+  "email.jpg": [
+    1179,
+    785
   ],
   "empathetic.png": [
     1658,
     1298
   ],
+  "fingers.jpg": [
+    3060,
+    4080
+  ],
+  "frog.jpeg": [
+    836,
+    940
+  ],
+  "garfield.jpeg": [
+    632,
+    360
+  ],
+  "grass.jpeg": [
+    360,
+    360
+  ],
   "grow.png": [
     1061,
     1472
+  ],
+  "health.jpeg": [
+    886,
+    886
+  ],
+  "here.jpg": [
+    3072,
+    4080
+  ],
+  "interface.jpeg": [
+    886,
+    886
   ],
   "isthmus2.jpg": [
     1122,
@@ -27,6 +107,18 @@
     1062,
     878
   ],
+  "mountain.jpg": [
+    1024,
+    1024
+  ],
+  "mushroom.jpg": [
+    4284,
+    5712
+  ],
+  "now.jpeg": [
+    792,
+    990
+  ],
   "optimal transport.png": [
     640,
     479
@@ -34,6 +126,10 @@
   "pendulum.png": [
     962,
     962
+  ],
+  "porous.jpeg": [
+    724,
+    1086
   ],
   "red.png": [
     1232,
@@ -43,9 +139,49 @@
     2341,
     1472
   ],
+  "seal.jpeg": [
+    740,
+    1058
+  ],
+  "sky.jpeg": [
+    434,
+    360
+  ],
+  "slime.jpg": [
+    3472,
+    4624
+  ],
+  "smile.jpeg": [
+    968,
+    967
+  ],
+  "snow.jpg": [
+    3072,
+    4080
+  ],
+  "spiral.jpg": [
+    4032,
+    3024
+  ],
+  "spongebob.jpeg": [
+    642,
+    360
+  ],
+  "target_marker.jpg": [
+    2750,
+    2765
+  ],
   "telemetry.png": [
     1386,
     1472
+  ],
+  "tortoise.png": [
+    456,
+    498
+  ],
+  "truth.jpeg": [
+    794,
+    990
   ],
   "unfolding.png": [
     1501,
@@ -54,6 +190,14 @@
   "utopia.png": [
     1192,
     1472
+  ],
+  "what_if.jpg": [
+    736,
+    1065
+  ],
+  "wind.jpg": [
+    872,
+    302
   ],
   "zizek.png": [
     1080,

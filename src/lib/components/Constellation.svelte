@@ -12,7 +12,7 @@
 	let gridWidth = 0;
 	let gridHeight = 0;
 
-	// Brian's Brain states: 0 = off, 1 = on, 2 = dying, 3 = dormant (visible but inactive)
+	// Brian's Brain states: 0 = off, 1 = on, 2 = dying
 	let grid: Uint8Array;
 	let nextGrid: Uint8Array;
 
@@ -21,37 +21,24 @@
 	let mouseY = -1000;
 	let mouseGridX = -1;
 	let mouseGridY = -1;
-	const HOVER_ACTIVATION_RADIUS = 8; // Grid cells - radius to activate dormant clusters
-
-	// Seed cluster positions (relative 0-1 coordinates)
-	interface SeedCluster {
-		x: number;
-		y: number;
-		activated: boolean;
-	}
-	let seedClusters: SeedCluster[] = [];
 
 	// Theme colors - very subtle so text remains readable
-	const themeColors: Record<BaseThemeName, { on: string; dying: string; dormant: string }> = {
+	const themeColors: Record<BaseThemeName, { on: string; dying: string }> = {
 		dawn: {
 			on: 'rgba(255, 176, 136, 0.35)',
-			dying: 'rgba(255, 220, 180, 0.18)',
-			dormant: 'rgba(255, 176, 136, 0.2)'
+			dying: 'rgba(255, 220, 180, 0.18)'
 		},
 		night: {
 			on: 'rgba(140, 130, 200, 0.18)',
-			dying: 'rgba(100, 90, 160, 0.08)',
-			dormant: 'rgba(140, 130, 200, 0.1)'
+			dying: 'rgba(100, 90, 160, 0.08)'
 		},
 		twilight: {
 			on: 'rgba(199, 146, 146, 0.18)',
-			dying: 'rgba(180, 160, 200, 0.08)',
-			dormant: 'rgba(199, 146, 146, 0.1)'
+			dying: 'rgba(180, 160, 200, 0.08)'
 		},
 		forest: {
 			on: 'rgba(144, 224, 96, 0.18)',
-			dying: 'rgba(100, 180, 70, 0.08)',
-			dormant: 'rgba(144, 224, 96, 0.1)'
+			dying: 'rgba(100, 180, 70, 0.08)'
 		}
 	};
 
@@ -60,63 +47,7 @@
 		gridHeight = Math.ceil(height / CELL_SIZE);
 		grid = new Uint8Array(gridWidth * gridHeight);
 		nextGrid = new Uint8Array(gridWidth * gridHeight);
-
-		// Create seed cluster positions
-		seedClusters = [
-			{ x: 0.15, y: 0.2, activated: false },
-			{ x: 0.85, y: 0.15, activated: false },
-			{ x: 0.1, y: 0.6, activated: false },
-			{ x: 0.9, y: 0.55, activated: false },
-			{ x: 0.2, y: 0.85, activated: false },
-			{ x: 0.75, y: 0.8, activated: false },
-			{ x: 0.5, y: 0.4, activated: false },
-		];
-
-		// Place dormant cells at each cluster
-		for (const cluster of seedClusters) {
-			placeDormantCluster(cluster);
-		}
-	}
-
-	function placeDormantCluster(cluster: SeedCluster) {
-		const centerX = Math.floor(cluster.x * gridWidth);
-		const centerY = Math.floor(cluster.y * gridHeight);
-		const clusterSize = 4;
-
-		// Create a small cluster of dormant cells
-		for (let i = 0; i < 12; i++) {
-			const angle = Math.random() * Math.PI * 2;
-			const dist = Math.random() * clusterSize;
-			const x = Math.floor(centerX + Math.cos(angle) * dist);
-			const y = Math.floor(centerY + Math.sin(angle) * dist);
-			if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
-				grid[y * gridWidth + x] = 3; // Dormant state
-			}
-		}
-	}
-
-	function activateCluster(cluster: SeedCluster) {
-		if (cluster.activated) return;
-		cluster.activated = true;
-
-		const centerX = Math.floor(cluster.x * gridWidth);
-		const centerY = Math.floor(cluster.y * gridHeight);
-		const activationRadius = 5;
-
-		// Convert dormant cells to active and add some new active cells
-		for (let dy = -activationRadius; dy <= activationRadius; dy++) {
-			for (let dx = -activationRadius; dx <= activationRadius; dx++) {
-				if (dx * dx + dy * dy > activationRadius * activationRadius) continue;
-				const x = centerX + dx;
-				const y = centerY + dy;
-				if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
-					const idx = y * gridWidth + x;
-					if (grid[idx] === 3 || Math.random() < 0.3) {
-						grid[idx] = 1; // Activate
-					}
-				}
-			}
-		}
+		// Start with empty grid - cells only appear on click
 	}
 
 	function countOnNeighbors(x: number, y: number): number {
@@ -137,12 +68,6 @@
 			for (let x = 0; x < gridWidth; x++) {
 				const idx = y * gridWidth + x;
 				const state = grid[idx];
-
-				// Dormant cells stay dormant until activated
-				if (state === 3) {
-					nextGrid[idx] = 3;
-					continue;
-				}
 
 				// Brian's Brain rules:
 				// OFF (0) -> ON (1) if exactly 2 neighbors are ON
@@ -177,16 +102,11 @@
 				const state = grid[y * gridWidth + x];
 				if (state === 0) continue;
 
-				if (state === 3) {
-					ctx.fillStyle = colors.dormant;
-				} else {
-					ctx.fillStyle = state === 1 ? colors.on : colors.dying;
-				}
-
+				ctx.fillStyle = state === 1 ? colors.on : colors.dying;
 				ctx.beginPath();
 				const cx = x * CELL_SIZE + CELL_SIZE / 2;
 				const cy = y * CELL_SIZE + CELL_SIZE / 2;
-				const radius = state === 1 ? CELL_SIZE * 0.35 : (state === 3 ? CELL_SIZE * 0.3 : CELL_SIZE * 0.25);
+				const radius = state === 1 ? CELL_SIZE * 0.35 : CELL_SIZE * 0.25;
 				ctx.arc(cx, cy, radius, 0, Math.PI * 2);
 				ctx.fill();
 			}
@@ -205,20 +125,6 @@
 		if (elapsed < frameInterval) return;
 
 		lastFrameTime = currentTime - (elapsed % frameInterval);
-
-		// Check if mouse is near any dormant cluster
-		if (mouseGridX >= 0 && mouseGridY >= 0) {
-			for (const cluster of seedClusters) {
-				if (cluster.activated) continue;
-				const clusterGridX = Math.floor(cluster.x * gridWidth);
-				const clusterGridY = Math.floor(cluster.y * gridHeight);
-				const dx = mouseGridX - clusterGridX;
-				const dy = mouseGridY - clusterGridY;
-				if (dx * dx + dy * dy < HOVER_ACTIVATION_RADIUS * HOVER_ACTIVATION_RADIUS) {
-					activateCluster(cluster);
-				}
-			}
-		}
 
 		updateGrid();
 		render();
@@ -266,19 +172,7 @@
 			mouseGridX = Math.floor(mouseX / CELL_SIZE);
 			mouseGridY = Math.floor(mouseY / CELL_SIZE);
 
-			// Check cluster activation on touch
-			for (const cluster of seedClusters) {
-				if (cluster.activated) continue;
-				const clusterGridX = Math.floor(cluster.x * gridWidth);
-				const clusterGridY = Math.floor(cluster.y * gridHeight);
-				const dx = mouseGridX - clusterGridX;
-				const dy = mouseGridY - clusterGridY;
-				if (dx * dx + dy * dy < HOVER_ACTIVATION_RADIUS * HOVER_ACTIVATION_RADIUS) {
-					activateCluster(cluster);
-				}
-			}
-
-			// Also spawn cells on touch
+			// Spawn cells on touch
 			const burstRadius = 4;
 			for (let dy = -burstRadius; dy <= burstRadius; dy++) {
 				for (let dx = -burstRadius; dx <= burstRadius; dx++) {
