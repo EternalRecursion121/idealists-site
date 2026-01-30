@@ -4,321 +4,372 @@
 	type BaseThemeName = 'dawn' | 'night' | 'twilight' | 'forest';
 	let { theme }: { theme: BaseThemeName } = $props();
 
-	let svg: SVGSVGElement;
-	let stars: {
-		id: number;
+	let canvas: HTMLCanvasElement;
+	let ctx: CanvasRenderingContext2D | null = null;
+
+	// Grid dimensions (low res for performance, scaled up)
+	const CELL_SIZE = 8;
+	let gridWidth = 0;
+	let gridHeight = 0;
+
+	// Brian's Brain states: 0 = off, 1 = on, 2 = dying, 3 = dormant (visible but inactive)
+	let grid: Uint8Array;
+	let nextGrid: Uint8Array;
+
+	// Mouse position for interaction
+	let mouseX = -1000;
+	let mouseY = -1000;
+	let mouseGridX = -1;
+	let mouseGridY = -1;
+	const HOVER_ACTIVATION_RADIUS = 8; // Grid cells - radius to activate dormant clusters
+
+	// Seed cluster positions (relative 0-1 coordinates)
+	interface SeedCluster {
 		x: number;
 		y: number;
-		targetX: number;
-		targetY: number;
-		baseX: number;
-		baseY: number;
-		size: number;
-		targetSize: number;
-		opacity: number;
-		targetOpacity: number;
-		twinklePhase: number;
-		twinkleSpeed: number;
-		isSunlight: boolean;
-		isDiamond: boolean;
-	}[] = $state([]);
+		activated: boolean;
+	}
+	let seedClusters: SeedCluster[] = [];
 
-	let time = $state(0);
-	let screenWidth = 0;
-	let screenHeight = 0;
-
-	const STAR_COUNT = 120;
-	const SUNLIGHT_RATIO = 0.25; // 25% golden sunlight sparkles in dawn mode
-	const DIAMOND_RATIO = 0.3; // 30% diamond-shaped stars
-
-	// Theme-specific configuration
-	const themeConfig: Record<BaseThemeName, {
-		twinkleSpeed: number;
-		driftAmount: number;
-		minOpacity: number;
-		maxOpacity: number;
-		visible: boolean;
-	}> = {
+	// Theme colors - very subtle so text remains readable
+	const themeColors: Record<BaseThemeName, { on: string; dying: string; dormant: string }> = {
+		dawn: {
+			on: 'rgba(255, 176, 136, 0.35)',
+			dying: 'rgba(255, 220, 180, 0.18)',
+			dormant: 'rgba(255, 176, 136, 0.2)'
+		},
 		night: {
-			twinkleSpeed: 0,
-			driftAmount: 0,
-			minOpacity: 0,
-			maxOpacity: 0,
-			visible: false
+			on: 'rgba(140, 130, 200, 0.18)',
+			dying: 'rgba(100, 90, 160, 0.08)',
+			dormant: 'rgba(140, 130, 200, 0.1)'
 		},
 		twilight: {
-			twinkleSpeed: 0.006,
-			driftAmount: 0,
-			minOpacity: 0.2,
-			maxOpacity: 1,
-			visible: true
+			on: 'rgba(199, 146, 146, 0.18)',
+			dying: 'rgba(180, 160, 200, 0.08)',
+			dormant: 'rgba(199, 146, 146, 0.1)'
 		},
 		forest: {
-			twinkleSpeed: 0.0015,
-			driftAmount: 15,
-			minOpacity: 0.2,
-			maxOpacity: 1,
-			visible: true
-		},
-		dawn: {
-			twinkleSpeed: 0.004,
-			driftAmount: 4,
-			minOpacity: 0.15,
-			maxOpacity: 0.8,
-			visible: true
+			on: 'rgba(144, 224, 96, 0.18)',
+			dying: 'rgba(100, 180, 70, 0.08)',
+			dormant: 'rgba(144, 224, 96, 0.1)'
 		}
 	};
 
-	function getStarSize(theme: BaseThemeName, isSunlight: boolean, isDiamond: boolean): number {
-		if (theme === 'forest') {
-			// Fireflies - larger, more varied
-			return 1.5 + Math.random() * 2;
-		} else if (theme === 'dawn') {
-			// Warm sunrise dust motes - soft and gentle
-			if (isSunlight) {
-				return 1 + Math.random() * 1.5;
+	function initGrid(width: number, height: number) {
+		gridWidth = Math.ceil(width / CELL_SIZE);
+		gridHeight = Math.ceil(height / CELL_SIZE);
+		grid = new Uint8Array(gridWidth * gridHeight);
+		nextGrid = new Uint8Array(gridWidth * gridHeight);
+
+		// Create seed cluster positions
+		seedClusters = [
+			{ x: 0.15, y: 0.2, activated: false },
+			{ x: 0.85, y: 0.15, activated: false },
+			{ x: 0.1, y: 0.6, activated: false },
+			{ x: 0.9, y: 0.55, activated: false },
+			{ x: 0.2, y: 0.85, activated: false },
+			{ x: 0.75, y: 0.8, activated: false },
+			{ x: 0.5, y: 0.4, activated: false },
+		];
+
+		// Place dormant cells at each cluster
+		for (const cluster of seedClusters) {
+			placeDormantCluster(cluster);
+		}
+	}
+
+	function placeDormantCluster(cluster: SeedCluster) {
+		const centerX = Math.floor(cluster.x * gridWidth);
+		const centerY = Math.floor(cluster.y * gridHeight);
+		const clusterSize = 4;
+
+		// Create a small cluster of dormant cells
+		for (let i = 0; i < 12; i++) {
+			const angle = Math.random() * Math.PI * 2;
+			const dist = Math.random() * clusterSize;
+			const x = Math.floor(centerX + Math.cos(angle) * dist);
+			const y = Math.floor(centerY + Math.sin(angle) * dist);
+			if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+				grid[y * gridWidth + x] = 3; // Dormant state
 			}
-			return 0.6 + Math.random() * 1;
-		} else {
-			// Regular stars
-			const base = isDiamond ? 1.2 : 0.8;
-			const variance = isDiamond ? 1.2 : 1.5;
-			const size = base + Math.random() * variance;
-			return Math.random() > 0.95 ? size + 1 : size;
 		}
 	}
 
-	function generateStars(width: number, height: number) {
-		screenWidth = width;
-		screenHeight = height;
+	function activateCluster(cluster: SeedCluster) {
+		if (cluster.activated) return;
+		cluster.activated = true;
 
-		const newStars: typeof stars = [];
+		const centerX = Math.floor(cluster.x * gridWidth);
+		const centerY = Math.floor(cluster.y * gridHeight);
+		const activationRadius = 5;
 
-		for (let i = 0; i < STAR_COUNT; i++) {
-			const x = Math.random() * width;
-			const y = Math.random() * height;
-			const isSunlight = Math.random() < SUNLIGHT_RATIO;
-			const isDiamond = Math.random() < DIAMOND_RATIO;
-			const size = getStarSize(theme, isSunlight, isDiamond);
-			const config = themeConfig[theme];
-
-			newStars.push({
-				id: i,
-				x,
-				y,
-				targetX: x,
-				targetY: y,
-				baseX: x,
-				baseY: y,
-				size,
-				targetSize: size,
-				opacity: config.visible ? Math.random() * 0.8 + 0.2 : 0,
-				targetOpacity: config.visible ? 1 : 0,
-				twinklePhase: Math.random() * Math.PI * 2,
-				twinkleSpeed: config.twinkleSpeed * (0.8 + Math.random() * 0.4),
-				isSunlight,
-				isDiamond
-			});
-		}
-
-		stars = newStars;
-	}
-
-	function updateStarTargets() {
-		const config = themeConfig[theme];
-
-		for (const star of stars) {
-			// Update target size based on theme
-			star.targetSize = getStarSize(theme, star.isSunlight, star.isDiamond);
-
-			// Update target opacity based on theme
-			star.targetOpacity = config.visible ? 1 : 0;
-
-			// Update twinkle speed based on theme
-			star.twinkleSpeed = config.twinkleSpeed * (0.8 + Math.random() * 0.4);
-		}
-	}
-
-	function updateStars() {
-		const config = themeConfig[theme];
-
-		for (const star of stars) {
-			// Smoothly interpolate size
-			const sizeDiff = star.targetSize - star.size;
-			star.size += sizeDiff * 0.05; // 5% per frame
-
-			// Smoothly interpolate opacity (base level)
-			const opacityDiff = star.targetOpacity - star.opacity;
-			star.opacity += opacityDiff * 0.08; // 8% per frame for quicker transitions
-
-			// Update twinkle phase
-			star.twinklePhase += star.twinkleSpeed;
-
-			// Calculate displayed opacity from twinkle - MORE DRAMATIC
-			let displayOpacity = star.opacity;
-			if (config.visible && star.opacity > 0.1) {
-				if (theme === 'forest') {
-					// Fireflies: smooth pulsing glow
-					const pulse = Math.sin(star.twinklePhase);
-					displayOpacity = star.opacity * (0.3 + pulse * 0.7);
-				} else if (theme === 'dawn') {
-					// Sunrise dust motes: gentle warm glow
-					const pulse = Math.sin(star.twinklePhase);
-					if (star.isSunlight) {
-						displayOpacity = star.opacity * (0.5 + pulse * 0.4);
-					} else {
-						displayOpacity = star.opacity * (0.3 + pulse * 0.3);
+		// Convert dormant cells to active and add some new active cells
+		for (let dy = -activationRadius; dy <= activationRadius; dy++) {
+			for (let dx = -activationRadius; dx <= activationRadius; dx++) {
+				if (dx * dx + dy * dy > activationRadius * activationRadius) continue;
+				const x = centerX + dx;
+				const y = centerY + dy;
+				if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+					const idx = y * gridWidth + x;
+					if (grid[idx] === 3 || Math.random() < 0.3) {
+						grid[idx] = 1; // Activate
 					}
-				} else if (theme === 'twilight') {
-					// Twilight stars: very dramatic twinkling
-					const twinkle = Math.sin(star.twinklePhase);
-					const flutter = Math.sin(star.twinklePhase * 3.1) * 0.25;
-					// Very dramatic range: 0.05 to 1.0
-					displayOpacity = star.opacity * Math.max(0.05, 0.2 + (twinkle * 0.5 + 0.5) * 0.8 + flutter);
+				}
+			}
+		}
+	}
+
+	function countOnNeighbors(x: number, y: number): number {
+		let count = 0;
+		for (let dy = -1; dy <= 1; dy++) {
+			for (let dx = -1; dx <= 1; dx++) {
+				if (dx === 0 && dy === 0) continue;
+				const nx = (x + dx + gridWidth) % gridWidth;
+				const ny = (y + dy + gridHeight) % gridHeight;
+				if (grid[ny * gridWidth + nx] === 1) count++;
+			}
+		}
+		return count;
+	}
+
+	function updateGrid() {
+		for (let y = 0; y < gridHeight; y++) {
+			for (let x = 0; x < gridWidth; x++) {
+				const idx = y * gridWidth + x;
+				const state = grid[idx];
+
+				// Dormant cells stay dormant until activated
+				if (state === 3) {
+					nextGrid[idx] = 3;
+					continue;
+				}
+
+				// Brian's Brain rules:
+				// OFF (0) -> ON (1) if exactly 2 neighbors are ON
+				// ON (1) -> DYING (2)
+				// DYING (2) -> OFF (0)
+				if (state === 0) {
+					const neighbors = countOnNeighbors(x, y);
+					nextGrid[idx] = neighbors === 2 ? 1 : 0;
+				} else if (state === 1) {
+					nextGrid[idx] = 2;
+				} else {
+					nextGrid[idx] = 0;
+				}
+			}
+		}
+
+		// Swap grids
+		[grid, nextGrid] = [nextGrid, grid];
+	}
+
+	function render() {
+		if (!ctx) return;
+
+		const colors = themeColors[theme];
+
+		// Clear canvas
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		// Draw cells
+		for (let y = 0; y < gridHeight; y++) {
+			for (let x = 0; x < gridWidth; x++) {
+				const state = grid[y * gridWidth + x];
+				if (state === 0) continue;
+
+				if (state === 3) {
+					ctx.fillStyle = colors.dormant;
+				} else {
+					ctx.fillStyle = state === 1 ? colors.on : colors.dying;
+				}
+
+				ctx.beginPath();
+				const cx = x * CELL_SIZE + CELL_SIZE / 2;
+				const cy = y * CELL_SIZE + CELL_SIZE / 2;
+				const radius = state === 1 ? CELL_SIZE * 0.35 : (state === 3 ? CELL_SIZE * 0.3 : CELL_SIZE * 0.25);
+				ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		}
+	}
+
+	let animationId: number | null = null;
+	let lastFrameTime = 0;
+	const targetFPS = 12;
+	const frameInterval = 1000 / targetFPS;
+
+	function animationLoop(currentTime: number) {
+		animationId = requestAnimationFrame(animationLoop);
+
+		const elapsed = currentTime - lastFrameTime;
+		if (elapsed < frameInterval) return;
+
+		lastFrameTime = currentTime - (elapsed % frameInterval);
+
+		// Check if mouse is near any dormant cluster
+		if (mouseGridX >= 0 && mouseGridY >= 0) {
+			for (const cluster of seedClusters) {
+				if (cluster.activated) continue;
+				const clusterGridX = Math.floor(cluster.x * gridWidth);
+				const clusterGridY = Math.floor(cluster.y * gridHeight);
+				const dx = mouseGridX - clusterGridX;
+				const dy = mouseGridY - clusterGridY;
+				if (dx * dx + dy * dy < HOVER_ACTIVATION_RADIUS * HOVER_ACTIVATION_RADIUS) {
+					activateCluster(cluster);
+				}
+			}
+		}
+
+		updateGrid();
+		render();
+	}
+
+	function handleMouseMove(e: MouseEvent) {
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+		mouseGridX = Math.floor(mouseX / CELL_SIZE);
+		mouseGridY = Math.floor(mouseY / CELL_SIZE);
+	}
+
+	function handleMouseLeave() {
+		mouseX = -1000;
+		mouseY = -1000;
+		mouseGridX = -1;
+		mouseGridY = -1;
+	}
+
+	function handleClick(e: MouseEvent) {
+		// Spawn a burst of cells on click
+		const clickGridX = Math.floor(e.clientX / CELL_SIZE);
+		const clickGridY = Math.floor(e.clientY / CELL_SIZE);
+		const burstRadius = 4;
+
+		for (let dy = -burstRadius; dy <= burstRadius; dy++) {
+			for (let dx = -burstRadius; dx <= burstRadius; dx++) {
+				if (dx * dx + dy * dy > burstRadius * burstRadius) continue;
+				const x = clickGridX + dx;
+				const y = clickGridY + dy;
+				if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+					if (Math.random() < 0.4) {
+						grid[y * gridWidth + x] = 1;
+					}
+				}
+			}
+		}
+	}
+
+	function handleTouchStart(e: TouchEvent) {
+		if (e.touches.length > 0) {
+			const touch = e.touches[0];
+			mouseX = touch.clientX;
+			mouseY = touch.clientY;
+			mouseGridX = Math.floor(mouseX / CELL_SIZE);
+			mouseGridY = Math.floor(mouseY / CELL_SIZE);
+
+			// Check cluster activation on touch
+			for (const cluster of seedClusters) {
+				if (cluster.activated) continue;
+				const clusterGridX = Math.floor(cluster.x * gridWidth);
+				const clusterGridY = Math.floor(cluster.y * gridHeight);
+				const dx = mouseGridX - clusterGridX;
+				const dy = mouseGridY - clusterGridY;
+				if (dx * dx + dy * dy < HOVER_ACTIVATION_RADIUS * HOVER_ACTIVATION_RADIUS) {
+					activateCluster(cluster);
 				}
 			}
 
-			// Apply drift for certain themes
-			if (config.driftAmount > 0 && star.opacity > 0.1) {
-				if (theme === 'forest') {
-					// Fireflies: organic floating movement
-					star.x = star.baseX + Math.sin(time * 0.3 + star.id * 0.7) * config.driftAmount;
-					star.y = star.baseY + Math.cos(time * 0.2 + star.id * 0.5) * config.driftAmount * 1.5;
-				} else if (theme === 'dawn') {
-					// Sunrise dust: slow lazy drift upward
-					star.x = star.baseX + Math.sin(time * 0.2 + star.id * 0.5) * config.driftAmount;
-					star.y = star.baseY + Math.cos(time * 0.15 + star.id * 0.3) * config.driftAmount * 0.8;
+			// Also spawn cells on touch
+			const burstRadius = 4;
+			for (let dy = -burstRadius; dy <= burstRadius; dy++) {
+				for (let dx = -burstRadius; dx <= burstRadius; dx++) {
+					if (dx * dx + dy * dy > burstRadius * burstRadius) continue;
+					const x = mouseGridX + dx;
+					const y = mouseGridY + dy;
+					if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+						if (Math.random() < 0.4) {
+							grid[y * gridWidth + x] = 1;
+						}
+					}
 				}
-			} else {
-				// Smoothly return to base position
-				const dx = star.baseX - star.x;
-				const dy = star.baseY - star.y;
-				star.x += dx * 0.05;
-				star.y += dy * 0.05;
 			}
 		}
-
-		time += 0.016; // ~60fps worth of time
 	}
 
-	// Generate diamond star path (4-pointed concave star)
-	function getDiamondPath(x: number, y: number, size: number): string {
-		const outerRadius = size;
-		const innerRadius = size * 0.4;
-
-		// 4 points at cardinal directions
-		const points = [];
-		for (let i = 0; i < 4; i++) {
-			const angle = (i * Math.PI / 2) - Math.PI / 2; // Start at top
-			// Outer point
-			points.push({
-				x: x + Math.cos(angle) * outerRadius,
-				y: y + Math.sin(angle) * outerRadius
-			});
-			// Inner point (between outer points)
-			const innerAngle = angle + Math.PI / 4;
-			points.push({
-				x: x + Math.cos(innerAngle) * innerRadius,
-				y: y + Math.sin(innerAngle) * innerRadius
-			});
+	function handleTouchMove(e: TouchEvent) {
+		if (e.touches.length > 0) {
+			const touch = e.touches[0];
+			mouseX = touch.clientX;
+			mouseY = touch.clientY;
+			mouseGridX = Math.floor(mouseX / CELL_SIZE);
+			mouseGridY = Math.floor(mouseY / CELL_SIZE);
 		}
-
-		// Build path
-		let path = `M ${points[0].x} ${points[0].y}`;
-		for (let i = 1; i < points.length; i++) {
-			path += ` L ${points[i].x} ${points[i].y}`;
-		}
-		path += ' Z';
-
-		return path;
 	}
 
-	let animationInterval: ReturnType<typeof setInterval> | null = null;
+	function handleTouchEnd() {
+		mouseX = -1000;
+		mouseY = -1000;
+		mouseGridX = -1;
+		mouseGridY = -1;
+	}
+
+	function handleResize() {
+		if (!canvas) return;
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		initGrid(canvas.width, canvas.height);
+	}
 
 	onMount(() => {
-		generateStars(window.innerWidth, window.innerHeight);
+		ctx = canvas.getContext('2d');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
 
-		animationInterval = setInterval(updateStars, 16); // ~60fps
+		initGrid(canvas.width, canvas.height);
 
-		const handleResize = () => {
-			const oldWidth = screenWidth;
-			const oldHeight = screenHeight;
-			screenWidth = window.innerWidth;
-			screenHeight = window.innerHeight;
+		animationId = requestAnimationFrame(animationLoop);
 
-			// Reposition stars proportionally
-			if (oldWidth && oldHeight) {
-				for (const star of stars) {
-					star.x = (star.x / oldWidth) * screenWidth;
-					star.y = (star.y / oldHeight) * screenHeight;
-					star.baseX = (star.baseX / oldWidth) * screenWidth;
-					star.baseY = (star.baseY / oldHeight) * screenHeight;
-					star.targetX = star.x;
-					star.targetY = star.y;
-				}
-			}
-		};
+		window.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseleave', handleMouseLeave);
+		window.addEventListener('click', handleClick);
+		window.addEventListener('touchstart', handleTouchStart);
+		window.addEventListener('touchmove', handleTouchMove);
+		window.addEventListener('touchend', handleTouchEnd);
 		window.addEventListener('resize', handleResize);
 
 		return () => {
-			if (animationInterval) clearInterval(animationInterval);
+			if (animationId) cancelAnimationFrame(animationId);
+			window.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseleave', handleMouseLeave);
+			window.removeEventListener('click', handleClick);
+			window.removeEventListener('touchstart', handleTouchStart);
+			window.removeEventListener('touchmove', handleTouchMove);
+			window.removeEventListener('touchend', handleTouchEnd);
 			window.removeEventListener('resize', handleResize);
 		};
 	});
 
-	// Update star targets when theme changes
+	// Re-render when theme changes
 	$effect(() => {
-		// Track theme dependency
 		theme;
-
-		if (stars.length > 0) {
-			updateStarTargets();
-		}
+		render();
 	});
 </script>
 
-<svg
-	bind:this={svg}
-	class="stars-bg"
-	viewBox="0 0 {typeof window !== 'undefined' ? window.innerWidth : 1920} {typeof window !== 'undefined' ? window.innerHeight : 1080}"
-	preserveAspectRatio="xMidYMid slice"
->
-	{#each stars as star (star.id)}
-		{#if star.isDiamond}
-			<path
-				d={getDiamondPath(star.x, star.y, star.size)}
-				fill={theme === 'dawn' && star.isSunlight ? 'var(--star-alt)' : 'currentColor'}
-				opacity={(star as any).displayOpacity || star.opacity}
-				class="star"
-			/>
-		{:else}
-			<circle
-				cx={star.x}
-				cy={star.y}
-				r={star.size}
-				fill={theme === 'dawn' && star.isSunlight ? 'var(--star-alt)' : 'currentColor'}
-				opacity={(star as any).displayOpacity || star.opacity}
-				class="star"
-			/>
-		{/if}
-	{/each}
-</svg>
+<canvas
+	bind:this={canvas}
+	class="automata-bg"
+	aria-hidden="true"
+></canvas>
 
 <style>
-	.stars-bg {
+	.automata-bg {
 		position: fixed;
 		top: 0;
 		left: 0;
 		width: 100vw;
 		height: 100vh;
 		z-index: -1;
-		color: var(--star, #ffffff);
-		pointer-events: none;
-		transition: color 0.8s ease;
-	}
-
-	.star {
-		will-change: opacity, transform;
-		opacity: 40%;
+		pointer-events: auto;
+		touch-action: none;
 	}
 </style>
