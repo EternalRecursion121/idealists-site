@@ -10,6 +10,7 @@ interface PageNode {
 
 function getRouteName(routePath: string): string {
 	if (routePath === '/') return 'home';
+	if (routePath === '/sitemap') return 'index';
 	return routePath.slice(1);
 }
 
