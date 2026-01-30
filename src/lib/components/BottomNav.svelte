@@ -29,7 +29,7 @@
 		<div class="nav-center">
 			<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
 			<span class="divider"></span>
-			<a href="/index" class="opacity-70 hover:opacity-100">index</a>
+			<a href="/sitemap" class="opacity-70 hover:opacity-100">index</a>
 		</div>
 		<a href={paths[next]} class="nav-next opacity-70 hover:opacity-100">{next} →</a>
 		<span class="line-h"></span>

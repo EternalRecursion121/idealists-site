@@ -7,7 +7,7 @@ const pageDescriptions: Record<string, string> = {
 	'/vibes': 'visual inspiration',
 	'/members': 'the people',
 	'/join': 'become one of us',
-	'/index': 'you are here'
+	'/sitemap': 'you are here'
 };
 
 export async function load({ parent }) {

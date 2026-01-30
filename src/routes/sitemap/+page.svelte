@@ -33,7 +33,7 @@
 
 	// Assign orbit based on page type and connectivity
 	function getOrbit(page: PageNode, allPages: PageNode[]): number {
-		if (page.path === '/index') return 0; // index at center
+		if (page.path === '/sitemap') return 0; // index at center
 		if (page.isWriting) return 3; // writings in outer cluster
 
 		const connectionCount = page.linksTo.length +
@@ -52,7 +52,7 @@
 		const orbit3: string[] = []; // writings
 
 		for (const page of pages) {
-			if (page.path === '/index') {
+			if (page.path === '/sitemap') {
 				angles.set(page.path, 0);
 			} else {
 				const orbit = getOrbit(page, pages);
@@ -90,7 +90,7 @@
 		const angles = assignAngles(data.pages);
 
 		return data.pages.map((page) => {
-			const orbit = page.path === '/index' ? 0 : getOrbit(page, data.pages);
+			const orbit = page.path === '/sitemap' ? 0 : getOrbit(page, data.pages);
 			const angle = angles.get(page.path) || 0;
 
 			let x: number, y: number;
@@ -267,7 +267,7 @@
 				href={page.path}
 				class="index-link"
 				class:accent={page.path === '/join'}
-				class:center={page.path === '/index'}
+				class:center={page.path === '/sitemap'}
 				class:writing={page.isWriting}
 				class:highlighted={hoveredPage && (page.path === hoveredPage || data.connections.some(c => (c.from === hoveredPage && c.to === page.path) || (c.to === hoveredPage && c.from === page.path)))}
 				style="

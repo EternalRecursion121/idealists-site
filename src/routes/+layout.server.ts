@@ -15,7 +15,7 @@ function getRouteName(routePath: string): string {
 
 function findInternalLinks(content: string, currentPath: string): string[] {
 	const links = new Set<string>();
-	const hrefRegex = /href=["'](\/?(?:writings|projects|library|vibes|members|join|index)?)\/?["']/g;
+	const hrefRegex = /href=["'](\/?(?:writings|projects|library|vibes|members|join|sitemap)?)\/?["']/g;
 	let match;
 
 	while ((match = hrefRegex.exec(content)) !== null) {
@@ -47,7 +47,7 @@ function getWritingSlugs(): string[] {
 function scanRoutes(): { pages: PageNode[]; connections: { from: string; to: string }[] } {
 	const pages: PageNode[] = [];
 	const routesDir = 'src/routes';
-	const mainRoutes = ['', 'writings', 'projects', 'library', 'vibes', 'members', 'join', 'index'];
+	const mainRoutes = ['', 'writings', 'projects', 'library', 'vibes', 'members', 'join', 'sitemap'];
 
 	for (const route of mainRoutes) {
 		const routePath = route === '' ? '/' : `/${route}`;
@@ -115,17 +115,17 @@ function scanRoutes(): { pages: PageNode[]; connections: { from: string; to: str
 			if (!pageNode.linksTo.includes(prevPath)) pageNode.linksTo.push(prevPath);
 			if (!pageNode.linksTo.includes(nextPath)) pageNode.linksTo.push(nextPath);
 			if (!pageNode.linksTo.includes('/join')) pageNode.linksTo.push('/join');
-			if (!pageNode.linksTo.includes('/index')) pageNode.linksTo.push('/index');
+			if (!pageNode.linksTo.includes('/sitemap')) pageNode.linksTo.push('/sitemap');
 		}
 	}
 
-	// Connect /index to all main pages (since it displays all of them)
-	const indexPage = pages.find(p => p.path === '/index');
-	if (indexPage) {
+	// Connect /sitemap to all main pages (since it displays all of them)
+	const sitemapPage = pages.find(p => p.path === '/sitemap');
+	if (sitemapPage) {
 		for (const route of mainRoutes) {
 			const routePath = route === '' ? '/' : `/${route}`;
-			if (routePath !== '/index' && !indexPage.linksTo.includes(routePath)) {
-				indexPage.linksTo.push(routePath);
+			if (routePath !== '/sitemap' && !sitemapPage.linksTo.includes(routePath)) {
+				sitemapPage.linksTo.push(routePath);
 			}
 		}
 	}
