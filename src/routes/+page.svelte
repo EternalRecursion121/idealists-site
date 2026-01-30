@@ -75,7 +75,14 @@
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        margin-top: 2.5rem;
         margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .word-header {
+            margin-top: 0;
+        }
     }
 
     .ideal-title {

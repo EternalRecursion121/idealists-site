@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BottomNav from '$lib/components/BottomNav.svelte';
+	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { onMount } from 'svelte';
 
 	type LlamaPhase = 'hidden' | 'appearing' | 'entering' | 'speaking' | 'exiting' | 'corner';
@@ -95,11 +96,8 @@ we are a collective. this literally means we are made up of people. you there, i
 	<title>Join Us — The Idealists Collective</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16 min-h-screen flex flex-col">
-	<header class="mb-8 sm:mb-12 text-center">
-		<h1 class="text-2xl sm:text-3xl font-semibold mb-4">join us</h1>
-		<p class="opacity-70 max-w-sm mx-auto">become part of whatever this is</p>
-	</header>
+<div class="max-w-3xl mx-auto px-4 min-h-screen flex flex-col text-center">
+	<PageHeader title="join us" description="become part of whatever this is" />
 
 	{#if llamaPhase !== 'hidden'}
 		<div

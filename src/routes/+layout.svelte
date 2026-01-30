@@ -2,12 +2,26 @@
 	import './layout.css';
 	import Constellation from '$lib/components/Constellation.svelte';
 	import FloatingLlama from '$lib/components/FloatingLlama.svelte';
+	import NavOverlay from '$lib/components/NavOverlay.svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	let { children } = $props();
+
+	interface Props {
+		children: any;
+		data: {
+			navPages: { name: string; path: string; linksTo: string[]; isWriting?: boolean }[];
+			navConnections: { from: string; to: string }[];
+		};
+	}
+
+	let { children, data }: Props = $props();
+
+	// Hide nav on index pages
+	let showNav = $derived(!$page.url.pathname.startsWith('/index'));
 
 	const themes = {
-		dawn: { bg: '#0A3D62', text: '#E8F4F8', accent: '#FF9A3C', heading: '#FFD89C', star: '#5BA3D0', starAlt: '#FFD700' },
+		dawn: { bg: '#FFF8F0', text: '#4A3728', accent: '#E07850', heading: '#C86840', star: '#FFD0A0', starAlt: '#FFA070' },
 		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', star: '#000000', starAlt: '#000000' },
 		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', star: '#ffe8a0', starAlt: '#ffe8a0' },
 		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', star: '#b8ff7a', starAlt: '#b8ff7a' }
@@ -107,21 +121,24 @@
 >
 	<Constellation theme={theme === 'auto' ? autoThemeName : theme} />
 	<FloatingLlama />
+
+	{#if showNav && data.navPages}
+		<NavOverlay pages={data.navPages} connections={data.navConnections} />
+	{/if}
+
 	<div class="theme-toggle-wrap">
 		<span class="theme-tooltip">{themeDescriptions[theme]}</span>
 		<button class="theme-toggle" onclick={cycleTheme} aria-label="Cycle theme">
 			{#if theme === 'dawn'}
-				<!-- Sun -->
+				<!-- Sunrise -->
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<circle cx="12" cy="12" r="5"/>
-					<line x1="12" y1="1" x2="12" y2="3"/>
-					<line x1="12" y1="21" x2="12" y2="23"/>
-					<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-					<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-					<line x1="1" y1="12" x2="3" y2="12"/>
-					<line x1="21" y1="12" x2="23" y2="12"/>
-					<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-					<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+					<path d="M18 14a6 6 0 0 0-12 0"/>
+					<line x1="2" y1="14" x2="22" y2="14"/>
+					<circle cx="12" cy="2" r="1" fill="currentColor" stroke="none"/>
+					<circle cx="5" cy="5" r="1" fill="currentColor" stroke="none"/>
+					<circle cx="19" cy="5" r="1" fill="currentColor" stroke="none"/>
+					<circle cx="2" cy="10" r="1" fill="currentColor" stroke="none"/>
+					<circle cx="22" cy="10" r="1" fill="currentColor" stroke="none"/>
 				</svg>
 			{:else if theme === 'night'}
 				<!-- Moon -->

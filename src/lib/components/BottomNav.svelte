@@ -22,30 +22,70 @@
 	const next = ring[(idx + 1) % ring.length];
 </script>
 
-<nav class="nav-header">
-	<a href={paths[prev]} class="opacity-80 hover:opacity-100">← {prev}</a>
-	<span class="opacity-50">•</span>
-	<a href="/join" class="tracking-wide text-[var(--accent)] opacity-[0.85] hover:opacity-100">
-		join us
-	</a>
-	<span class="opacity-50">•</span>
-	<a href={paths[next]} class="opacity-80 hover:opacity-100">{next} →</a>
-</nav>
+<footer class="site-footer">
+	<div class="footer-grid">
+		<span class="line-h"></span>
+		<a href={paths[prev]} class="nav-prev opacity-70 hover:opacity-100">← {prev}</a>
+		<div class="nav-center">
+			<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
+			<span class="divider"></span>
+			<a href="/index" class="opacity-70 hover:opacity-100">index</a>
+		</div>
+		<a href={paths[next]} class="nav-next opacity-70 hover:opacity-100">{next} →</a>
+		<span class="line-h"></span>
+	</div>
+</footer>
 
 <style>
-	.nav-header {
-		position: fixed;
-		top: 1rem;
-		left: 1rem;
-		display: flex;
-		gap: 1rem;
-		flex-wrap: wrap;
+	.site-footer {
+		margin-top: auto;
+		padding-top: 6rem;
+		padding-bottom: 2rem;
 		font-size: 0.875rem;
-		z-index: 10;
 	}
 
+	.footer-grid {
+		display: grid;
+		grid-template-columns: 3rem auto auto auto 3rem;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		margin: 0 auto;
+	}
+
+	.line-h {
+		height: 1px;
+		width: 100%;
+		background: var(--text);
+		opacity: 0.2;
+	}
+
+	.nav-prev {
+		text-align: right;
+	}
+
+	.nav-next {
+		text-align: left;
+	}
+
+	.nav-center {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.divider {
+		width: 1px;
+		height: 0.75rem;
+		background: var(--text);
+		opacity: 0.25;
+	}
+
+
 	@media (min-width: 640px) {
-		.nav-header {
+		.footer-grid {
+			grid-template-columns: 4rem auto auto auto 4rem;
 			gap: 1.5rem;
 		}
 	}

@@ -61,10 +61,10 @@
 			visible: true
 		},
 		dawn: {
-			twinkleSpeed: 0.008,
-			driftAmount: 6,
-			minOpacity: 0.1,
-			maxOpacity: 1,
+			twinkleSpeed: 0.004,
+			driftAmount: 4,
+			minOpacity: 0.15,
+			maxOpacity: 0.8,
 			visible: true
 		}
 	};
@@ -74,12 +74,11 @@
 			// Fireflies - larger, more varied
 			return 1.5 + Math.random() * 2;
 		} else if (theme === 'dawn') {
+			// Warm sunrise dust motes - soft and gentle
 			if (isSunlight) {
-				// Sunlight sparkles - larger and more prominent
-				return 1.2 + Math.random() * 2;
+				return 1 + Math.random() * 1.5;
 			}
-			// Water - smaller, subtler
-			return 0.5 + Math.random() * 1.2;
+			return 0.6 + Math.random() * 1;
 		} else {
 			// Regular stars
 			const base = isDiamond ? 1.2 : 0.8;
@@ -163,14 +162,12 @@
 					const pulse = Math.sin(star.twinklePhase);
 					displayOpacity = star.opacity * (0.3 + pulse * 0.7);
 				} else if (theme === 'dawn') {
-					// Water sparkles: quick bright flashes
+					// Sunrise dust motes: gentle warm glow
 					const pulse = Math.sin(star.twinklePhase);
 					if (star.isSunlight) {
-						// Sunlight: very bright dramatic flashes
-						displayOpacity = star.opacity * (pulse > 0.5 ? 0.95 + Math.random() * 0.05 : 0.2 + pulse * 0.5);
+						displayOpacity = star.opacity * (0.5 + pulse * 0.4);
 					} else {
-						// Water: subtler rippling effect
-						displayOpacity = star.opacity * (pulse > 0.65 ? 0.8 + Math.random() * 0.2 : 0.15 + pulse * 0.4);
+						displayOpacity = star.opacity * (0.3 + pulse * 0.3);
 					}
 				} else if (theme === 'twilight') {
 					// Twilight stars: very dramatic twinkling
@@ -188,9 +185,9 @@
 					star.x = star.baseX + Math.sin(time * 0.3 + star.id * 0.7) * config.driftAmount;
 					star.y = star.baseY + Math.cos(time * 0.2 + star.id * 0.5) * config.driftAmount * 1.5;
 				} else if (theme === 'dawn') {
-					// Water sparkles: gentle wave-like shimmer
-					star.x = star.baseX + Math.sin(time * 0.4 + star.id) * config.driftAmount;
-					star.y = star.baseY + Math.sin(time * 0.6 + star.id * 0.4) * (config.driftAmount * 0.4);
+					// Sunrise dust: slow lazy drift upward
+					star.x = star.baseX + Math.sin(time * 0.2 + star.id * 0.5) * config.driftAmount;
+					star.y = star.baseY + Math.cos(time * 0.15 + star.id * 0.3) * config.driftAmount * 0.8;
 				}
 			} else {
 				// Smoothly return to base position

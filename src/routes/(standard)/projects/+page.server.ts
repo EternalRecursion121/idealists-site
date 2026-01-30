@@ -47,5 +47,9 @@ const projects: Project[] = [
 ];
 
 export async function load() {
-	return { projects: shuffle(projects) };
+	return {
+		projects: shuffle(projects),
+		title: 'projects',
+		description: "things we're building together"
+	};
 }

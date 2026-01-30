@@ -224,8 +224,8 @@
     }
 
     .pronunciation {
-        font-size: 0.875rem;
-        font-style: italic;
+        font-size: 0.8rem;
+        font-weight: 400;
         opacity: 0.6;
         color: var(--accent);
     }

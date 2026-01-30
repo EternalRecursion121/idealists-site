@@ -38,5 +38,10 @@ export async function load() {
 		})
 		.filter((m): m is Member => m !== null);
 
-	return { members: shuffle(members) };
+	return {
+		members: shuffle(members),
+		title: 'members',
+		description: 'the people behind the collective',
+		centered: true
+	};
 }

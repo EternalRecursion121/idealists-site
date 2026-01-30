@@ -37,5 +37,9 @@ export async function load({ setHeaders }) {
 	// Sort by most recently updated
 	writings.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-	return { writings };
+	return {
+		writings,
+		title: 'writings',
+		description: 'essays and thoughts from the collective'
+	};
 }
