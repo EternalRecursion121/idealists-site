@@ -69,14 +69,22 @@
 		orbit2.forEach((path, i) => {
 			angles.set(path, (i / orbit2.length) * Math.PI * 2 - Math.PI / 3);
 		});
-		// Writings cluster around the /writings page area
-		const writingsAngle = angles.get('/writings') || -Math.PI / 2;
-		// Spread writings across a larger arc to avoid overlap
-		const spreadPerWriting = Math.min(0.4, Math.PI * 1.2 / Math.max(1, orbit3.length));
+		// Spread writings evenly across the top arc (away from main nav items)
+		const arcStart = -Math.PI * 0.85; // start from upper left
+		const arcEnd = -Math.PI * 0.15; // end at upper right
+		const arcSpan = arcEnd - arcStart;
 		orbit3.forEach((path, i) => {
-			const offset = (i - (orbit3.length - 1) / 2) * spreadPerWriting;
-			angles.set(path, writingsAngle + offset);
+			const t = orbit3.length > 1 ? i / (orbit3.length - 1) : 0.5;
+			angles.set(path, arcStart + t * arcSpan);
 		});
+
+		// Swap home and writings positions for symmetry
+		const homeAngle = angles.get('/');
+		const writingsAngle = angles.get('/writings');
+		if (homeAngle !== undefined && writingsAngle !== undefined) {
+			angles.set('/', writingsAngle);
+			angles.set('/writings', homeAngle);
+		}
 
 		return angles;
 	}
@@ -85,7 +93,7 @@
 		const centerX = width / 2;
 		const centerY = height / 2;
 		const baseRadius = Math.min(width, height) * (mobile ? 0.25 : 0.18);
-		const orbitRadii = [0, baseRadius, baseRadius * 1.6, baseRadius * 2.4];
+		const orbitRadii = [0, baseRadius, baseRadius * 1.6, baseRadius * 3];
 
 		const angles = assignAngles(data.pages);
 

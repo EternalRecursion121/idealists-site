@@ -131,6 +131,7 @@
 				<circle cx="5" cy="13" r="1.5" opacity="0.5"/>
 				<circle cx="12" cy="12" r="1.5" opacity="0.5"/>
 			</svg>
+			<span class="toggle-label">index</span>
 		{/if}
 	</button>
 
@@ -203,6 +204,12 @@
 
 	.nav-toggle:hover {
 		opacity: 0.9;
+	}
+
+	.toggle-label {
+		font-size: 0.7rem;
+		margin-left: 0.3rem;
+		letter-spacing: -0.02em;
 	}
 
 	.nav-overlay.expanded .nav-toggle {
