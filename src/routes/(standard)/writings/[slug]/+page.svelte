@@ -2,7 +2,6 @@
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
-	import BottomNav from '$lib/components/BottomNav.svelte';
 	import AnnotationLayer from '$lib/annotations/components/AnnotationLayer.svelte';
 	import type { WritingWithHistory } from '$lib/types/writing';
 
@@ -130,7 +129,6 @@
 		</div>
 	{/if}
 
-	<BottomNav current="writings" />
 </div>
 
 <AnnotationLayer slug={data.writing.metadata.slug} annotationsMarkdown={data.annotationsMarkdown} useGitHub={true} />
