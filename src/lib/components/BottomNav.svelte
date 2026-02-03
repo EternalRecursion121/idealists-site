@@ -17,9 +17,9 @@
 
 	let { current }: Props = $props();
 
-	const idx = ring.indexOf(current);
-	const prev = ring[(idx - 1 + ring.length) % ring.length];
-	const next = ring[(idx + 1) % ring.length];
+	let idx = $derived(ring.indexOf(current));
+	let prev = $derived(ring[(idx - 1 + ring.length) % ring.length]);
+	let next = $derived(ring[(idx + 1) % ring.length]);
 </script>
 
 <footer class="site-footer">
