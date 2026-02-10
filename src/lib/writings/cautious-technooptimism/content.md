@@ -1,6 +1,6 @@
 ---
-title: cautious technooptimism
-author: Sudarsh Kunnavakkam
+title: Cautious Technooptimism
+author: sudarsh
 date: 2026-02-06
 draft: false
 ---
