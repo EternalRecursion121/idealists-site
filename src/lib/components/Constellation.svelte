@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 
 	type BaseThemeName = 'dawn' | 'night' | 'twilight' | 'forest';
-	let { theme }: { theme: BaseThemeName } = $props();
+	let { theme, hidden = false }: { theme: BaseThemeName; hidden?: boolean } = $props();
 
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D | null = null;
@@ -307,6 +307,20 @@
 		};
 	});
 
+	// Pause/resume animation when hidden changes
+	$effect(() => {
+		if (hidden) {
+			if (animationId) {
+				cancelAnimationFrame(animationId);
+				animationId = null;
+			}
+		} else {
+			if (!animationId && ctx) {
+				animationId = requestAnimationFrame(animationLoop);
+			}
+		}
+	});
+
 	// Re-render when theme changes
 	$effect(() => {
 		theme;
@@ -317,6 +331,7 @@
 <canvas
 	bind:this={canvas}
 	class="automata-bg"
+	class:hidden
 	aria-hidden="true"
 ></canvas>
 
@@ -330,5 +345,12 @@
 		z-index: -1;
 		pointer-events: auto;
 		touch-action: none;
+		opacity: 1;
+		transition: opacity 0.4s ease;
+	}
+
+	.automata-bg.hidden {
+		opacity: 0;
+		pointer-events: none;
 	}
 </style>

@@ -20,6 +20,9 @@
 	// Hide nav on index pages
 	let showNav = $derived(!$page.url.pathname.startsWith('/index'));
 
+	// Hide constellation on individual writing pages (not the /writings list)
+	let isWritingDetail = $derived(/^\/writings\/.+/.test($page.url.pathname));
+
 	const themes = {
 		dawn: { bg: '#FFF8F0', text: '#4A3728', accent: '#E07850', heading: '#C86840', star: '#FFD0A0', starAlt: '#FFA070' },
 		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', star: '#000000', starAlt: '#000000' },
@@ -119,7 +122,7 @@
 	class="app"
 	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --star: {currentColors.star}; --star-alt: {currentColors.starAlt};"
 >
-	<Constellation theme={theme === 'auto' ? autoThemeName : theme} />
+	<Constellation theme={theme === 'auto' ? autoThemeName : theme} hidden={isWritingDetail} />
 	<FloatingLlama />
 
 	{#if showNav && data.navPages}
