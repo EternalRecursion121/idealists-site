@@ -48,3 +48,13 @@ independent to some extent.
 BOLD the terms in this glossary
 
 ---
+
+## "productivity"
+> prefix: " function of valence, joy,and "
+> suffix: ". Historically,
+we have adopte"
+
+### @viceversa1024 · Feb 10, 2026
+what happened to arousal?
+
+---
