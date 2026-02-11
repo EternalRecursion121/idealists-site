@@ -27,3 +27,13 @@ do lead to "
 remove
 
 ---
+
+## "one of the wants I have for the future"
+> prefix: " worries me a lot, in fact -- "
+> suffix: " is that we are
+able to lift B"
+
+### @viceversa1024 · Feb 10, 2026
+this may just be ur style but it sounds too passive to me idk
+
+---
