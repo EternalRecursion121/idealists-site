@@ -32,7 +32,7 @@
             description: "we cannot succeed alone. nor would we want to."
         },
         {
-            title: "love",
+            title: "loving",
             description: "don't compromise on your integrity. don't sell your soul. do everything with love."
         }
     ];

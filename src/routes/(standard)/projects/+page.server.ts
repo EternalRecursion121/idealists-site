@@ -37,7 +37,7 @@ const projects: Project[] = [
 	{
 		name: 'Magazine',
 		url: null,
-		description: 'A hybrid digital-physical publication exploring the intersection of technology and human experience. Embedded NFC tags bridge the tangible and digital, featuring essays, art, poetry, and conversations with collective members about their work.'
+		description: 'A hybrid digital-physical publication exploring technology and human experience. Embedded NFC tags bridge the tangible and digital, featuring essays, art, poetry, and conversations with collective members about their work.'
 	},
 	{
 		name: 'This Website',
