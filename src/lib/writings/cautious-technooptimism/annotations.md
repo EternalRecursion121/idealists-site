@@ -37,3 +37,14 @@ able to lift B"
 this may just be ur style but it sounds too passive to me idk
 
 ---
+
+## "Valence"
+> prefix: "e
+independent to some extent.
+"
+> suffix: " is this long term, high level"
+
+### @viceversa1024 · Feb 10, 2026
+BOLD the terms in this glossary
+
+---
