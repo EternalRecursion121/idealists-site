@@ -17,3 +17,13 @@ Claude Cowork. "
 hedge less
 
 ---
+
+## "job loss and"
+> prefix: "ot normal -- they 
+do lead to "
+> suffix: " permanent economic displaceme"
+
+### @viceversa1024 · Feb 10, 2026
+remove
+
+---
