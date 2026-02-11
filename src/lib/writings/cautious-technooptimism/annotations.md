@@ -53,3 +53,13 @@ what happened to arousal?
 transcendental meditation can do this too
 
 ---
+
+## "consolidation of wealth due to technology entirely negates this goal."
+> prefix: "ple out of poverty -- and the "
+> suffix: "
+With the very real possibilit"
+
+### @Samuel Ratnam · Feb 11, 2026
+this is not clear to me - keeping humans around is pretty cheap in grand scheme of things. seems plausible we could have massive consolidation of power while simultaneously lifting billions of people out of poverty
+
+---
