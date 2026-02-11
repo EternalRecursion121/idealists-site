@@ -9,9 +9,6 @@
 ---
 
 ## "It seems not"
-> prefix: "the release of
-Claude Cowork. "
-> suffix: " unreasonable that we see larg"
 
 ### @viceversa1024 · Feb 10, 2026
 hedge less
@@ -19,9 +16,6 @@ hedge less
 ---
 
 ## "job loss and"
-> prefix: "ot normal -- they 
-do lead to "
-> suffix: " permanent economic displaceme"
 
 ### @viceversa1024 · Feb 10, 2026
 remove
@@ -30,8 +24,6 @@ remove
 
 ## "one of the wants I have for the future"
 > prefix: " worries me a lot, in fact -- "
-> suffix: " is that we are
-able to lift B"
 
 ### @viceversa1024 · Feb 10, 2026
 this may just be ur style but it sounds too passive to me idk
@@ -39,10 +31,6 @@ this may just be ur style but it sounds too passive to me idk
 ---
 
 ## "Valence"
-> prefix: "e
-independent to some extent.
-"
-> suffix: " is this long term, high level"
 
 ### @viceversa1024 · Feb 10, 2026
 BOLD the terms in this glossary
@@ -51,10 +39,17 @@ BOLD the terms in this glossary
 
 ## "productivity"
 > prefix: " function of valence, joy,and "
-> suffix: ". Historically,
-we have adopte"
 
 ### @viceversa1024 · Feb 10, 2026
 what happened to arousal?
+
+---
+
+## "phenomenological transhumanism"
+> prefix: "t to motivate some version of "
+> suffix: ". In addition to transhumanism"
+
+### @viceversa1024 · Feb 10, 2026
+transcendental meditation can do this too
 
 ---
