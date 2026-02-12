@@ -21,6 +21,9 @@ SO REAL AND TRUE AND FIRE
 ### @Ariel · Jan 31, 2026
 It seems to me, though, that sometimes being eaten is a good thing that provides a lot of purpose? See: how people describe falling in love; how people describe Big Projects... etc and it's unclear to me when this is good vs bad. And I don't think "the thing that's eating you is alive" is a good enough criterion to mean being eaten by that thing is necessarily good.
 
+#### @Samuel Ratnam · Feb 12, 2026
+seems to me to be the distinction between being consumed vs transformed - the latter contains the possibility of new growth while the former leads to death and stagnation
+
 ---
 
 ## "hyperstition"
