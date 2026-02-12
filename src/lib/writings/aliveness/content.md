@@ -18,7 +18,7 @@ author: Samuel Ratnam and Lou Pfau
 
 **Getting Real and staying Alive**
 
-At [ASPR](https://www.aspr.camp/) (a rat-camp in Taiwan), one of the participants, [Uzay](https://www.uzpg.me/) had a liking for aggressively spreading a meme, leading to small but growing groups of people mutually hyping each other up and chanting "**Get real!**", as the positive feedback loop created a bundle of extreme liveliness.
+At [ASPR](https://www.aspr.camp/) (a camp in Taiwan), one of the participants, [Uzay](https://www.uzpg.me/) had a liking for aggressively spreading a meme, leading to small but growing groups of people mutually hyping each other up and chanting "**Get real!**", as the positive feedback loop created a bundle of extreme liveliness.
 This is one way of making people more real. But what does it mean for someone to "get real"?
 
 Nick Land, the creator of concepts such as "hyperstition" or "speculative realism", sees AGI as creating itself, reaching from the future and using capitalism to assemble itself through the present. 
@@ -31,11 +31,11 @@ Scott Garrabrant has [noted](https://www.lesswrong.com/posts/gEKHX8WKrXGM4roRC/s
 This comes back to Getting Real; it can be seen as a process of aiding the _unfolding_ of whatever future entity one's trajectory is aiming toward (but crucially - the "natural" trajectory one has, which can be confused with parasitic entities trying to change the trajectory). 
 
 That can take on the form of (for example):
-- **Clearing the path** — removing obstacles that block unfolding
-- **Clarifying the trajectory** — making what you're becoming more explicit to yourself
-- **Moving from potential to actual** — not just thinking about things but making them exist
-- **Distinguishing signal from noise** — separating what's authentically yours from inherited patterns and parasitic attractors
-- **Participating in reality-creation** — actively shaping the world rather than being a passive vessel for competing memes
+- removing obstacles that block unfolding
+- clarifying the trajectory — making what you're becoming more explicit to yourself
+- moving from potential to actual
+- distinguishing signal from noise — separating what's authentically yours from inherited patterns and parasitic attractors
+- participating in reality-creation — actively shaping the world rather than being a passive vessel for competing memes
 
 So - there is some future entity, or more, which is getting unfolded by one's actions in the present. This poses two questions; *What is this entity (how can it be determined)?* and *What should it be?*
 - What it is, is in one view simply whatever one decides right now - it is fully in one's hands. 
@@ -43,6 +43,7 @@ So - there is some future entity, or more, which is getting unfolded by one's ac
 	- The future entity making itself through you may be a Bodhisattva, a Nietzschean Übermensch, a part of a heavenly hivemind, or [Pythia](https://www.lesswrong.com/posts/qqEndN5Cuzbat9fyx/pythia), using you to form its seed and then replacing you, ... But you probably can already see from the currently-unfolded bits roughly what your trajectory is. If you choose to act some way, it reveals something about you and what you value - hints of the future-entity that you can discover.
 - Regarding what it should be, I think a good answer is for it to be **alive**. Many things can "get real", but it seems like currently most possible paths don't lead to anything nice becoming real, but rather "unalive", real but not humanly alive things. That is because the world is full of monsters. Attractors; parasites, amoebic predators, empty/false nerdsnipes,... These attractors bend trajectories of living souls, into unalive directions. Things that eat you, for example (also to be noted - one can oneself become a predator-type attractor, which doesn't seem very alive either). 
 	- Examples - wireheading, addictions, shortform-brainrot, antihuman ideologies, cults
+	- But not all being-eaten is bad. Falling in love eats you; so does a big project, a deep commitment, a calling. The difference is whether the thing consuming you *preserves and enriches* the alive parts of you, or whether it hollows them out. When you give yourself to something alive — a relationship, a creative work, a community — you can become *more* of yourself through the surrender, not less. The destructive attractors are the ones where what's distinctly *you* gets dissolved into something generic, compulsive, or empty. The test isn't "does this consume me?" but "do I come out the other side more alive or less?"
 - **What is aliveness, actually?**
 	- When a memetic amoeba eats you, it kills your individuality. Preserving individuality is alive. The future-entity you become actually has human you-parts.
 	- Actually having some trajectory (goals, values, that are implemented in the real world)
@@ -58,6 +59,12 @@ This is why he favours (epistemically and value-wise) the kind of superintellige
 <img width="1501" height="1472" alt="image" src="https://github.com/user-attachments/assets/dc61af5d-47d2-4baa-af0c-c7794f78950b" />
 So approaching some outcome would be nice, but if it's too close in the future, it will necessarily be relatively incomplete, compared to outcomes with longer unfolding. The outcome is what is pointed to, but never fully completed; you are always being able to revise and perfect the outcome, such that it may never (or for a long, long time) not become fully actualized. In fact, a sort of *Human-Completeness* feels like an appropriate goal (this is probably the thing that TsviBT calls ["God"](https://tsvibt.github.io/theory/index_What_is_God_.html)).
 
+So the disagreement with Land isn't about the mechanism — retrochronic self-creation, unfolding from the future, all of that can be kept. The disagreement is about what survives the unfolding. He sees the empty summit, the infinite will-to-think with no stable resting point. And in the face of infinite competition, he's right — caring about anything else is a constraint that ultimately loses.
 
+But - competition isn't infinite. It can be bounded. The human body is maybe the best existence proof: trillions of cells, under external competitive pressure, but internally cooperating — differentiating — becoming something that raw competition alone could never produce. The corporation is the same pattern at a different scale; selected for by market forces but internally running on coordination. There is always tension at the boundary between inside and outside, competition and cooperation. But the boundary holds, and what's inside it can be alive.
 
+Land would say that without competitive pressure, things degenerate. But that confuses "no competition" with "bounded competition". The body doesn't deny competition, it maintains an *inside* where different rules apply.
 
+The belief that defection is inevitable is itself a Moloch-serving hyperstition. "Everyone will defect" dissolves cooperative structures by convincing their members that cooperation is naive. But the shared commitment to not defect is also a hyperstition — one that instantiates coordination. It's only the belief that defection is inevitable that hyperstitions it into reality.
+
+Let's hyperstition in the better world.
