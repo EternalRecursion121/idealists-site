@@ -31,3 +31,12 @@ It seems to me, though, that sometimes being eaten is a good thing that provides
 a self-fulfilling idea that becomes real through its own existence
 
 ---
+
+## "speculative realism"
+> prefix: "ts such as "hyperstition" or ""
+> suffix: "", sees AGI as creating itself"
+
+### @Samuel Ratnam · Feb 12, 2026
+a 21st-century Continental philosophical movement that rejects "correlationism"—the belief that reality is inseparable from human thought—arguing instead that a mind-independent world exists
+
+---
