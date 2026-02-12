@@ -22,3 +22,21 @@ SO REAL AND TRUE AND FIRE
 It seems to me, though, that sometimes being eaten is a good thing that provides a lot of purpose? See: how people describe falling in love; how people describe Big Projects... etc and it's unclear to me when this is good vs bad. And I don't think "the thing that's eating you is alive" is a good enough criterion to mean being eaten by that thing is necessarily good.
 
 ---
+
+## "hyperstition"
+> prefix: " creator of concepts such as ""
+> suffix: "" or "speculative realism", se"
+
+### @Samuel Ratnam · Feb 12, 2026
+a self-fulfilling idea that becomes real through its own existence
+
+---
+
+## "speculative realism"
+> prefix: "ts such as "hyperstition" or ""
+> suffix: "", sees AGI as creating itself"
+
+### @Samuel Ratnam · Feb 12, 2026
+a 21st-century Continental philosophical movement that rejects "correlationism"—the belief that reality is inseparable from human thought—arguing instead that a mind-independent world exists
+
+---
