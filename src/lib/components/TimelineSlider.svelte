@@ -12,9 +12,10 @@
 			path?: string;
 			revisions?: Revision[];
 		}[];
+		style?: 'default' | 'notebook';
 	}
 
-	let { revisions, currentIndex, onSelect, branches }: Props = $props();
+	let { revisions, currentIndex, onSelect, branches, style }: Props = $props();
 
 	// Track element positions for SVG line drawing
 	let containerEl = $state<HTMLDivElement>();
@@ -77,7 +78,7 @@
 
 {#if branches?.length}
 	<!-- Branching layout -->
-	<div class="branch-container" bind:this={containerEl}>
+	<div class="branch-container" class:notebook={style === 'notebook'} bind:this={containerEl}>
 		<!-- SVG header with root node and curves - coordinates calculated from actual element positions -->
 		<svg class="branch-header-svg" viewBox="0 0 {containerWidth} 56" preserveAspectRatio="xMidYMid meet">
 			<!-- Left branch curve -->
@@ -155,7 +156,7 @@
 	</div>
 {:else}
 	<!-- Simple linear layout (no branches) -->
-	<div class="timeline-container">
+	<div class="timeline-container" class:notebook={style === 'notebook'}>
 		<div class="timeline-track">
 			{#each revisions as revision, i (revision.hash)}
 				<button
@@ -346,5 +347,47 @@
 
 	.external-point:hover .point-dot {
 		background: var(--accent);
+	}
+
+	/* ===== Notebook Style ===== */
+	.branch-container.notebook,
+	.timeline-container.notebook {
+		font-family: 'Reenie Beanie', cursive;
+	}
+
+	.notebook .branch-label {
+		font-size: 1rem;
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
+	.notebook .point-label {
+		font-size: 1.1rem;
+	}
+
+	.notebook .point-date {
+		font-size: 1rem;
+	}
+
+	.notebook .point-message {
+		font-size: 1.1rem;
+	}
+
+	.notebook .point-dot {
+		border-color: rgba(225, 182, 14, 0.8);
+	}
+
+	.notebook .timeline-point.active .point-dot {
+		background: rgba(225, 182, 14, 0.8);
+		border-color: rgba(225, 182, 14, 0.8);
+	}
+
+	.notebook .branch-track::before,
+	.notebook .timeline-track::before {
+		background: rgba(225, 182, 14, 0.5);
+	}
+
+	:global(.notebook) .branch-header-svg path {
+		stroke: rgba(225, 182, 14, 0.8);
 	}
 </style>

@@ -145,6 +145,7 @@
 						currentIndex={currentRevisionIndex}
 						onSelect={(i) => currentRevisionIndex = i}
 						branches={data.writing.metadata.branches}
+						style={data.writing.metadata.style}
 					/>
 				</div>
 			{/if}
@@ -541,5 +542,31 @@
 	.notebook-style .header-centered p {
 		font-family: 'Reenie Beanie', cursive;
 		font-size: 1.5rem;
+	}
+
+	/* Notebook timeline section */
+	.notebook-style .timeline-section::before {
+		background: rgba(225, 182, 14, 0.5);
+	}
+
+	.notebook-style .timeline-section:has(.history-expanded)::before {
+		background: rgba(225, 182, 14, 0.8);
+	}
+
+	.notebook-style .history-toggle {
+		font-family: 'Reenie Beanie', cursive;
+		font-size: 1.3rem;
+	}
+
+	.notebook-style .history-toggle:hover {
+		color: rgba(180, 140, 10, 1);
+	}
+
+	.notebook-style .history-toggle.history-expanded {
+		color: rgba(180, 140, 10, 1);
+	}
+
+	.notebook-style .toggle-icon {
+		color: rgba(225, 182, 14, 0.8);
 	}
 </style>
