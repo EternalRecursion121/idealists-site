@@ -128,7 +128,7 @@
 		{@html renderMarkdown(getBody(currentRevision.content))}
 	</article>
 
-	{#if data.writing.revisions.length > 1}
+	{#if data.writing.revisions.length > 1 || data.writing.metadata.branches?.length}
 		<div class="timeline-section">
 			<button
 				class="history-toggle"
