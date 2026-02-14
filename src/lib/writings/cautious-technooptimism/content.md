@@ -3,6 +3,11 @@ title: Cautious Technooptimism
 author: sudarsh
 date: 2026-02-06
 draft: false
+branches:
+  - url: https://sudarsh.com/blog/cautious-technooptimism/
+    label: sudarsh.com
+    repo: skunnavakkam/skunnavakkam.github.io
+    path: content/blog/cautious-technooptimism/index.md
 ---
 
 The next few years are going to be incredibly transformative. There are many technologies

@@ -1,6 +1,8 @@
 import { error } from '@sveltejs/kit';
-import { getWritingSlugs, getWritingPath, getWritingWithRevisions, extractFrontmatter, getFileHistory, getAnnotations } from '$lib/server/git-history';
-import type { WritingMetadata, WritingWithHistory } from '$lib/types/writing';
+import { dev } from '$app/environment';
+import { getWritingSlugs, getWritingPath, getWritingWithRevisions, extractFrontmatter, getFileHistory, getAnnotations, getExternalFileHistory } from '$lib/server/git-history';
+import type { WritingMetadata, WritingWithHistory, Revision } from '$lib/types/writing';
+import { readFile } from 'fs/promises';
 
 export async function load({ params, setHeaders }) {
 	// Cache for 60s, serve stale while revalidating for up to 1 hour
@@ -15,14 +17,52 @@ export async function load({ params, setHeaders }) {
 		throw error(404, 'Writing not found');
 	}
 
-	const revisions = await getWritingWithRevisions(slug);
+	let revisions = await getWritingWithRevisions(slug);
+	let currentContent: string;
 
-	if (revisions.length === 0) {
-		throw error(404, 'Writing has no history');
+	// In dev mode, handle local-only writings that don't exist on GitHub yet
+	if (dev) {
+		try {
+			currentContent = await readFile(getWritingPath(slug), 'utf-8');
+			// If no revisions from GitHub, create a draft revision from local file
+			if (revisions.length === 0) {
+				revisions = [{
+					hash: 'local-draft',
+					shortHash: 'draft',
+					date: new Date().toISOString(),
+					author: 'local',
+					message: 'Local draft (not yet committed)',
+					content: currentContent
+				}];
+			}
+		} catch {
+			if (revisions.length === 0) {
+				throw error(404, 'Writing has no history');
+			}
+			currentContent = revisions[0].content;
+		}
+	} else {
+		if (revisions.length === 0) {
+			throw error(404, 'Writing has no history');
+		}
+		currentContent = revisions[0].content;
 	}
 
-	const currentContent = revisions[0].content;
-	const { title, description, authors, body } = extractFrontmatter(currentContent);
+	const { title, description, authors, branches, style, body } = extractFrontmatter(currentContent);
+
+	// Fetch revision history for external branches
+	let branchesWithRevisions = branches;
+	if (branches?.length) {
+		branchesWithRevisions = await Promise.all(
+			branches.map(async (branch) => {
+				if (branch.repo && branch.path) {
+					const externalRevisions = await getExternalFileHistory(branch.repo, branch.path);
+					return { ...branch, revisions: externalRevisions };
+				}
+				return branch;
+			})
+		);
+	}
 
 	const metadata: WritingMetadata = {
 		slug,
@@ -31,7 +71,9 @@ export async function load({ params, setHeaders }) {
 		authors,
 		createdAt: revisions[revisions.length - 1].date,
 		updatedAt: revisions[0].date,
-		revisionCount: revisions.length
+		revisionCount: revisions.length,
+		style,
+		branches: branchesWithRevisions
 	};
 
 	const writing: WritingWithHistory = {

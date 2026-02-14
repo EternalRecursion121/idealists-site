@@ -77,15 +77,18 @@
 
 <svelte:head>
 	<title>{data.writing.metadata.title} — The Idealists Collective</title>
+	{#if data.writing.metadata.style === 'notebook'}
+		<link href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap" rel="stylesheet">
+	{/if}
 </svelte:head>
 
-<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 sm:py-16" class:notebook-style={data.writing.metadata.style === 'notebook'}>
 	<header class="header-centered">
 		<h1 class="text-2xl sm:text-3xl font-semibold mb-2">{data.writing.metadata.title}</h1>
 		{#if data.writing.metadata.description}
 			<p class="opacity-70 mb-4">{data.writing.metadata.description}</p>
 		{/if}
-		<div class="text-sm opacity-50">
+		<div class="text-sm opacity-50 byline-row">
 			{#if data.writing.metadata.authors?.length}
 				<span>{data.writing.metadata.authors.join(' & ')}</span>
 				<span class="mx-2">•</span>
@@ -97,6 +100,24 @@
 					Viewing revision from {formatDate(currentRevision.date)}
 				{/if}
 			</span>
+			{#if data.writing.metadata.branches?.length}
+				{#each data.writing.metadata.branches as branch}
+					<a
+						href={branch.url}
+						target="_blank"
+						rel="noopener"
+						class="fork-icon"
+						title="also on {branch.label}"
+					>
+						<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+							<circle cx="5" cy="3" r="1.5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+							<circle cx="5" cy="13" r="1.5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+							<circle cx="11" cy="6" r="1.5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+							<path d="M5 4.5v7M5 6.5c0-1.5 2-2.5 4.5-2.5" stroke="currentColor" fill="none" stroke-width="1.5"/>
+						</svg>
+					</a>
+				{/each}
+			{/if}
 		</div>
 		<div class="separator">
 			<button onclick={() => history.back()} class="sep-link">&lt;&lt;&lt;</button><a href={`/writings/${data.nextSlug}`} class="sep-link">&gt;&gt;&gt;</a>
@@ -123,6 +144,7 @@
 						revisions={data.writing.revisions}
 						currentIndex={currentRevisionIndex}
 						onSelect={(i) => currentRevisionIndex = i}
+						branches={data.writing.metadata.branches}
 					/>
 				</div>
 			{/if}
@@ -231,6 +253,28 @@
 
 	.sep-link:hover {
 		opacity: 1;
+	}
+
+	.byline-row {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+	}
+
+	.fork-icon {
+		display: inline-flex;
+		align-items: center;
+		margin-left: 0.5rem;
+		color: var(--accent);
+		opacity: 0.5;
+		transition: opacity 0.2s ease, transform 0.2s ease;
+	}
+
+	.fork-icon:hover {
+		opacity: 1;
+		transform: scale(1.15);
 	}
 
 	.timeline-section {
@@ -438,5 +482,64 @@
 
 	.writing-content :global(.math-inline) {
 		display: inline;
+	}
+
+	/* ===== Notebook Style ===== */
+	.notebook-style {
+		--notebook-highlight: rgba(225, 182, 14, 0.4);
+	}
+
+	.notebook-style .writing-content {
+		font-family: 'Reenie Beanie', cursive;
+		font-size: 1.5rem;
+		line-height: 1.4;
+	}
+
+	.notebook-style .writing-content :global(a) {
+		color: var(--text);
+		text-decoration: none;
+		background-image: linear-gradient(to right,
+			rgba(225, 182, 14, 0.4),
+			rgba(225, 182, 14, 0.6) 20%,
+			rgba(225, 182, 14, 0.5) 80%,
+			rgba(225, 182, 14, 0.4));
+		background-size: 100% 0.5em;
+		background-position: 0 88%;
+		background-repeat: no-repeat;
+		transition: background-size 0.2s;
+	}
+
+	.notebook-style .writing-content :global(a:hover) {
+		background-size: 100% 100%;
+		opacity: 1;
+	}
+
+	.notebook-style .writing-content :global(blockquote) {
+		background-image: linear-gradient(to right,
+			rgba(225, 182, 14, 0.3),
+			rgba(225, 182, 14, 0.5) 20%,
+			rgba(225, 182, 14, 0.4) 80%,
+			rgba(225, 182, 14, 0.3));
+		border-left: none;
+	}
+
+	.notebook-style .writing-content :global(img) {
+		display: block;
+		margin: 2rem auto;
+		max-width: 100%;
+		padding: 12px;
+		background: #fff;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+		transform: rotate(-0.5deg);
+	}
+
+	.notebook-style .header-centered h1 {
+		font-family: 'Reenie Beanie', cursive;
+		font-size: 3rem;
+	}
+
+	.notebook-style .header-centered p {
+		font-family: 'Reenie Beanie', cursive;
+		font-size: 1.5rem;
 	}
 </style>

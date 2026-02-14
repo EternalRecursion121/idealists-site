@@ -1,6 +1,8 @@
 import { diffLines } from 'diff';
 import { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN } from '$env/static/private';
+import { dev } from '$app/environment';
 import type { Revision, RevisionWithDiff, DiffResult, DiffLine } from '$lib/types/writing';
+import { readdir } from 'fs/promises';
 
 const WRITINGS_DIR = 'src/lib/writings';
 
@@ -18,6 +20,19 @@ const headers: HeadersInit = {
 };
 
 export async function getWritingSlugs(): Promise<string[]> {
+	// In dev mode, read from local filesystem to see uncommitted writings
+	if (dev) {
+		try {
+			const entries = await readdir(WRITINGS_DIR, { withFileTypes: true });
+			return entries
+				.filter(entry => entry.isDirectory())
+				.map(entry => entry.name);
+		} catch (error) {
+			console.error('Failed to read local writings:', error);
+			// Fall through to GitHub
+		}
+	}
+
 	try {
 		const res = await fetch(
 			`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${WRITINGS_DIR}`,
@@ -301,7 +316,37 @@ export async function saveAnnotations(
 	}
 }
 
-export function extractFrontmatter(content: string): { title?: string; description?: string; authors?: string[]; body: string } {
+export async function getExternalFileHistory(repo: string, filePath: string): Promise<Revision[]> {
+	try {
+		const res = await fetch(
+			`https://api.github.com/repos/${repo}/commits?path=${encodeURIComponent(filePath)}`,
+			{ headers }
+		);
+
+		if (!res.ok) return [];
+
+		const commits = await res.json();
+
+		return commits.map((commit: {
+			sha: string;
+			commit: {
+				author: { name: string; date: string };
+				message: string;
+			};
+		}) => ({
+			hash: commit.sha,
+			shortHash: commit.sha.slice(0, 7),
+			date: commit.commit.author.date,
+			author: commit.commit.author.name,
+			message: commit.commit.message.split('\n')[0]
+		}));
+	} catch (error) {
+		console.error('Failed to fetch external file history:', repo, filePath, error);
+		return [];
+	}
+}
+
+export function extractFrontmatter(content: string): { title?: string; description?: string; authors?: string[]; style?: 'default' | 'notebook'; branches?: { url: string; label: string; repo?: string; path?: string }[]; body: string } {
 	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 
 	if (!frontmatterMatch) {
@@ -337,10 +382,60 @@ export function extractFrontmatter(content: string): { title?: string; descripti
 		}
 	}
 
+	// Parse branches - YAML array of objects format:
+	// branches:
+	//   - url: https://...
+	//     label: site.com
+	//     repo: user/repo (optional)
+	//     path: path/to/file.md (optional)
+	let branches: { url: string; label: string; repo?: string; path?: string }[] | undefined;
+	const branchesBlockMatch = frontmatter.match(/^branches:\s*\n((?:\s+.*\n?)*)/m);
+	if (branchesBlockMatch) {
+		const branchesBlock = branchesBlockMatch[1];
+		const parsed: { url: string; label: string; repo?: string; path?: string }[] = [];
+		let current: { url?: string; label?: string; repo?: string; path?: string } = {};
+
+		for (const line of branchesBlock.split('\n')) {
+			const urlMatch = line.match(/^\s*-?\s*url:\s*(.+?)\s*$/);
+			const labelMatch = line.match(/^\s+label:\s*(.+?)\s*$/);
+			const repoMatch = line.match(/^\s+repo:\s*(.+?)\s*$/);
+			const pathMatch = line.match(/^\s+path:\s*(.+?)\s*$/);
+
+			if (urlMatch) {
+				// New entry - save previous if complete
+				if (current.url && current.label) {
+					parsed.push(current as { url: string; label: string; repo?: string; path?: string });
+				}
+				current = { url: urlMatch[1] };
+			} else if (labelMatch) {
+				current.label = labelMatch[1];
+			} else if (repoMatch) {
+				current.repo = repoMatch[1];
+			} else if (pathMatch) {
+				current.path = pathMatch[1];
+			}
+		}
+
+		// Don't forget the last entry
+		if (current.url && current.label) {
+			parsed.push(current as { url: string; label: string; repo?: string; path?: string });
+		}
+
+		if (parsed.length > 0) {
+			branches = parsed;
+		}
+	}
+
+	// Parse style
+	const styleMatch = frontmatter.match(/^style:\s*(.+?)\s*$/m);
+	const style = styleMatch?.[1] as 'default' | 'notebook' | undefined;
+
 	return {
 		title: titleMatch?.[1],
 		description: descMatch?.[1],
 		authors: authors?.length ? authors : undefined,
+		style,
+		branches: branches?.length ? branches : undefined,
 		body: body.trim()
 	};
 }

@@ -6,6 +6,14 @@ export interface WritingMetadata {
 	createdAt: string; // ISO 8601
 	updatedAt: string; // ISO 8601
 	revisionCount: number;
+	style?: 'default' | 'notebook';  // visual style for the writing
+	branches?: {
+		url: string;
+		label: string;
+		repo?: string;  // e.g., "user/repo"
+		path?: string;  // e.g., "content/blog/post.md"
+		revisions?: Revision[];  // populated at runtime
+	}[];
 }
 
 export interface Revision {
