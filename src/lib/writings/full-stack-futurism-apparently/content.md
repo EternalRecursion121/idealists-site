@@ -1,6 +1,6 @@
 ---
-title: Full-stack futurism, apparently
-description: neo-extropians?
+title: Full-stack futurism
+description: neo-extropians
 authors: Lydia Nottingham
 ---
 
@@ -10,6 +10,6 @@ This is linked to 'San Francisco, not Berkeley': I am a starry-eyed San Francisc
 
 This is linked to liking the output of FHI/Forethought best among the 'EA orgs'. To understanding arguments about 'the optimal timing for superintelligence {development, deployment}', Aschenbrenner and Trammell, Drexler's Paretotopia, 'slower not necessarily better', and perceiving AI safety people who assume 'AI safety = slower' like alien kin.
 
-Anders Sandberg's 'full-stack futurism' very appealing. Execution, implementation important. [TESCREAL made sense for a while](https://lydnot.github.io/tescreal-test/). EA was my first brush with prioritization, one component of the 'full stack'. I perceive the seeds of full-stack futurism in Cosmos' [philosopher-builders](https://cosmos-institute.org/), Ada's [scientific-industrial capacity](https://adaptivegood.substack.com/), Ben's [SCHEME Community](https://scheme.zone/), Samuel and Megan's [Idealists Collective](https://idealistscollective.org/), Nick/Saul/my [FFHII](https://partiful.com/e/rgN2MCXeHiiCMNaJRZk5), techno-optimist [SoTA](https://ilikethefuture.com/). This 'full-stack futurism' is only going to work if we [execute](https://lydianottingham.substack.com/p/there-are-two-types-of-work) on the 'full-stack' part.
+Anders Sandberg's 'full-stack futurism' very appealing. [Execution](https://lydianottingham.substack.com/p/there-are-two-types-of-work), implementation important. TESCREAL made sense for a while. EA was my first brush with prioritization, one component of the 'full stack'.
 
 Originally published on [Substack](https://lydianottingham.substack.com/p/full-stack-futurism-apparently).
