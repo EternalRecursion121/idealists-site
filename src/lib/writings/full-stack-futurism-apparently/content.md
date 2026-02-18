@@ -4,7 +4,7 @@ description: neo-extropians?
 authors: Lydia Nottingham
 ---
 
-I was confused for a while why I seemed to be getting more distant from EA/rationality, which [raised me](https://substack.com/@lydianottingham/note/c-215033277) (2021-25). I reached around for 'post-rationality, but…energetic, constructive, still active in the world'?
+I was confused for a while why I seemed to be getting more distant from EA/rationality, which raised me (2021-25). I reached around for 'post-rationality, but…energetic, constructive, still active in the world'?
 
 This is linked to 'San Francisco, not Berkeley': I am a starry-eyed San Franciscan; I don't know how much I have in common with Berkeley. The open-plan transparency-pilled shipping/sharing-first freethinking offices of Mox over the marginally more insular Constellation.
 
