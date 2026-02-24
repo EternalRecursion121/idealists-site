@@ -366,14 +366,19 @@
 
 	/* Hero */
 	.hero {
-		min-height: 100vh;
+		min-height: 100svh;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		text-align: center;
 		padding: 2rem;
+		padding-bottom: 14rem;
 		position: relative;
+		/* Break out of parent max-width constraint */
+		width: 100vw;
+		margin-left: calc(-50vw + 50%);
+		box-sizing: border-box;
 	}
 
 	.hero-content {
@@ -419,14 +424,14 @@
 
 	.hero-scroll-hint {
 		position: absolute;
-		bottom: 2rem;
+		bottom: 8rem;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.75rem;
 		letter-spacing: 0.1em;
-		opacity: 0.4;
+		opacity: 0.25;
 		transition: opacity 0.3s;
 	}
 
