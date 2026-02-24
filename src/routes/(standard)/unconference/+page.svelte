@@ -128,7 +128,7 @@
 				And yet the discourse about our future is fragmented, reactive, and strikingly short on vision. Faced with the problems of our present, it's easy to feel powerless — to see the challenges as too large for us to do anything about. Or to fall into the opposite trap: a naive optimism that things will work out, that progress is inevitable and technology will fix everything. And the idealists — those who refuse to accept either, who are actively fighting to create the futures they want to see — are scattered across disciplines, communities, and countries, each unaware of how many others share their hope.
 			</p>
 			<p class="lead">
-				<em>The Idealists Unconference exists to break that isolation.</em> We are bringing together thinkers and makers — scientists, philosophers, artists, policymakers, technologists, writers — to ask the question: what kind of future do we actually want, and how do we get there?
+				The Idealists Unconference exists to break that isolation. We are bringing together thinkers and makers — scientists, philosophers, artists, policymakers, technologists, writers — to ask the question: <em>what kind of future do we actually want, and how do we get there?</em>
 			</p>
 			<p class="lead">
 				The aim of the conference is that every participant leaves with a reignited sense that a radically better future is possible, that the obstacles are not as insurmountable as they feel, and that it is up to us to make it happen.
