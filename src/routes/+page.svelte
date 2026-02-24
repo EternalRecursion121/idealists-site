@@ -1,6 +1,5 @@
 <script lang="ts">
     import DNA from '$lib/components/DNA.svelte';
-    import Definition from '$lib/components/Definition.svelte';
     import Logo from '$lib/components/Logo.svelte';
     import BottomNav from '$lib/components/BottomNav.svelte';
 
@@ -9,7 +8,7 @@
     let starVelocity = $state(0);
     let isHovering = $state(false);
 
-    // Star momentum effect
+    // Star momentum effect - animation loop requires imperative state updates
     $effect(() => {
         let frameId: number;
         const animate = () => {
@@ -30,6 +29,29 @@
         frameId = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(frameId);
     });
+
+    const navLinks = [
+        {
+            href: '/writings',
+            title: 'writings',
+            description: 'essays and explorations'
+        },
+        {
+            href: '/library',
+            title: 'library',
+            description: 'readings that inspire us'
+        },
+        {
+            href: '/glossary',
+            title: 'glossary',
+            description: 'our vocabulary'
+        },
+        {
+            href: '/projects',
+            title: 'projects',
+            description: 'what we are building'
+        }
+    ];
 </script>
 
 <svelte:head>
@@ -40,20 +62,30 @@
 
     <div class="word-header">
         <div class="ideal-title">
-            <span>THE IDEALISTS <span class="nowrap">C<span
+            <span>THE IDEALISTS <span class="nowrap">C<button
                 class="logo-wrapper"
                 onmouseenter={() => isHovering = true}
                 onmouseleave={() => isHovering = false}
-            ><Logo size={48} rotation={starRotation} /></span>LLECTIVE</span></span>
+                aria-label="Spin logo"
+            ><Logo size={48} rotation={starRotation} /></button>LLECTIVE</span></span>
         </div>
     </div>
 
     <section class="intro-section">
-        <p class="intro-text">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
+        <p class="intro-text">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i class="accent-text">idealists</i>.</p>
     </section>
 
-    <!-- Definition hero -->
-    <Definition />
+    <section class="explore-section">
+        <h2 class="section-header">explore</h2>
+        <nav class="nav-grid">
+            {#each navLinks as link (link.href)}
+                <a href={link.href} class="nav-card">
+                    <span class="nav-title">{link.title}</span>
+                    <span class="nav-desc">{link.description}</span>
+                </a>
+            {/each}
+        </nav>
+    </section>
 
     <!-- DNA -->
     <DNA />
@@ -102,6 +134,10 @@
         user-select: none;
         vertical-align: middle;
         margin: 0 -0.1em;
+        background: none;
+        border: none;
+        padding: 0;
+        color: inherit;
     }
 
     .nowrap {
@@ -109,7 +145,7 @@
     }
 
     .intro-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.5rem;
     }
 
     .intro-text {
@@ -119,9 +155,73 @@
         opacity: 0.85;
     }
 
+    .accent-text {
+        color: var(--accent);
+    }
+
+    .explore-section {
+        margin-bottom: 3rem;
+    }
+
+    .section-header {
+        font-family: var(--font-sans);
+        font-weight: bold;
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1.25rem;
+        opacity: 0.85;
+    }
+
+    .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .nav-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 1.25rem 1rem;
+        border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+        border-radius: 0.25rem;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s, transform 0.15s;
+        background: transparent;
+    }
+
+    .nav-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .nav-card:hover .nav-title {
+        color: var(--accent);
+    }
+
+    .nav-title {
+        font-family: var(--font-serif);
+        font-weight: 600;
+        font-size: 1.25rem;
+        transition: color 0.2s;
+    }
+
+    .nav-desc {
+        font-family: var(--font-serif);
+        font-size: 0.85rem;
+        opacity: 0.6;
+    }
+
     @media (max-width: 640px) {
         .intro-text {
             font-size: 1rem;
+        }
+
+        .nav-grid {
+            grid-template-columns: 1fr;
         }
     }
 

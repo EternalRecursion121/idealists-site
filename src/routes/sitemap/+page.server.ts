@@ -4,6 +4,7 @@ const pageDescriptions: Record<string, string> = {
 	'/writings': 'essays & thoughts',
 	'/projects': 'things we\'re building',
 	'/library': 'our influences',
+	'/glossary': 'our vocabulary',
 	'/vibes': 'visual inspiration',
 	'/members': 'the people',
 	'/join': 'become one of us',
