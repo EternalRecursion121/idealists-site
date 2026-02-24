@@ -18,7 +18,8 @@
 	{#each data.projects as project}
 		<article>
 			{#if project.url}
-				<a href={project.url} target="_blank" rel="noopener" class="group">
+				{@const isExternal = project.url.startsWith('http')}
+				<a href={project.url} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="group">
 					<h2 class="font-semibold mb-2 group-hover:opacity-70">{project.name}</h2>
 				</a>
 			{:else}

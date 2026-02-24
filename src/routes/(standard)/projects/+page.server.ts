@@ -15,6 +15,11 @@ function shuffle<T>(array: T[]): T[] {
 
 const projects: Project[] = [
 	{
+		name: 'The Idealists Unconference',
+		url: '/unconference',
+		description: 'A week-long gathering to imagine the future. April 4–12, 2026: five days in the Cotswolds, two days in London. Creating a time capsule from possible futures.'
+	},
+	{
 		name: 'Web Decompiler',
 		url: null,
 		description: "A tool for grabbing every atomic action available from a website—API calls, HTTP requests, source code—to give people more autonomy over what they do on the web. Browse Instagram without their algorithm, read news sites without enabling cookies, run frequent actions through the terminal, redesign a site's UI just because you can."
