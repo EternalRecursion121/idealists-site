@@ -26,12 +26,12 @@ const projects: Project[] = [
 	},
 	{
 		name: "I'm Bored",
-		url: 'https://github.com/[REDACTED]/im-bored',
+		url: 'https://github.com/EternalRecursion121/im-bored', // pragma: allowlist secret
 		description: "An app to replace Instagram, TikTok, and YouTube as your default place to go when you're bored. An algorithm you control, pulling from whatever sources you like, that you can customize endlessly. Content flows through a visual DAG of Sources and Transforms—mixed and filtered however you want."
 	},
 	{
 		name: 'Non-Linear Writing Interface',
-		url: 'https://github.com/[REDACTED]/non-linear-writing-interface',
+		url: 'https://github.com/EternalRecursion121/non-linear-writing-interface', // pragma: allowlist secret
 		description: 'A keyboard-native, node-based writing application for crafting branching narratives. Explore multiple story directions simultaneously through branching and parallelization, visualizing narrative structure as a directed acyclic graph.'
 	},
 	{
@@ -76,7 +76,7 @@ const projects: Project[] = [
 	},
 	{
 		name: 'This Website',
-		url: 'https://github.com/[REDACTED]/[REDACTED]',
+		url: 'https://github.com/EternalRecursion121/idealists-site', // pragma: allowlist secret
 		description: 'The home of the collective. A living document featuring constellation navigation, version-controlled writings, and the occasional wandering llama.'
 	}
 ];
