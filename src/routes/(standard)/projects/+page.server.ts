@@ -42,7 +42,7 @@ const projects: Project[] = [
 	{
 		name: 'Wafflelist',
 		url: 'https://wafflelist.mxbi.net/',
-		description: 'A list-first to-do app with due dates, snooze controls, and Today/Tomorrow/Week workflows, plus encrypted sync between sessions.'
+		description: 'A fast, unbloated to-do system with reminders and schedules, built for easy capture so tasks actually get added. Cross-platform with sync, end-to-end encryption, and a strong UX are core requirements. Exploring kanban flows too, including an "awaiting someone else" state that resurfaces for follow-up after X days.'
 	},
 	{
 		name: 'Nothingburger Injector',
