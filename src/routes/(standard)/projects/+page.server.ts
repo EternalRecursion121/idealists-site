@@ -42,27 +42,27 @@ const projects: Project[] = [
 	{
 		name: 'Wafflelist',
 		url: 'https://wafflelist.mxbi.net/',
-		description: 'A fast, unbloated to-do system with reminders and schedules, built for easy capture so tasks actually get added. Cross-platform with sync, end-to-end encryption, and a strong UX are core requirements. Exploring kanban flows too, including an "awaiting someone else" state that resurfaces for follow-up after X days.'
+		description: 'A list-first to-do app with due dates, snooze controls, and Today/Tomorrow/Week workflows, plus encrypted sync between sessions.'
 	},
 	{
 		name: 'Nothingburger Injector',
 		url: 'https://xide.quest/nothingburger/',
-		description: 'Turns short sentences into pages of nothingburger text that can, in principle, be analyzed to recover the original meaning.'
+		description: 'Turns sentences into pages of nothingburger text, with seed-based extraction so the original meaning can be recovered.'
 	},
 	{
 		name: 'HyprLenia',
 		url: 'https://github.com/JamesL425/HyprLenia---Taichi',
-		description: 'A 3D real-time emergent behavior sandbox.'
+		description: 'A hyperoptimized realtime 3D emergent-behavior playground ported to Taichi Lang.'
 	},
 	{
 		name: 'Anthist',
 		url: 'https://www.anthist.com/',
-		description: 'A project hosted at anthist.com.'
+		description: 'A distraction-free content reader for curating your own anthology of blogs, videos, and articles, with an ethical feed algorithm.'
 	},
 	{
 		name: 'small web browsing',
 		url: 'https://mains.in.net/smallweb/idealists-v2.html',
-		description: 'A small-web browsing experiment: an Idealists v2 page on the small web.'
+		description: 'A smallweb crawl snapshot ("idealists-v2") that surfaces discoveries ranked by local PageRank across a seeded set of domains.'
 	},
 	{
 		name: 'programming-in-language',
