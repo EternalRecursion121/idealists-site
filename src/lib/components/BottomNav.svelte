@@ -1,92 +1,111 @@
 <script lang="ts">
-	type Page = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
+	type Page = 'home' | 'writings' | 'projects' | 'glossary' | 'library' | 'members' | 'vibes';
 
-	const ring: Page[] = ['projects', 'writings', 'home', 'library', 'members', 'vibes'];
-	const paths: Record<Page, string> = {
-		home: '/',
-		writings: '/writings',
-		vibes: '/vibes',
-		library: '/library',
-		projects: '/projects',
-		members: '/members'
-	};
+	const pages: { name: Page; path: string }[] = [
+		{ name: 'home', path: '/' },
+		{ name: 'writings', path: '/writings' },
+		{ name: 'projects', path: '/projects' },
+		{ name: 'glossary', path: '/glossary' },
+		{ name: 'library', path: '/library' },
+		{ name: 'members', path: '/members' },
+		{ name: 'vibes', path: '/vibes' }
+	];
 
 	interface Props {
 		current: Page;
 	}
 
 	let { current }: Props = $props();
-
-	let idx = $derived(ring.indexOf(current));
-	let prev = $derived(ring[(idx - 1 + ring.length) % ring.length]);
-	let next = $derived(ring[(idx + 1) % ring.length]);
 </script>
 
 <footer class="site-footer">
-	<div class="footer-grid">
-		<span class="line-h"></span>
-		<a href={paths[prev]} class="nav-prev opacity-70 hover:opacity-100">← {prev}</a>
-		<div class="nav-center">
-			<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
-			<span class="divider"></span>
-			<a href="/sitemap" class="opacity-70 hover:opacity-100">index</a>
-		</div>
-		<a href={paths[next]} class="nav-next opacity-70 hover:opacity-100">{next} →</a>
-		<span class="line-h"></span>
+	<nav class="footer-nav" aria-label="Site navigation">
+		{#each pages as pg (pg.name)}
+			{#if pg.name === current}
+				<span class="nav-link current">{pg.name}</span>
+			{:else}
+				<a href={pg.path} class="nav-link">{pg.name}</a>
+			{/if}
+		{/each}
+	</nav>
+	<div class="footer-secondary">
+		<a href="/join" class="join-link">join us</a>
+		<span class="dot">·</span>
+		<a href="/sitemap" class="index-link">index</a>
 	</div>
 </footer>
 
 <style>
 	.site-footer {
 		margin-top: auto;
-		padding-top: 6rem;
+		padding-top: 5rem;
 		padding-bottom: 2rem;
-		font-size: 0.875rem;
 	}
 
-	.footer-grid {
-		display: grid;
-		grid-template-columns: 3rem auto auto auto 3rem;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		margin: 0 auto;
-	}
-
-	.line-h {
-		height: 1px;
-		width: 100%;
-		background: var(--text);
-		opacity: 0.2;
-	}
-
-	.nav-prev {
-		text-align: right;
-	}
-
-	.nav-next {
-		text-align: left;
-	}
-
-	.nav-center {
+	.footer-nav {
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
+		gap: 0.4rem 1.25rem;
+		justify-content: center;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+	}
+
+	.nav-link {
+		font-family: var(--font-sans);
+		font-size: 0.8rem;
+		letter-spacing: 0.02em;
+		text-decoration: none;
+		color: var(--text);
+		opacity: 0.55;
+		transition: opacity 0.15s ease, color 0.15s ease;
+		padding: 0.25rem 0;
+	}
+
+	.nav-link:hover {
+		opacity: 1;
+		color: var(--accent);
+	}
+
+	.nav-link.current {
+		opacity: 0.9;
+		font-weight: 600;
+	}
+
+	.footer-secondary {
+		display: flex;
+		justify-content: center;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.6rem;
+		padding-top: 0.75rem;
+		font-size: 0.75rem;
 	}
 
-	.divider {
-		width: 1px;
-		height: 0.75rem;
-		background: var(--text);
-		opacity: 0.25;
+	.join-link {
+		color: var(--accent);
+		text-decoration: none;
+		opacity: 0.8;
+		transition: opacity 0.15s ease;
 	}
 
+	.join-link:hover {
+		opacity: 1;
+		color: var(--accent);
+	}
 
-	@media (min-width: 640px) {
-		.footer-grid {
-			grid-template-columns: 4rem auto auto auto 4rem;
-			gap: 1.5rem;
-		}
+	.dot {
+		opacity: 0.3;
+	}
+
+	.index-link {
+		text-decoration: none;
+		color: var(--text);
+		opacity: 0.5;
+		transition: opacity 0.15s ease;
+	}
+
+	.index-link:hover {
+		opacity: 1;
+		color: var(--accent);
 	}
 </style>

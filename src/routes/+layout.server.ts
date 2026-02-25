@@ -7,14 +7,15 @@ interface PageNode {
 
 // Hardcoded route data (filesystem scanning doesn't work in production on Vercel)
 const mainPages: PageNode[] = [
-	{ name: 'home', path: '/', linksTo: ['/writings', '/library', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'writings', path: '/writings', linksTo: ['/', '/library', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'projects', path: '/projects', linksTo: ['/', '/writings', '/library', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'library', path: '/library', linksTo: ['/', '/writings', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'vibes', path: '/vibes', linksTo: ['/', '/writings', '/projects', '/library', '/members', '/join', '/sitemap'] },
-	{ name: 'members', path: '/members', linksTo: ['/', '/writings', '/projects', '/library', '/vibes', '/join', '/sitemap'] },
-	{ name: 'join', path: '/join', linksTo: ['/', '/writings', '/projects', '/library', '/vibes', '/members', '/sitemap'] },
-	{ name: 'index', path: '/sitemap', linksTo: ['/', '/writings', '/projects', '/library', '/vibes', '/members', '/join'] }
+	{ name: 'home', path: '/', linksTo: ['/writings', '/library', '/glossary', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
+	{ name: 'writings', path: '/writings', linksTo: ['/', '/library', '/glossary', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
+	{ name: 'projects', path: '/projects', linksTo: ['/', '/writings', '/library', '/glossary', '/members', '/vibes', '/join', '/sitemap'] },
+	{ name: 'glossary', path: '/glossary', linksTo: ['/', '/writings', '/library', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
+	{ name: 'library', path: '/library', linksTo: ['/', '/writings', '/glossary', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
+	{ name: 'vibes', path: '/vibes', linksTo: ['/', '/writings', '/glossary', '/projects', '/library', '/members', '/join', '/sitemap'] },
+	{ name: 'members', path: '/members', linksTo: ['/', '/writings', '/glossary', '/projects', '/library', '/vibes', '/join', '/sitemap'] },
+	{ name: 'join', path: '/join', linksTo: ['/', '/writings', '/glossary', '/projects', '/library', '/vibes', '/members', '/sitemap'] },
+	{ name: 'index', path: '/sitemap', linksTo: ['/', '/writings', '/glossary', '/projects', '/library', '/vibes', '/members', '/join'] }
 ];
 
 const writings: PageNode[] = [
