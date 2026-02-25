@@ -45,6 +45,11 @@ const projects: Project[] = [
 		description: 'A fast, unbloated to-do system with reminders and schedules, built for easy capture so tasks actually get added. Cross-platform with sync, end-to-end encryption, and a strong UX are core requirements. Exploring kanban flows too, including an "awaiting someone else" state that resurfaces for follow-up after X days.'
 	},
 	{
+		name: 'Nothingburger Injector',
+		url: 'https://xide.quest/nothingburger/',
+		description: 'Turns short sentences into pages of nothingburger text that can, in principle, be analyzed to recover the original meaning.'
+	},
+	{
 		name: 'programming-in-language',
 		url: null,
 		description: 'A work-in-progress specification language and CLI called "speck" for steering LLM-assisted development without losing control. It models each module at overview, declarative, and functional layers with typed interfaces, so intent and design decisions persist beyond a single agent session. The goal is to make iteration fast like vibe-coding, while making edits and dependency propagation much more reliable for real software.'
