@@ -80,3 +80,11 @@ See `.env.example`.
 - Navigation is not discovered dynamically in production; it is hand-maintained.
 - Annotation writes are committed to the `main` branch in server logic.
 - Writings history depends on GitHub API availability and credentials.
+
+## Cursor Cloud specific instructions
+
+- **Dev server**: `npm run dev` starts Vite on port 5173. See `CLAUDE.md` for all available scripts.
+- **Type checking**: `npm run check` runs `svelte-kit sync && svelte-check`. The codebase has 2 pre-existing TS errors (in `github.ts` and `AnnotationLayer.svelte`) and several a11y warnings — these are not regressions.
+- **Build**: `npm run build` runs `generate-vibes-manifest.js` then `vite build`. The first run after `svelte-kit sync` may emit a tsconfig warning about `.svelte-kit/tsconfig.json`; this is harmless and resolves on subsequent runs.
+- **No external services required**: The site runs fully from local files. GitHub API/OAuth env vars (see `.env.example`) are optional — only needed for writing revision history and annotation features.
+- **Adapter**: Uses `@sveltejs/adapter-vercel`; production deploys target Vercel, but local dev/preview works without any Vercel config.
