@@ -55,6 +55,11 @@ const projects: Project[] = [
 		description: 'A 3D real-time emergent behavior sandbox.'
 	},
 	{
+		name: 'Anthist',
+		url: 'https://www.anthist.com/',
+		description: 'A project hosted at anthist.com.'
+	},
+	{
 		name: 'programming-in-language',
 		url: null,
 		description: 'A work-in-progress specification language and CLI called "speck" for steering LLM-assisted development without losing control. It models each module at overview, declarative, and functional layers with typed interfaces, so intent and design decisions persist beyond a single agent session. The goal is to make iteration fast like vibe-coding, while making edits and dependency propagation much more reliable for real software.'
