@@ -60,6 +60,11 @@ const projects: Project[] = [
 		description: 'A project hosted at anthist.com.'
 	},
 	{
+		name: 'small web browsing',
+		url: 'https://mains.in.net/smallweb/idealists-v2.html',
+		description: 'A small-web browsing experiment: an Idealists v2 page on the small web.'
+	},
+	{
 		name: 'programming-in-language',
 		url: null,
 		description: 'A work-in-progress specification language and CLI called "speck" for steering LLM-assisted development without losing control. It models each module at overview, declarative, and functional layers with typed interfaces, so intent and design decisions persist beyond a single agent session. The goal is to make iteration fast like vibe-coding, while making edits and dependency propagation much more reliable for real software.'
