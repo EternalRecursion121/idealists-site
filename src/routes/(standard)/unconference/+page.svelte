@@ -6,8 +6,19 @@
 	let scrollY = $state(0);
 
 	// Expandable state
-	let eventsExpanded = $state(false);
+	let retreatExpanded = $state(false);
+	let conferenceExpanded = $state(false);
+	let expandedCategories = $state<Set<string>>(new Set());
 	let showBudget = $state(false);
+
+	function toggleCategory(title: string) {
+		if (expandedCategories.has(title)) {
+			expandedCategories.delete(title);
+			expandedCategories = new Set(expandedCategories);
+		} else {
+			expandedCategories = new Set(expandedCategories).add(title);
+		}
+	}
 
 	onMount(() => {
 		mounted = true;
@@ -82,14 +93,13 @@
 
 
 	const budgetItems = [
-		{ category: "Retreat Accommodation", low: "£9,000", high: "£15,000", desc: "Country house, 6 nights, 20–25 people" },
-		{ category: "Meals & Incidentals", low: "£3,000", high: "£6,000", desc: "Catering and supplies for 6 days" },
-		{ category: "Conference Venue", low: "£0", high: "£1,600", desc: "London venue hire, 2 days" },
-		{ category: "Conference Catering", low: "£1,600", high: "£4,800", desc: "Meals for up to 80, 2 days" },
-		{ category: "Conference Accommodation", low: "£0", high: "£16,000", desc: "Subsidised lodging for attendees" },
-		{ category: "Travel Grants", low: "£0", high: "£15,000", desc: "Flights and trains for participants" },
-		{ category: "Production & Media", low: "£0", high: "£3,000", desc: "Editing, printing, photography" },
-		{ category: "Contingency", low: "£1,000", high: "£5,000", desc: "Unforeseen costs (10%)" }
+		{ category: "Retreat Accommodation", low: "£3,500", high: "£7,000", desc: "Country house rental, Cotswolds, 6 nights for 20–25 people" },
+		{ category: "Retreat Meals & Incidentals", low: "£3,000", high: "£6,000", desc: "Catering, groceries, supplies for 6 days" },
+		{ category: "Conference Venue", low: "£0", high: "£1,600", desc: "London venue hire (e.g. Newspeak House), 2 days, AV included" },
+		{ category: "Conference Catering", low: "£3,200", high: "£4,800", desc: "Meals and refreshments for up to 80 attendees, 2 days" },
+		{ category: "Conference Accommodation", low: "£0", high: "£16,000", desc: "Subsidised lodging for out-of-town conference attendees" },
+		{ category: "Travel Grants", low: "£0", high: "£5,000", desc: "Flights and trains for international and UK-based participants" },
+		{ category: "Media Costs", low: "£500", high: "£3,000", desc: "Editing, design, publication, photography, printing" }
 	];
 </script>
 
@@ -154,18 +164,18 @@
 			<h2 class="section-header">the week</h2>
 
 			<div class="event-cards">
-				<article class="event-card" class:expanded={eventsExpanded}>
-					<button class="event-toggle" onclick={() => eventsExpanded = !eventsExpanded}>
+				<article class="event-card" class:expanded={retreatExpanded}>
+					<button class="event-toggle" onclick={() => retreatExpanded = !retreatExpanded}>
 						<div class="event-header">
 							<div>
 								<span class="event-day">Apr 4–10</span>
 								<h3 class="event-name">The Retreat</h3>
 								<p class="event-location">Cotswolds countryside</p>
 							</div>
-							<span class="expand-icon">{eventsExpanded ? '−' : '+'}</span>
+							<span class="expand-icon">{retreatExpanded ? '−' : '+'}</span>
 						</div>
 					</button>
-					{#if eventsExpanded}
+					{#if retreatExpanded}
 						<div class="event-content" transition:slide={{ duration: 300 }}>
 							<p class="event-description">
 								A five-day retreat for 20–30 participants at a rented country house in the Cotswolds. The format is deliberately open-ended and unconference-style, with ample unstructured time for deep conversation, collaborative work, and serendipitous connection.
@@ -183,18 +193,18 @@
 					{/if}
 				</article>
 
-				<article class="event-card" class:expanded={eventsExpanded}>
-					<button class="event-toggle" onclick={() => eventsExpanded = !eventsExpanded}>
+				<article class="event-card" class:expanded={conferenceExpanded}>
+					<button class="event-toggle" onclick={() => conferenceExpanded = !conferenceExpanded}>
 						<div class="event-header">
 							<div>
 								<span class="event-day">Apr 11–12</span>
 								<h3 class="event-name">The Unconference</h3>
 								<p class="event-location">London</p>
 							</div>
-							<span class="expand-icon">{eventsExpanded ? '−' : '+'}</span>
+							<span class="expand-icon">{conferenceExpanded ? '−' : '+'}</span>
 						</div>
 					</button>
-					{#if eventsExpanded}
+					{#if conferenceExpanded}
 						<div class="event-content" transition:slide={{ duration: 300 }}>
 							<p class="event-description">
 								A two-day unconference for up to 80 participants in London. The tentative location is Newspeak House, running from 9am to 6pm. In addition to the retreat attendees, we will open applications to support a larger group.
@@ -234,8 +244,7 @@
 					<span class="capsule-tag">physical ephemera</span>
 				</div>
 				<p class="capsule-note">
-					Premiered at a public exhibition on April 12, 2026 in London. Distributed as a printed anthology
-					and companion website.
+					Distributed as a printed anthology and companion website.
 				</p>
 			</div>
 		</div>
@@ -263,15 +272,20 @@
 			</p>
 			<div class="voice-categories">
 				{#each voiceCategories as category}
-					<div class="voice-category">
-						<h3 class="category-title">{category.title}</h3>
-						<div class="category-quotes">
-							{#each category.quotes as quote}
-								<blockquote class="testimonial">
-									<p class="testimonial-quote">"{quote}"</p>
-								</blockquote>
-							{/each}
-						</div>
+					<div class="voice-category" class:expanded={expandedCategories.has(category.title)}>
+						<button class="category-toggle" onclick={() => toggleCategory(category.title)}>
+							<h3 class="category-title">{category.title}</h3>
+							<span class="expand-icon">{expandedCategories.has(category.title) ? '−' : '+'}</span>
+						</button>
+						{#if expandedCategories.has(category.title)}
+							<div class="category-quotes" transition:slide={{ duration: 300 }}>
+								{#each category.quotes as quote}
+									<blockquote class="testimonial">
+										<p class="testimonial-quote">"{quote}"</p>
+									</blockquote>
+								{/each}
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -281,67 +295,68 @@
 	<!-- Support -->
 	<section class="section support">
 		<div class="section-inner">
-			<h2 class="section-header">support this gathering</h2>
-			<div class="support-content">
-				<p class="support-intro">
-					We are seeking funders interested in financing part or all of the conference costs.
-					Contributions at any level are welcome:
-				</p>
-				<div class="funding-tiers">
-					<div class="tier">
-						<span class="tier-amount">£5k–10k</span>
-						<span class="tier-desc">core retreat costs</span>
-					</div>
-					<div class="tier">
-						<span class="tier-amount">£20k–40k</span>
-						<span class="tier-desc">fully subsidised retreat + London conference</span>
-					</div>
-					<div class="tier">
-						<span class="tier-amount">£50k–70k</span>
-						<span class="tier-desc">full travel grants & maximum accessibility</span>
-					</div>
-				</div>
-
-				<button class="budget-toggle" onclick={() => showBudget = !showBudget}>
-					{showBudget ? '− hide budget breakdown' : '+ view budget breakdown'}
+			<div class="support-card" class:expanded={showBudget}>
+				<button class="support-toggle" onclick={() => showBudget = !showBudget}>
+					<h2 class="section-header">support this gathering</h2>
+					<span class="expand-icon">{showBudget ? '−' : '+'}</span>
 				</button>
-
 				{#if showBudget}
-					<div class="budget-table" transition:slide={{ duration: 300 }}>
-						<div class="budget-header">
-							<span>Category</span>
-							<span>Low</span>
-							<span>High</span>
-						</div>
-						{#each budgetItems as item}
-							<div class="budget-row">
-								<div class="budget-category">
-									<span class="budget-name">{item.category}</span>
-									<span class="budget-desc">{item.desc}</span>
-								</div>
-								<span class="budget-amount">{item.low}</span>
-								<span class="budget-amount">{item.high}</span>
+					<div class="support-content" transition:slide={{ duration: 300 }}>
+						<p class="support-intro">
+							We are seeking funders interested in financing part or all of the conference costs.
+							Contributions at any level are welcome:
+						</p>
+						<div class="funding-tiers">
+							<div class="tier">
+								<span class="tier-amount">£10k</span>
+								<span class="tier-desc">core retreat costs</span>
 							</div>
-						{/each}
-						<div class="budget-row budget-total">
-							<span>Total</span>
-							<span>£14,600</span>
-							<span>£68,400</span>
+							<div class="tier">
+								<span class="tier-amount">£20k–30k</span>
+								<span class="tier-desc">fully subsidised retreat + London conference</span>
+							</div>
+							<div class="tier">
+								<span class="tier-amount">£40k+</span>
+								<span class="tier-desc">full travel grants & maximum accessibility</span>
+							</div>
+						</div>
+
+						<div class="budget-table">
+							<div class="budget-header">
+								<span>Category</span>
+								<span>Low</span>
+								<span>High</span>
+							</div>
+							{#each budgetItems as item}
+								<div class="budget-row">
+									<div class="budget-category">
+										<span class="budget-name">{item.category}</span>
+										<span class="budget-desc">{item.desc}</span>
+									</div>
+									<span class="budget-amount">{item.low}</span>
+									<span class="budget-amount">{item.high}</span>
+								</div>
+							{/each}
+							<div class="budget-row budget-total">
+								<span>Total</span>
+								<span>£10,200</span>
+								<span>£43,400</span>
+							</div>
+						</div>
+
+						<p class="support-note">
+							Your support will directly enable researchers and thinkers to come together at a critical moment—to build shared frameworks,
+							forge cross-community relationships, and articulate a constructive vision for the future.
+						</p>
+						<div class="contact-block">
+							<p class="contact-label">To discuss partnership opportunities:</p>
+							<div class="contacts">
+								<a href="mailto:jasminexinzeli@gmail.com" class="contact">Jasmine Li</a>
+								<a href="mailto:samueljratnam@gmail.com" class="contact">Samuel Ratnam</a>
+							</div>
 						</div>
 					</div>
 				{/if}
-
-				<p class="support-note">
-					Your support will directly enable researchers and thinkers to come together at a critical moment—to build shared frameworks,
-					forge cross-community relationships, and articulate a constructive vision for the future.
-				</p>
-				<div class="contact-block">
-					<p class="contact-label">To discuss partnership opportunities:</p>
-					<div class="contacts">
-						<a href="mailto:jasminexinzeli@gmail.com" class="contact">Jasmine Li</a>
-						<a href="mailto:samueljratnam@gmail.com" class="contact">Samuel Ratnam</a>
-					</div>
-				</div>
 			</div>
 		</div>
 	</section>
@@ -524,6 +539,7 @@
 	.event-cards {
 		display: grid;
 		gap: 1.5rem;
+		align-items: start;
 	}
 
 	.event-card {
@@ -720,11 +736,42 @@
 	.voice-categories {
 		display: flex;
 		flex-direction: column;
-		gap: 2.5rem;
+		gap: 1rem;
 	}
 
 	.voice-category {
 		position: relative;
+		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+		border-radius: 4px;
+		background: color-mix(in srgb, var(--text) 2%, transparent);
+		transition: border-color 0.3s, background 0.3s;
+	}
+
+	.voice-category.expanded {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 5%, transparent);
+	}
+
+	.category-toggle {
+		width: 100%;
+		padding: 1rem 1.25rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: inherit;
+		text-align: left;
+	}
+
+	.category-toggle:hover {
+		color: var(--accent);
+	}
+
+	.category-toggle .expand-icon {
+		font-size: 1.25rem;
+		opacity: 0.5;
 	}
 
 	.category-title {
@@ -733,7 +780,7 @@
 		letter-spacing: 0.1em;
 		text-transform: lowercase;
 		color: var(--accent);
-		margin: 0 0 1rem 0;
+		margin: 0;
 		opacity: 0.9;
 	}
 
@@ -741,7 +788,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		padding-left: 1rem;
+		padding: 0 1.25rem 1.25rem 1.25rem;
+		margin-left: 1.25rem;
 		border-left: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 	}
 
@@ -763,8 +811,47 @@
 		background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--accent) 5%, transparent) 100%);
 	}
 
+	.support-card {
+		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+		border-radius: 4px;
+		background: color-mix(in srgb, var(--text) 2%, transparent);
+		transition: border-color 0.3s, background 0.3s;
+	}
+
+	.support-card.expanded {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 5%, transparent);
+	}
+
+	.support-toggle {
+		width: 100%;
+		padding: 1.5rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: inherit;
+		text-align: left;
+	}
+
+	.support-toggle:hover {
+		color: var(--accent);
+	}
+
+	.support-toggle .section-header {
+		margin: 0;
+	}
+
+	.support-toggle .expand-icon {
+		font-size: 1.25rem;
+		opacity: 0.5;
+	}
+
 	.support-content {
 		text-align: center;
+		padding: 0 1.5rem 1.5rem 1.5rem;
 	}
 
 	.support-intro {
