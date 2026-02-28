@@ -3,11 +3,17 @@
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import { onMount } from 'svelte';
 
-	type LlamaPhase = 'hidden' | 'appearing' | 'entering' | 'speaking' | 'exiting' | 'corner';
+	type LlamaPhase = 'hidden' | 'appearing' | 'entering' | 'speaking' | 'sad' | 'sad-floating' | 'exiting' | 'corner';
 
 	let llamaPhase = $state<LlamaPhase>('hidden');
 	let messageIndex = $state(0);
 	let llamafied = $state(false);
+	let sadMessage = $state('');
+
+	// Track click timing for skip detection
+	let clickTimes: number[] = [];
+	const FAST_CLICK_THRESHOLD = 400; // ms between clicks to count as "fast"
+	const FAST_CLICKS_NEEDED = 4; // number of fast clicks to trigger sad path
 
 	const messages = [
 		"hey you!",
@@ -36,6 +42,11 @@
 		"this literally means we are made up of people.",
 		"you there, in your meat bag: you are a person.",
 		"care to join us?",
+	];
+
+	const sadMessages = [
+		"fine, if you don't want to listen...",
+		"i'll just... go then.",
 	];
 
 	const llamaContent = `hey you! yes, you there, in your meat bag. do you like the fact that the software in the eldritch portal you call a phone is a soul sucking demon that feasts on your attention?
@@ -68,13 +79,59 @@ we are a collective. this literally means we are made up of people. you there, i
 					}, 1000);
 				});
 			});
-		}, 3000);
+		}, 1200);
 
 		return () => clearTimeout(enterTimeout);
 	});
 
+	function checkForFastClicking(): boolean {
+		const now = Date.now();
+		clickTimes.push(now);
+
+		// Keep only recent clicks
+		clickTimes = clickTimes.filter(t => now - t < 3000);
+
+		// Count fast consecutive clicks
+		let fastClicks = 0;
+		for (let i = 1; i < clickTimes.length; i++) {
+			if (clickTimes[i] - clickTimes[i - 1] < FAST_CLICK_THRESHOLD) {
+				fastClicks++;
+			} else {
+				fastClicks = 0; // Reset if there's a slow click
+			}
+		}
+
+		return fastClicks >= FAST_CLICKS_NEEDED - 1;
+	}
+
+	function triggerSadPath() {
+		sadMessage = sadMessages[0];
+		llamaPhase = 'sad';
+
+		setTimeout(() => {
+			sadMessage = sadMessages[1];
+		}, 1500);
+
+		setTimeout(() => {
+			llamaPhase = 'sad-floating';
+		}, 3000);
+
+		setTimeout(() => {
+			llamaPhase = 'exiting';
+		}, 5000);
+
+		setTimeout(() => {
+			llamaPhase = 'corner';
+		}, 6000);
+	}
+
 	function advanceMessage() {
 		if (llamaPhase !== 'speaking') return;
+
+		if (checkForFastClicking()) {
+			triggerSadPath();
+			return;
+		}
 
 		if (messageIndex < messages.length - 1) {
 			messageIndex++;
@@ -105,6 +162,8 @@ we are a collective. this literally means we are made up of people. you there, i
 			class:appearing={llamaPhase === 'appearing'}
 			class:entering={llamaPhase === 'entering'}
 			class:speaking={llamaPhase === 'speaking'}
+			class:sad={llamaPhase === 'sad'}
+			class:sad-floating={llamaPhase === 'sad-floating'}
 			class:exiting={llamaPhase === 'exiting'}
 			class:corner={llamaPhase === 'corner'}
 		>
@@ -113,6 +172,11 @@ we are a collective. this literally means we are made up of people. you there, i
 					<button class="speech-bubble" onclick={advanceMessage}>
 						{messages[messageIndex]}
 					</button>
+				{/if}
+				{#if llamaPhase === 'sad' || llamaPhase === 'sad-floating'}
+					<div class="speech-bubble sad-bubble">
+						{sadMessage}
+					</div>
 				{/if}
 				<button
 					class="llama-button"
@@ -123,6 +187,7 @@ we are a collective. this literally means we are made up of people. you there, i
 						alt="A wise llama"
 						class="llama-image"
 						class:rainbow={llamafied}
+						class:sad-llama={llamaPhase === 'sad' || llamaPhase === 'sad-floating'}
 					/>
 				</button>
 			</div>
@@ -253,6 +318,17 @@ we are a collective. this literally means we are made up of people. you there, i
 		opacity: 1;
 	}
 
+	.llama-overlay.sad .llama-wrapper {
+		transform: scale(1) rotate(0deg);
+		opacity: 1;
+	}
+
+	.llama-overlay.sad-floating .llama-wrapper {
+		transform: translateX(-40vw) scale(0.9) rotate(-5deg);
+		opacity: 0.7;
+		transition: transform 2s ease-in-out, opacity 2s ease-in-out;
+	}
+
 	.llama-overlay.exiting .llama-wrapper {
 		transform: scale(0) rotate(720deg);
 		opacity: 0;
@@ -279,6 +355,18 @@ we are a collective. this literally means we are made up of people. you there, i
 
 	.llama-image.rainbow {
 		animation: rainbow-intense 0.5s linear infinite;
+	}
+
+	.llama-image.sad-llama {
+		animation: none;
+		filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3)) grayscale(0.3);
+		transform: rotate(-8deg);
+		transition: transform 0.5s ease, filter 0.5s ease;
+	}
+
+	.sad-bubble {
+		cursor: default;
+		opacity: 0.9;
 	}
 
 	@keyframes rainbow-shimmer {
