@@ -9,7 +9,10 @@
 	let retreatExpanded = $state(false);
 	let conferenceExpanded = $state(false);
 	let expandedCategories = $state<Set<string>>(new Set());
+	let showCapsule = $state(false);
+	let showWorkshops = $state(false);
 	let showBudget = $state(false);
+	let showBudgetBreakdown = $state(false);
 
 	function toggleCategory(title: string) {
 		if (expandedCategories.has(title)) {
@@ -22,18 +25,19 @@
 
 	onMount(() => {
 		mounted = true;
-		const handleScroll = () => scrollY = window.scrollY;
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
+		const root = document.documentElement;
+		const handleScroll = () => {
+			scrollY = window.scrollY;
+			const shouldSnap = window.scrollY < window.innerHeight * 0.9;
+			root.classList.toggle('unconference-snap', shouldSnap);
+		};
+		handleScroll();
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+			root.classList.remove('unconference-snap');
+		};
 	});
-
-	const questions = [
-		{ text: "Can goodness compete?", url: "https://joecarlsmith.substack.com/p/video-and-transcript-of-talk-on-can" },
-		{ text: "What advice do different futures give back to us?", url: null },
-		{ text: "What does a good ordinary life look like in 2075?", url: null },
-		{ text: "What institutions would we build from scratch?", url: null },
-		{ text: "What will people be nostalgic for?", url: null }
-	];
 
 	const voiceCategories = [
 		{
@@ -128,39 +132,39 @@
 		</div>
 	</header>
 
-	<!-- Premise -->
-	<section class="section premise">
-		<div class="section-inner">
-			<p class="lead">
-				We are living through a period of extraordinary technological change. The consequences of this are unfolding far faster than our economies, institutions, and cultures are equipped to handle. Within the coming decades, we will face questions about our society that we cannot afford to get wrong.
-			</p>
-			<p class="lead">
-				But the discourse about our future is fragmented, reactive, and strikingly short on vision. Faced with the problems of our present, it's easy to feel powerless — to see the challenges as too large for us to do anything about. Or to fall into the opposite trap: a naive optimism that things will work out, that progress is inevitable and technology will fix everything. And the idealists — those who refuse to accept either, who are actively fighting to create the futures they want to see — are scattered across disciplines, communities, and countries, each unaware of how many others share their hope.
-			</p>
-			<p class="lead">
-				The Idealists Unconference exists to break that isolation. We are bringing together thinkers and makers — scientists, philosophers, artists, policymakers, technologists, writers — to ask the question: <em>what kind of future do we actually want, and how do we get there?</em>
-			</p>
-			<p class="lead">
-				The aim of the conference is that every participant leaves with a reignited sense that a radically better future is possible, that the obstacles are not as insurmountable as they feel, and that it is up to us to make it happen.
-			</p>
-			<p class="lead">
-				Some questions we are excited about:
-			</p>
-			<div class="inline-questions">
-				{#each questions as question}
-					{#if question.url}
-						<a href={question.url} target="_blank" rel="noopener" class="inline-question">{question.text}</a>
-					{:else}
-						<span class="inline-question">{question.text}</span>
-					{/if}
-				{/each}
-			</div>
-		</div>
-	</section>
-
+	<div class="content-shell">
 	<!-- Structure -->
 	<section class="section structure compact">
 		<div class="section-inner">
+			<p class="week-intro">
+				The idealists conference exists to explore and create a stance of hope we ought to take, in the face of our current reality, to get to good futures; to practice this stance of hope, collectively, through discussion and dialogue and making; to impart this stance onto its participants, and into what they will create long after the conference is over.
+			</p>
+		<details class="full-draft">
+			<summary>Ok, but what does this actually mean?</summary>
+			<div class="full-draft-content">
+				<p>Consider: The world is on fire.</p>
+				<p>We live in the world.</p>
+				<p>Given that we live in the world, which is on fire, how ought we relate to it?</p>
+				<p>This question is painful to grapple with. So painful, in fact, that there are at least two varieties of wishing it away: (1) the world is doomed, the fire will eat everything, there is nothing we can do; (2) the fire is good actually, we should want the fire to eat everything, let's make the fire go faster. While we believe that, taken wholesale, both approaches are misguided, we also believe that they each contain a grain of truth: The fire is, in fact, daunting. The fire is, in fact, very large in scope, and requires humanity to display coordination and competence. We must buck up and face the tangled horror-problems reality presents us with. We must not solve easier problems than those to make ourselves feel good. We must stare the monster in the face. Fire is good, eventually. For humanity to grow up is for humanity to become powerful: to let that flame burn away the proems that plague us, so that utopia can flower in the ash. Many of the technologies, attitudes and ideas contained in the gasoline making the fire worse are cousins to beautiful fingers that point toward this end.</p>
+				<p>We believe the synthesis of these attitudes presents a secret third option-a way of relating to reality such that answering the question becomes not only bearable, but fun:</p>
+				<p>Hope. Good-old-fashioned hope. Dangerous, beguiling, loveable hope. Hope so unbearable it makes the world seem bearable, after all.</p>
+				<p>What is hope? First, hope is distinct from optimism. Things are actually pretty bad right now, and on track to becoming much worse; if we want things to get better, we should not delude ourselves into thinking things are already fine. To be optimistic about the current state of affairs would be to live in delusion.</p>
+				<p>While optimism is a summary statistic of reality, hope is a stance one can take with respect to reality, regardless of how grim reality really is. Hope is a stance characterized by ntradiction: to take on hope as a stance is to dream up fantastical wondrous futures, and explore strange thought experiments probing at fundamental ideas; but also to be relentlessly practical about immediate actions that can be taken, and carefully consider how those actions will eventually lead to good outcomes. Hope is not a stance to be taken on alone, because the future will be lived-in by more than one person.</p>
+				<p>The stance of hope is very much not the stance of heroism. Note that slogging through a field, bloody and bruised, arms shaking around your sword, swiping at fire-breathing dragons is not actually fun! Being a hero is not fun. The stance of hope thus does not require you to be a hero.</p>
+				<p>We believe that formulating this stance of hope, and putting it into practice, will require cognitive variety and exploration. We believe that art is preparadigmatic philosophy is preparadigmatic mathematics is preparadigmatic science is preparadigmatic engineering is preparadigmatic policy. We believe that we should mine insights from all parts of this funnel, put these varied techniques and aesthetics into considered dialogue, and carefully tend to what emerges. The guiding question of the conference will be:</p>
+				<p><strong>What kind of future do we actually want, and how do we get there?</strong></p>
+				<blockquote>
+					<p>Do not go gentle into that good night.<br>Rage, rage against the dying of the light.</p>
+				</blockquote>
+				<p>-Dylan Thomas</p>
+				<details class="full-draft">
+					<summary>Ok, but what does this actually mean?</summary>
+					<div class="full-draft-content">
+						<p>Technology is changing the world faster than we are equipped to handle. We need new ideas. We need new institutions. We need to think carefully about where we are going. But more than this we need hope – hope that the future can be better and hope to fuel us in fighting for it. The conference aims to provide a space for imagining and creating the future we want.</p>
+					</div>
+				</details>
+			</div>
+		</details>
 			<h2 class="section-header">the week</h2>
 
 			<div class="event-cards">
@@ -225,51 +229,11 @@
 		</div>
 	</section>
 
-	<!-- Time Capsule -->
-	<section class="section capsule">
-		<div class="section-inner">
-			<h2 class="section-header">the output</h2>
-			<div class="capsule-content">
-				<h3 class="capsule-title">A Backward-Looking Time Capsule</h3>
-				<p class="capsule-description">
-					The main output will be a curated collection of speculative fiction, policy sketches, artwork, letters,
-					institutional blueprints, and other artefacts—situated from possible futures back to the present day.
-				</p>
-				<div class="capsule-examples">
-					<span class="capsule-tag">fictional policy memos from 2060</span>
-					<span class="capsule-tag">letters from grandchildren</span>
-					<span class="capsule-tag">institutional blueprints</span>
-					<span class="capsule-tag">speculative fiction</span>
-					<span class="capsule-tag">artwork</span>
-					<span class="capsule-tag">physical ephemera</span>
-				</div>
-				<p class="capsule-note">
-					Distributed as a printed anthology and companion website.
-				</p>
-			</div>
-		</div>
-	</section>
-
-	<!-- Workshop Ideas -->
-	<section class="section workshops">
-		<div class="section-inner">
-			<h2 class="section-header">workshop sketches</h2>
-			<p class="workshops-intro">Some ideas our members are excited about:</p>
-			<div class="workshop-grid">
-				{#each workshopIdeas as idea}
-					<div class="workshop-card">{idea}</div>
-				{/each}
-			</div>
-		</div>
-	</section>
-
 	<!-- Voices -->
 	<section class="section voices">
 		<div class="section-inner">
 			<h2 class="section-header">what we want this to be</h2>
-			<p class="voices-intro">
-				What members of the Idealists Collective want this event to be:
-			</p>
+
 			<div class="voice-categories">
 				{#each voiceCategories as category}
 					<div class="voice-category" class:expanded={expandedCategories.has(category.title)}>
@@ -281,7 +245,7 @@
 							<div class="category-quotes" transition:slide={{ duration: 300 }}>
 								{#each category.quotes as quote}
 									<blockquote class="testimonial">
-										<p class="testimonial-quote">"{quote}"</p>
+										<p class="testimonial-quote">{quote}</p>
 									</blockquote>
 								{/each}
 							</div>
@@ -292,74 +256,125 @@
 		</div>
 	</section>
 
-	<!-- Support -->
-	<section class="section support">
+	<!-- Workshop Ideas & Time Capsule -->
+	<section class="section compact">
 		<div class="section-inner">
-			<div class="support-card" class:expanded={showBudget}>
-				<button class="support-toggle" onclick={() => showBudget = !showBudget}>
-					<h2 class="section-header">support this gathering</h2>
-					<span class="expand-icon">{showBudget ? '−' : '+'}</span>
-				</button>
-				{#if showBudget}
-					<div class="support-content" transition:slide={{ duration: 300 }}>
-						<p class="support-intro">
-							We are seeking funders interested in financing part or all of the conference costs.
-							Contributions at any level are welcome:
-						</p>
-						<div class="funding-tiers">
-							<div class="tier">
-								<span class="tier-amount">£10k</span>
-								<span class="tier-desc">core retreat costs</span>
-							</div>
-							<div class="tier">
-								<span class="tier-amount">£20k–30k</span>
-								<span class="tier-desc">fully subsidised retreat + London conference</span>
-							</div>
-							<div class="tier">
-								<span class="tier-amount">£40k+</span>
-								<span class="tier-desc">full travel grants & maximum accessibility</span>
+			<div class="expandables-group">
+				<div class="workshops-card" class:expanded={showWorkshops}>
+					<button class="workshops-toggle" onclick={() => showWorkshops = !showWorkshops}>
+						<h2 class="section-header">workshop sketches</h2>
+						<span class="expand-icon">{showWorkshops ? '−' : '+'}</span>
+					</button>
+					{#if showWorkshops}
+						<div class="workshops-content" transition:slide={{ duration: 300 }}>
+							<p class="workshops-intro">Some ideas members are excited about:</p>
+							<div class="workshop-grid">
+								{#each workshopIdeas as idea}
+									<div class="workshop-card">{idea}</div>
+								{/each}
 							</div>
 						</div>
+					{/if}
+				</div>
 
-						<div class="budget-table">
-							<div class="budget-header">
-								<span>Category</span>
-								<span>Low</span>
-								<span>High</span>
-							</div>
-							{#each budgetItems as item}
-								<div class="budget-row">
-									<div class="budget-category">
-										<span class="budget-name">{item.category}</span>
-										<span class="budget-desc">{item.desc}</span>
-									</div>
-									<span class="budget-amount">{item.low}</span>
-									<span class="budget-amount">{item.high}</span>
+				<div class="workshops-card" class:expanded={showCapsule}>
+					<button class="workshops-toggle" onclick={() => showCapsule = !showCapsule}>
+						<h2 class="section-header">a backward-looking time capsule</h2>
+						<span class="expand-icon">{showCapsule ? '−' : '+'}</span>
+					</button>
+					{#if showCapsule}
+						<div class="workshops-content" transition:slide={{ duration: 300 }}>
+							<p class="workshops-intro">
+								Over the course of the week, we will create a curated collection of speculative fiction, policy sketches, artwork, letters,
+								institutional blueprints, and other artefacts—situated from possible futures back to the present day.
+							</p>
+							<ul class="capsule-examples">
+								<li>fictional policy memos from 2060</li>
+								<li>letters from grandchildren</li>
+								<li>institutional blueprints</li>
+								<li>speculative fiction</li>
+								<li>artwork</li>
+								<li>physical ephemera</li>
+							</ul>
+							<p class="capsule-note">
+								Distributed as a printed anthology and companion website.
+							</p>
+						</div>
+					{/if}
+				</div>
+				<div class="workshops-card support-highlight" class:expanded={showBudget}>
+					<button class="workshops-toggle" onclick={() => showBudget = !showBudget}>
+						<h2 class="section-header">support this gathering</h2>
+						<span class="expand-icon">{showBudget ? '−' : '+'}</span>
+					</button>
+					{#if showBudget}
+						<div class="support-content" transition:slide={{ duration: 300 }}>
+							<p class="support-intro">
+								We are seeking funders interested in financing part or all of the conference costs.
+								Contributions at any level are welcome:
+							</p>
+							<div class="funding-tiers">
+								<div class="tier">
+									<span class="tier-amount">£10k</span>
+									<span class="tier-desc">core retreat costs</span>
 								</div>
-							{/each}
-							<div class="budget-row budget-total">
-								<span>Total</span>
-								<span>£10,200</span>
-								<span>£43,400</span>
+								<div class="tier">
+									<span class="tier-amount">£20k–30k</span>
+									<span class="tier-desc">fully subsidised retreat + London conference</span>
+								</div>
+								<div class="tier">
+									<span class="tier-amount">£40k+</span>
+									<span class="tier-desc">full travel grants & maximum accessibility</span>
+								</div>
 							</div>
-						</div>
 
-						<p class="support-note">
-							Your support will directly enable researchers and thinkers to come together at a critical moment—to build shared frameworks,
-							forge cross-community relationships, and articulate a constructive vision for the future.
-						</p>
-						<div class="contact-block">
-							<p class="contact-label">To discuss partnership opportunities:</p>
-							<div class="contacts">
-								<a href="mailto:jasminexinzeli@gmail.com" class="contact">Jasmine Li</a>
-								<a href="mailto:samueljratnam@gmail.com" class="contact">Samuel Ratnam</a>
+							<button class="budget-toggle" onclick={() => showBudgetBreakdown = !showBudgetBreakdown}>
+								{showBudgetBreakdown ? '− hide budget breakdown' : '+ view budget breakdown'}
+							</button>
+
+							{#if showBudgetBreakdown}
+								<div class="budget-table" transition:slide={{ duration: 300 }}>
+									<div class="budget-header">
+										<span>Category</span>
+										<span>Low</span>
+										<span>High</span>
+									</div>
+									{#each budgetItems as item}
+										<div class="budget-row">
+											<div class="budget-category">
+												<span class="budget-name">{item.category}</span>
+												<span class="budget-desc">{item.desc}</span>
+											</div>
+											<span class="budget-amount">{item.low}</span>
+											<span class="budget-amount">{item.high}</span>
+										</div>
+									{/each}
+									<div class="budget-row budget-total">
+										<span>Total</span>
+										<span>£10,200</span>
+										<span>£43,400</span>
+									</div>
+								</div>
+							{/if}
+
+							<p class="support-note">
+								Your support will directly enable researchers and thinkers to come together at a critical moment—to build shared frameworks,
+								forge cross-community relationships, and articulate a constructive vision for the future.
+							</p>
+							<div class="contact-block">
+								<p class="contact-label">To discuss partnership opportunities:</p>
+								<div class="contacts">
+									<a href="mailto:jasminexinzeli@gmail.com" class="contact">Jasmine Li</a>
+									<a href="mailto:samueljratnam@gmail.com" class="contact">Samuel Ratnam</a>
+								</div>
 							</div>
 						</div>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			</div>
 		</div>
 	</section>
+	</div>
 
 	<!-- Footer -->
 	<footer class="page-footer">
@@ -370,7 +385,7 @@
 
 <style>
 	.unconference {
-		--section-padding: 3rem 1.5rem;
+		--section-padding: 1.5rem 1.5rem;
 		opacity: 0;
 		transition: opacity 0.6s ease;
 	}
@@ -394,6 +409,8 @@
 		width: 100vw;
 		margin-left: calc(-50vw + 50%);
 		box-sizing: border-box;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
 	}
 
 	.hero-content {
@@ -469,9 +486,27 @@
 		padding-bottom: 1.5rem;
 	}
 
+	.content-shell {
+		max-width: 980px;
+		margin: 0 auto;
+		border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+		border-radius: 0.75rem;
+		background: color-mix(in srgb, var(--text) 5%, transparent);
+		backdrop-filter: blur(5px);
+		-webkit-backdrop-filter: blur(5px);
+		overflow: hidden;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+	}
+
+	:global(html.unconference-snap) {
+		scroll-snap-type: y mandatory;
+	}
+
 	.section-inner {
 		max-width: 800px;
 		margin: 0 auto;
+		padding: clamp(1rem, 2vw, 1.5rem);
 	}
 
 	.section-header {
@@ -484,55 +519,51 @@
 		opacity: 0.8;
 	}
 
-	/* Premise */
-	.premise {
-		background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--accent) 3%, transparent) 100%);
-	}
-
-	.lead {
+	.week-intro {
 		font-family: var(--font-serif);
-		font-size: 1.2rem;
+		font-size: 1.15rem;
 		line-height: 1.7;
-		margin: 0 0 1.5rem 0;
+		margin: 0 0 1.25rem 0;
 		opacity: 0.85;
 	}
 
-	.lead em {
-		font-style: italic;
-		color: var(--accent);
+	.full-draft {
+		margin: 0 0 1.5rem 0;
+		padding: 0.9rem 1rem;
+		border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+		background: color-mix(in srgb, var(--accent) 3%, transparent);
+		border-radius: 4px;
 	}
 
-	/* Inline Questions */
-	.inline-questions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
+	.full-draft summary {
+		cursor: pointer;
+		font-size: 0.9rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.full-draft-content {
 		margin-top: 1rem;
 	}
 
-	.inline-question {
+	.full-draft .full-draft {
+		margin-top: 1rem;
+	}
+
+	.full-draft-content p {
 		font-family: var(--font-serif);
-		font-size: 0.95rem;
-		font-style: italic;
-		padding: 0.6rem 1.1rem;
-		border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-		border-radius: 2rem;
-		color: var(--text);
+		font-size: 1rem;
+		line-height: 1.7;
+		margin: 0 0 1rem 0;
 		opacity: 0.85;
-		transition: all 0.2s;
-		text-decoration: none;
 	}
 
-	.inline-question:hover {
-		border-color: var(--accent);
-		color: var(--accent);
-		opacity: 1;
-		background: color-mix(in srgb, var(--accent) 8%, transparent);
-	}
-
-	a.inline-question:hover {
-		text-decoration: underline;
-		text-underline-offset: 3px;
+	.full-draft-content blockquote {
+		margin: 0.5rem 0 1rem;
+		padding-left: 1rem;
+		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
 	}
 
 	/* Event Cards */
@@ -639,19 +670,55 @@
 
 	/* Time Capsule */
 	.capsule {
-		background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, transparent) 0%, transparent 100%);
+		background: transparent;
+	}
+
+	.capsule-card {
+		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+		border-radius: 4px;
+		background: color-mix(in srgb, var(--text) 2%, transparent);
+		max-width: 720px;
+		margin: 0 auto;
+		transition: border-color 0.3s, background 0.3s;
+	}
+
+	.capsule-card.expanded {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 5%, transparent);
+	}
+
+	.capsule-toggle {
+		width: 100%;
+		padding: 1.25rem 1.5rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: inherit;
+		text-align: left;
+	}
+
+	.capsule-toggle:hover {
+		color: var(--accent);
+	}
+
+	.capsule-toggle .expand-icon {
+		font-size: 1.25rem;
+		opacity: 0.5;
 	}
 
 	.capsule-content {
-		text-align: center;
+		text-align: left;
+		padding: 0 1.5rem 1.5rem 1.5rem;
 	}
 
 	.capsule-title {
 		font-family: var(--font-serif);
-		font-size: 1.75rem;
+		font-size: 1.5rem;
 		font-weight: 400;
-		font-style: italic;
-		margin: 0 0 1.5rem 0;
+		margin: 0;
 		color: var(--heading);
 	}
 
@@ -660,38 +727,86 @@
 		font-size: 1.1rem;
 		line-height: 1.7;
 		opacity: 0.8;
-		max-width: 600px;
-		margin: 0 auto 2rem auto;
+		max-width: 700px;
+		margin: 0 0 1.25rem 0;
 	}
 
 	.capsule-examples {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 0.75rem;
-		margin-bottom: 2rem;
+		list-style: disc;
+		margin: 0 0 1.25rem 1.25rem;
+		padding: 0;
 	}
 
-	.capsule-tag {
-		font-size: 0.85rem;
-		padding: 0.5rem 1rem;
-		border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-		border-radius: 2rem;
-		color: var(--accent);
-		transition: background 0.2s;
-	}
-
-	.capsule-tag:hover {
-		background: color-mix(in srgb, var(--accent) 10%, transparent);
+	.capsule-examples li {
+		font-family: var(--font-serif);
+		font-size: 1rem;
+		line-height: 1.55;
+		opacity: 0.85;
+		margin: 0 0 0.35rem 0;
 	}
 
 	.capsule-note {
-		font-size: 0.9rem;
-		opacity: 0.6;
-		font-style: italic;
+		font-size: 0.95rem;
+		opacity: 0.72;
+		font-style: normal;
+		margin: 0;
+	}
+
+	/* Expandables group */
+	.expandables-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 	}
 
 	/* Workshops */
+	.workshops-card {
+		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
+		border-radius: 4px;
+		background: color-mix(in srgb, var(--text) 2%, transparent);
+		transition: border-color 0.3s, background 0.3s;
+	}
+
+	.workshops-card.expanded {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 5%, transparent);
+	}
+
+	.workshops-card.support-highlight {
+		border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+		border-width: 1.5px;
+	}
+
+	.workshops-toggle {
+		width: 100%;
+		padding: 1.25rem 1.5rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: inherit;
+		text-align: left;
+	}
+
+	.workshops-toggle:hover {
+		color: var(--accent);
+	}
+
+	.workshops-toggle .section-header {
+		margin: 0;
+	}
+
+	.workshops-toggle .expand-icon {
+		font-size: 1.25rem;
+		opacity: 0.5;
+	}
+
+	.workshops-content {
+		padding: 0 1.5rem 1.5rem 1.5rem;
+	}
+
 	.workshops-intro {
 		font-family: var(--font-serif);
 		font-size: 1rem;
@@ -722,7 +837,7 @@
 
 	/* Voices */
 	.voices {
-		background: color-mix(in srgb, var(--accent) 3%, transparent);
+		background: transparent;
 	}
 
 	.voices-intro {
@@ -787,28 +902,32 @@
 	.category-quotes {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.9rem;
 		padding: 0 1.25rem 1.25rem 1.25rem;
-		margin-left: 1.25rem;
-		border-left: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 	}
 
 	.testimonial {
 		margin: 0;
+		position: relative;
+		padding: 1rem 1.1rem 0.95rem 1.2rem;
+		border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+		border-radius: 0.45rem;
+		background: color-mix(in srgb, var(--accent) 7%, transparent);
 	}
 
 	.testimonial-quote {
 		font-family: var(--font-serif);
-		font-size: 1rem;
-		line-height: 1.7;
-		font-style: italic;
-		opacity: 0.8;
+		font-size: 0.98rem;
+		line-height: 1.62;
+		letter-spacing: 0.005em;
+		opacity: 0.88;
 		margin: 0;
 	}
 
 	/* Support */
 	.support {
-		background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--accent) 5%, transparent) 100%);
+		background: transparent;
 	}
 
 	.support-card {
@@ -1040,15 +1159,11 @@
 	/* Responsive */
 	@media (min-width: 640px) {
 		.unconference {
-			--section-padding: 4rem 2rem;
+			--section-padding: 2rem 2rem;
 		}
 
 		.hero-title {
 			font-size: clamp(3rem, 10vw, 6rem);
-		}
-
-		.lead {
-			font-size: 1.35rem;
 		}
 
 		.question {
