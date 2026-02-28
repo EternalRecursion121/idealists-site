@@ -88,7 +88,7 @@
 
 	const workshopIdeas = [
 		"flash fiction about mundane lives in 2075",
-		"active inference formalisms of the self and power structures",
+		"blankets on blankets (sit on fluffy blankets and discuss markov blankets, why they change, your blankets, jung's blankets, carson's blankets, dennett's blankets, etc)",
 		"shoot a mini documentary in a day",
 		"write a play about post-AGI governance",
 		"letters from your grandchildren",
@@ -160,7 +160,7 @@
 				<details class="full-draft">
 					<summary>Ok, but what does this actually mean?</summary>
 					<div class="full-draft-content">
-						<p>Technology is changing the world faster than we are equipped to handle. We need new ideas. We need new institutions. We need to think carefully about where we are going. But more than this we need hope – hope that the future can be better and hope to fuel us in fighting for it. The conference aims to provide a space for imagining and creating the future we want.</p>
+						<p>Technology is changing the world faster than we are equipped to handle. We need new ideas. We need new institutions. We need to think carefully about where we are going. But more than this we need hope – hope that the future can be better and hope to fuel us in fighting for it. The conference aims to provide a space for imagining and creating the futures we want.</p>
 					</div>
 				</details>
 			</div>
@@ -229,54 +229,10 @@
 		</div>
 	</section>
 
-	<!-- Voices -->
-	<section class="section voices">
-		<div class="section-inner">
-			<h2 class="section-header">what we want this to be</h2>
-
-			<div class="voice-categories">
-				{#each voiceCategories as category}
-					<div class="voice-category" class:expanded={expandedCategories.has(category.title)}>
-						<button class="category-toggle" onclick={() => toggleCategory(category.title)}>
-							<h3 class="category-title">{category.title}</h3>
-							<span class="expand-icon">{expandedCategories.has(category.title) ? '−' : '+'}</span>
-						</button>
-						{#if expandedCategories.has(category.title)}
-							<div class="category-quotes" transition:slide={{ duration: 300 }}>
-								{#each category.quotes as quote}
-									<blockquote class="testimonial">
-										<p class="testimonial-quote">{quote}</p>
-									</blockquote>
-								{/each}
-							</div>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		</div>
-	</section>
-
-	<!-- Workshop Ideas & Time Capsule -->
+	<!-- Capsule -->
 	<section class="section compact">
 		<div class="section-inner">
 			<div class="expandables-group">
-				<div class="workshops-card" class:expanded={showWorkshops}>
-					<button class="workshops-toggle" onclick={() => showWorkshops = !showWorkshops}>
-						<h2 class="section-header">workshop sketches</h2>
-						<span class="expand-icon">{showWorkshops ? '−' : '+'}</span>
-					</button>
-					{#if showWorkshops}
-						<div class="workshops-content" transition:slide={{ duration: 300 }}>
-							<p class="workshops-intro">Some ideas members are excited about:</p>
-							<div class="workshop-grid">
-								{#each workshopIdeas as idea}
-									<div class="workshop-card">{idea}</div>
-								{/each}
-							</div>
-						</div>
-					{/if}
-				</div>
-
 				<div class="workshops-card" class:expanded={showCapsule}>
 					<button class="workshops-toggle" onclick={() => showCapsule = !showCapsule}>
 						<h2 class="section-header">a backward-looking time capsule</h2>
@@ -302,6 +258,57 @@
 						</div>
 					{/if}
 				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Voices -->
+	<section class="section compact">
+		<div class="section-inner">
+			<h2 class="section-header">what we want this to be</h2>
+
+			<div class="voice-categories">
+				{#each voiceCategories as category}
+					<div class="voice-category" class:expanded={expandedCategories.has(category.title)}>
+						<button class="category-toggle" onclick={() => toggleCategory(category.title)}>
+							<h3 class="category-title">{category.title}</h3>
+							<span class="expand-icon">{expandedCategories.has(category.title) ? '−' : '+'}</span>
+						</button>
+						{#if expandedCategories.has(category.title)}
+							<div class="category-quotes" transition:slide={{ duration: 300 }}>
+								{#each category.quotes as quote}
+									<blockquote class="testimonial">
+										<p class="testimonial-quote">{quote}</p>
+									</blockquote>
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
+			<div class="workshops-card" class:expanded={showWorkshops}>
+				<button class="workshops-toggle" onclick={() => showWorkshops = !showWorkshops}>
+					<h2 class="section-header">workshop sketches</h2>
+					<span class="expand-icon">{showWorkshops ? '−' : '+'}</span>
+				</button>
+				{#if showWorkshops}
+					<div class="workshops-content" transition:slide={{ duration: 300 }}>
+						<p class="workshops-intro">Some ideas members are excited about:</p>
+						<div class="workshop-grid">
+							{#each workshopIdeas as idea}
+								<div class="workshop-card">{idea}</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
+	</section>
+
+	<!-- Support -->
+	<section class="section compact">
+		<div class="section-inner">
+			<div class="expandables-group">
 				<div class="workshops-card support-highlight" class:expanded={showBudget}>
 					<button class="workshops-toggle" onclick={() => showBudget = !showBudget}>
 						<h2 class="section-header">support this gathering</h2>
@@ -392,6 +399,16 @@
 
 	.unconference.mounted {
 		opacity: 1;
+	}
+
+	.unconference :is(a, button, summary, input, textarea, select):focus,
+	.unconference :is(a, button, summary, input, textarea, select):focus-visible {
+		outline: none;
+		box-shadow: none;
+	}
+
+	.unconference :is(a, button, summary, input, textarea, select) {
+		-webkit-tap-highlight-color: transparent;
 	}
 
 	/* Hero */
@@ -817,22 +834,20 @@
 	.workshop-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1rem;
+		gap: 0.9rem;
 	}
 
 	.workshop-card {
 		font-family: var(--font-serif);
-		font-size: 1rem;
-		font-style: italic;
-		padding: 1.25rem;
-		background: color-mix(in srgb, var(--text) 3%, transparent);
-		border-left: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
-		transition: border-color 0.2s, background 0.2s;
-	}
-
-	.workshop-card:hover {
-		border-color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 5%, transparent);
+		font-size: 0.98rem;
+		line-height: 1.62;
+		letter-spacing: 0.005em;
+		opacity: 0.88;
+		padding: 1rem 1.1rem 0.95rem 1.2rem;
+		border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+		border-radius: 0.45rem;
+		background: color-mix(in srgb, var(--accent) 7%, transparent);
 	}
 
 	/* Voices */
