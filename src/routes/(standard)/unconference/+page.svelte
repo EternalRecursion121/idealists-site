@@ -281,22 +281,21 @@
 						{/if}
 					</div>
 				{/each}
-			</div>
-			<div class="workshops-card" class:expanded={showWorkshops}>
-				<button class="workshops-toggle" onclick={() => showWorkshops = !showWorkshops}>
-					<h2 class="section-header">workshop sketches</h2>
+				<div class="voice-category" class:expanded={showWorkshops}>
+				<button class="category-toggle" onclick={() => showWorkshops = !showWorkshops}>
+					<h3 class="category-title">workshop sketches</h3>
 					<span class="expand-icon">{showWorkshops ? '−' : '+'}</span>
 				</button>
 				{#if showWorkshops}
-					<div class="workshops-content" transition:slide={{ duration: 300 }}>
-						<p class="workshops-intro">Some ideas members are excited about:</p>
-						<div class="workshop-grid">
-							{#each workshopIdeas as idea}
-								<div class="workshop-card">{idea}</div>
-							{/each}
-						</div>
+					<div class="category-quotes" transition:slide={{ duration: 300 }}>
+						{#each workshopIdeas as idea}
+							<blockquote class="testimonial">
+								<p class="testimonial-quote">{idea}</p>
+							</blockquote>
+						{/each}
 					</div>
 				{/if}
+			</div>
 			</div>
 		</div>
 	</section>
