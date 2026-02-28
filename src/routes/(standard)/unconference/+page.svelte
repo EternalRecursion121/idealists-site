@@ -153,10 +153,6 @@
 				<p>The stance of hope is very much not the stance of heroism. Note that slogging through a field, bloody and bruised, arms shaking around your sword, swiping at fire-breathing dragons is not actually fun! Being a hero is not fun. The stance of hope thus does not require you to be a hero.</p>
 				<p>We believe that formulating this stance of hope, and putting it into practice, will require cognitive variety and exploration. We believe that art is preparadigmatic philosophy is preparadigmatic mathematics is preparadigmatic science is preparadigmatic engineering is preparadigmatic policy. We believe that we should mine insights from all parts of this funnel, put these varied techniques and aesthetics into considered dialogue, and carefully tend to what emerges. The guiding question of the conference will be:</p>
 				<p><strong>What kind of future do we actually want, and how do we get there?</strong></p>
-				<blockquote>
-					<p>Do not go gentle into that good night.<br>Rage, rage against the dying of the light.</p>
-				</blockquote>
-				<p>-Dylan Thomas</p>
 				<details class="full-draft">
 					<summary>Ok, but what does this actually mean?</summary>
 					<div class="full-draft-content">
@@ -790,8 +786,13 @@
 	}
 
 	.workshops-card.support-highlight {
-		border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-		border-width: 1.5px;
+		border: 2px solid var(--accent);
+		background: color-mix(in srgb, var(--accent) 8%, transparent);
+	}
+
+	.workshops-card.support-highlight .section-header {
+		font-size: 0.8rem;
+		letter-spacing: 0.15em;
 	}
 
 	.workshops-toggle {
