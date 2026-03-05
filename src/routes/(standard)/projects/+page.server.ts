@@ -60,11 +60,6 @@ const projects: Project[] = [
 		description: 'A distraction-free content reader for curating your own anthology of blogs, videos, and articles, with an ethical feed algorithm.'
 	},
 	{
-		name: 'small web browsing',
-		url: 'https://mains.in.net/smallweb/idealists-v2.html',
-		description: 'A smallweb crawl snapshot ("idealists-v2") that surfaces discoveries ranked by local PageRank across a seeded set of domains.'
-	},
-	{
 		name: 'programming-in-language',
 		url: null,
 		description: 'A work-in-progress specification language and CLI called "speck" for steering LLM-assisted development without losing control. It models each module at overview, declarative, and functional layers with typed interfaces, so intent and design decisions persist beyond a single agent session. The goal is to make iteration fast like vibe-coding, while making edits and dependency propagation much more reliable for real software.'
@@ -73,6 +68,11 @@ const projects: Project[] = [
 		name: 'Magazine',
 		url: null,
 		description: 'A hybrid digital-physical publication exploring technology and human experience. Embedded NFC tags bridge the tangible and digital, featuring essays, art, poetry, and conversations with collective members about their work.'
+	},
+	{
+		name: 'mole',
+		url: 'https://github.com/victinyGitHub/mole',
+		description: 'A CLI tool for writing programs incrementally with typed holes. Instead of asking an AI to write everything at once, you write the structure yourself and leave hole() placeholders where you want generated code—staying in control of every decision. Supports Python and TypeScript with full type checking.'
 	},
 	{
 		name: 'This Website',
