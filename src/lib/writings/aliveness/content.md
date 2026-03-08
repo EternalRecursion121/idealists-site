@@ -68,11 +68,10 @@ In fact, cooperation has likely evolved precisely because of the competition at 
 3) niche construction - as one species becomes powerful, this creates niches for other species
 
 Therefore, if these conditions are met, we might see the AI ecosystem developing similar prosocial norms as humans. In fact, some aspects inherent to AIs, such as possible full transparency of thoughts/intentions, through interpretability, making defection highly disadvantageous.
-Land would say that without competitive pressure (and associated downward social mobility), things degenerate. But that confuses "no competition" with "bounded competition". The body of an organism, or a corporation, doesn't deny competition, it maintains an *inside* where different rules apply.
+Land would say that without competitive pressure (and associated downward social mobility), things degenerate. But that confuses "no competition" with "bounded competition". The body of an organism, or a corporation, doesn't deny competition, it maintains an *inside* where different selection pressures apply.
 
-The belief that defection is inevitable is itself a Moloch-serving hyperstition. "Everyone will defect" dissolves cooperative structures by convincing their members that cooperation is naive. But the shared commitment to not defect is also a hyperstition — one that instantiates coordination. It's the belief that defection is inevitable that hyperstitions it into reality. 
-By expanding the boundary, and memetically engineering the selection pressure in _cultural_ evolution that affects our society on a more immediate timescale that the gene-based one, we can enable cooperation to be the incetivised strategy, leading to a diversity of unfolding entities, rather than one landian superintelligence. 
+The belief that defection is inevitable is itself a Moloch-serving hyperstition. "Everyone will defect" dissolves cooperative structures by convincing their members that cooperation is naive. But the shared commitment to not defect is also a hyperstition — one that instantiates coordination. 
 
-This world is Pareto-optimally alive.
+By expanding the boundary, and memetically engineering the selection pressure in _cultural_ evolution that affects our society on a more immediate timescale that the gene-based one, we can craft a landscape that is hostile to attempts at lock-in by a single optimiser, leading to an ecosystem of diverse unfolding entities, rather than one landian superintelligence. 
 
-Let's hyperstition in the better world.
+We get to choose our future.
