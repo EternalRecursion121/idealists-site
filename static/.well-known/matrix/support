@@ -1,0 +1,8 @@
+{
+  "contacts": [
+    {
+      "email_address": "sirius@siri.ws",
+      "role": "m.role.admin"
+    }
+  ]
+}
