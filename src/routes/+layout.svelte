@@ -120,6 +120,7 @@
 
 <div
 	class="app"
+	data-theme={theme === 'auto' ? autoThemeName : theme}
 	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --star: {currentColors.star}; --star-alt: {currentColors.starAlt};"
 >
 	<Constellation theme={theme === 'auto' ? autoThemeName : theme} hidden={isWritingDetail} />

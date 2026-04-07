@@ -1,15 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { SvelteSet } from 'svelte/reactivity';
-
-    const headerOptions = [
-        "dna",
-        "architecture",
-        "principles",
-        "demands",
-        "core"
-    ];
-
     const items = [
         {
             title: "utopian",
@@ -36,207 +25,94 @@
             description: "don't compromise on your integrity. don't sell your soul. do everything with love."
         }
     ];
-
-    let currentIndex = $state(0);
-    let expandedItems = new SvelteSet<string>();
-    let measureEl: HTMLElement | null = null;
-    let maxHeight = $state(0);
-
-    function cycleHeader() {
-        currentIndex = (currentIndex + 1) % headerOptions.length;
-    }
-
-    function toggleItem(title: string) {
-        if (expandedItems.has(title)) {
-            expandedItems.delete(title);
-        } else {
-            expandedItems.add(title);
-        }
-    }
-
-    onMount(() => {
-        if (measureEl) {
-            const elements = measureEl.querySelectorAll<HTMLElement>('.measure-item');
-            const heights = Array.from(elements, el => Math.ceil(el.getBoundingClientRect().height));
-            maxHeight = heights.length ? Math.max(...heights) : 0;
-        }
-
-        // Auto-cycle every 10 seconds
-        const interval = setInterval(cycleHeader, 10000);
-        return () => clearInterval(interval);
-    });
 </script>
 
-<div bind:this={measureEl} class="offscreen-measure">
-    {#each headerOptions as option, i (i)}
-        <h2 class="measure-item text-sm uppercase tracking-wide mb-6">our {option}</h2>
-    {/each}
-</div>
-
 <section>
-    <button
-        class="caps-header-button"
-        style={`min-height: ${maxHeight}px`}
-        onclick={cycleHeader}
-    >
-        <h2 class="text-sm uppercase tracking-wide mb-6" style="color: var(--accent)">our {headerOptions[currentIndex]}</h2>
-    </button>
-    <ul class="dna-list">
+    <h2 class="section-header">our dna</h2>
+    <div class="principles-grid">
         {#each items as item (item.title)}
-            {@const isExpanded = expandedItems.has(item.title)}
-            <li class="dna-item">
-                <button
-                    class="dna-title"
-                    class:expanded={isExpanded}
-                    onclick={() => toggleItem(item.title)}
-                >
-                    <span class="title-text">{item.title}</span>
-                    <span class="indicator">{isExpanded ? '−' : '+'}</span>
-                </button>
-                <div class="dna-desc" class:expanded={isExpanded}>
-                    <p>{item.description}</p>
-                </div>
-            </li>
+            <div class="principle-card">
+                <span class="principle-title">{item.title}</span>
+                <p class="principle-desc">{item.description}</p>
+            </div>
         {/each}
-    </ul>
+    </div>
 </section>
 
 <style>
-    .caps-header-button {
-        display: block;
-        font-size: 1.25rem;
-        line-height: 1.5;
-        max-width: 50ch;
-        margin-bottom: 1.5rem;
-        opacity: 0.85;
-        cursor: pointer;
-        background: none;
-        border: none;
-        color: inherit;
-        font-family: inherit;
-        text-align: left;
-        padding: 0;
-    }
-
-    .caps-header-button:hover {
-        opacity: 1;
-        font-style: italic;
-    }
-
-    .caps-header-button h2 {
+    .section-header {
         font-family: var(--font-sans);
         font-weight: bold;
-        letter-spacing: .2em;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--accent);
+        margin-bottom: 1rem;
     }
 
-    .offscreen-measure {
-        position: absolute;
-        visibility: hidden;
-        pointer-events: none;
-        height: 0;
+    .principles-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 480px) {
+        .principles-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .principle-card {
+        padding: 1rem 1.25rem;
+        position: relative;
+        background: color-mix(in srgb, var(--text) 4%, transparent);
+        border-radius: 8px;
+        transition: background 0.3s, transform 0.2s;
         overflow: hidden;
     }
 
-    .offscreen-measure h2 {
-        font-family: var(--font-sans);
-        font-weight: bold;
-
-    }
-
-    .dna-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .dna-item {
-        position: relative;
-        padding-left: 1rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .dna-item::before {
+    .principle-card::before {
         content: '';
         position: absolute;
-        left: 0;
-        top: 0.5rem;
-        bottom: 0.5rem;
-        width: 2px;
-        background: var(--accent);
-        opacity: 0.15;
-        transition: opacity 0.2s ease;
+        inset: 0;
+        border-radius: 8px;
+        padding: 1px;
+        background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--accent) 30%, transparent),
+            transparent 60%
+        );
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s;
     }
 
-    .dna-item:hover::before {
-        opacity: 0.4;
-    }
-
-    .dna-item:has(.expanded)::before {
+    .principle-card:hover::before {
         opacity: 1;
     }
 
-    .dna-title {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.6rem 0;
-        background: none;
-        border: none;
-        color: inherit;
-        font-family: inherit;
-        font-size: 1.15rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-align: left;
-        transition: transform 0.15s ease;
+    .principle-card:hover {
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        transform: translateY(-1px);
     }
 
-    .dna-title:hover {
-        color: var(--accent);
-        transform: translateX(4px);
-    }
-
-    .dna-title.expanded .title-text {
-        font-style: italic;
-        color: var(--accent);
-    }
-
-    .indicator {
-        font-weight: 300;
-        font-size: 1rem;
-        color: var(--accent);
-        opacity: 0.5;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .dna-title:hover .indicator {
-        opacity: 1;
-    }
-
-    .dna-title.expanded .indicator {
-        opacity: 1;
-        transform: rotate(45deg);
-    }
-
-    .dna-desc {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-    }
-
-    .dna-desc.expanded {
-        max-height: 10rem;
-    }
-
-    .dna-desc > p {
-        margin: 0;
-        padding: 0 0 1rem 0;
-        max-width: 50ch;
+    .principle-title {
+        display: block;
         font-family: var(--font-serif);
-        font-size: 0.95rem;
+        font-style: italic;
+        font-size: 1.15rem;
+        margin-bottom: 0.35rem;
+        color: var(--heading);
+    }
+
+    .principle-desc {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
         line-height: 1.5;
-        color: var(--text);
+        opacity: 0.55;
     }
 </style>
-

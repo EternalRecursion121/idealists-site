@@ -1,35 +1,7 @@
 <script lang="ts">
-    import DNA from '$lib/components/DNA.svelte';
     import Definition from '$lib/components/Definition.svelte';
-    import Logo from '$lib/components/Logo.svelte';
+    import DNA from '$lib/components/DNA.svelte';
     import BottomNav from '$lib/components/BottomNav.svelte';
-
-    // Star rotation physics
-    let starRotation = $state(0);
-    let starVelocity = $state(0);
-    let isHovering = $state(false);
-
-    // Star momentum effect
-    $effect(() => {
-        let frameId: number;
-        const animate = () => {
-            // Accelerate while hovering
-            if (isHovering) {
-                starVelocity += 0.5;
-                starVelocity = Math.min(starVelocity, 15); // max speed
-            } else {
-                // Apply friction when not hovering
-                starVelocity *= 0.96;
-                if (Math.abs(starVelocity) < 0.05) {
-                    starVelocity = 0;
-                }
-            }
-            starRotation += starVelocity;
-            frameId = requestAnimationFrame(animate);
-        };
-        frameId = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(frameId);
-    });
 </script>
 
 <svelte:head>
@@ -37,33 +9,59 @@
 </svelte:head>
 
 <div class="page-container">
-
-    <div class="word-header">
-        <div class="ideal-title">
-            <span>THE IDEALISTS <span class="nowrap">C<span
-                class="logo-wrapper"
-                onmouseenter={() => isHovering = true}
-                onmouseleave={() => isHovering = false}
-            ><Logo size={48} rotation={starRotation} /></span>LLECTIVE</span></span>
+    <div class="hero">
+        <div class="hero-logo">
+            <img src="/flower-logo.png" alt="The Idealists Collective" class="flower" />
+        </div>
+        <div class="hero-text">
+            <h1 class="title">THE IDEALISTS COLLECTIVE</h1>
+            <p class="tagline">a community of philosophers, artists and technologists who believe the future is worth fighting for</p>
         </div>
     </div>
 
-    <section class="intro-section">
-        <p class="intro-text">we are philosophers, artists, and technologists who believe the future is worth fighting for. we will not be satisfied with any direction other than towards utopia. we are, first and foremost, <i style="color: var(--accent)">idealists</i>.</p>
-    </section>
+    <div class="main-grid">
+        <div class="left-col">
+            <Definition />
 
-    <!-- Definition hero -->
-    <Definition />
+            <nav class="link-grid">
+                <a href="/writings" class="link-card">
+                    <span class="card-title">writings</span>
+                    <span class="card-desc">essays on technology, philosophy, and the future we want to build</span>
+                </a>
+                <a href="/projects" class="link-card">
+                    <span class="card-title">projects</span>
+                    <span class="card-desc">tools and experiments born from our principles</span>
+                </a>
+                <a href="/library" class="link-card">
+                    <span class="card-title">library</span>
+                    <span class="card-desc">books, talks, and resources that shape our thinking</span>
+                </a>
+                <a href="/members" class="link-card">
+                    <span class="card-title">members</span>
+                    <span class="card-desc">the people behind the collective</span>
+                </a>
+                <a href="/vibes" class="link-card">
+                    <span class="card-title">vibes</span>
+                    <span class="card-desc">visual fragments of the world we're reaching for</span>
+                </a>
+                <a href="/join" class="link-card accent">
+                    <span class="card-title">join us</span>
+                    <span class="card-desc">bring your idealism — we're better together</span>
+                </a>
+            </nav>
+        </div>
 
-    <!-- DNA -->
-    <DNA />
+        <div class="right-col">
+            <DNA />
+        </div>
+    </div>
 
     <BottomNav current="home" />
 </div>
 
 <style>
     .page-container {
-        max-width: 48rem;
+        max-width: 64rem;
         margin: 0 auto;
         padding: 1rem;
         min-height: 100vh;
@@ -71,85 +69,160 @@
         flex-direction: column;
     }
 
-    .word-header {
+    /* Hero — logo + title side by side */
+    .hero {
         display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
+        align-items: center;
+        gap: 1.5rem;
         margin-top: 2.5rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
 
     @media (min-width: 640px) {
-        .word-header {
-            margin-top: 0;
+        .hero {
+            margin-top: 1rem;
+            gap: 2rem;
         }
     }
 
-    .ideal-title {
+    .hero-logo {
+        flex-shrink: 0;
+    }
+
+    .flower {
+        width: 60px;
+        height: 60px;
+        image-rendering: pixelated;
+    }
+
+    :global([data-theme="night"]) .flower,
+    :global([data-theme="twilight"]) .flower,
+    :global([data-theme="forest"]) .flower {
+        filter: invert(1);
+    }
+
+    @media (min-width: 640px) {
+        .flower {
+            width: 90px;
+            height: 90px;
+        }
+    }
+
+    .hero-text {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
-        font-family: var(--font-sans);
-        font-weight: bold;
-        font-size: 2rem;
-        letter-spacing: .05em;
-        color: var(--heading);
     }
 
-    .logo-wrapper {
-        display: inline-block;
-        cursor: pointer;
-        user-select: none;
-        vertical-align: middle;
-        margin: 0 -0.1em;
-    }
-
-    .nowrap {
-        white-space: nowrap;
-    }
-
-    .intro-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .intro-text {
+    .title {
         font-family: var(--font-serif);
+        font-weight: 400;
+        font-size: 1.75rem;
+        letter-spacing: 0.08em;
+        color: var(--heading);
+        margin: 0;
+        line-height: 1.15;
+    }
+
+    @media (min-width: 640px) {
+        .title {
+            font-size: 2.5rem;
+        }
+    }
+
+    .tagline {
+        font-family: var(--font-serif);
+        font-size: 0.95rem;
+        opacity: 0.65;
+        margin: 0;
+        font-style: italic;
+    }
+
+    @media (min-width: 640px) {
+        .tagline {
+            font-size: 1.1rem;
+        }
+    }
+
+    /* Two-column main grid */
+    .main-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .main-grid {
+            flex-direction: row;
+            gap: 3rem;
+        }
+    }
+
+    .left-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .right-col {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Navigation grid */
+    .link-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+
+    .link-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 0.85rem 1rem;
+        border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+        border-radius: 6px;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    }
+
+    .link-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        background: color-mix(in srgb, var(--accent) 5%, transparent);
+    }
+
+    .link-card.accent {
+        border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    .link-card.accent:hover {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+
+    .card-title {
+        font-family: var(--font-serif);
+        font-style: italic;
+        font-weight: 400;
         font-size: 1.1rem;
-        line-height: 1.6;
-        opacity: 0.85;
     }
 
-    @media (max-width: 640px) {
-        .intro-text {
-            font-size: 1rem;
-        }
+    .card-desc {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        line-height: 1.45;
+        opacity: 0.5;
     }
 
-    @media (max-width: 400px) {
-        .ideal-title {
-            font-size: 1.5rem;
-        }
-
-        .logo-wrapper :global(svg) {
-            width: 36px;
-            height: 36px;
-        }
-    }
-
-    /* Desktop */
     @media (min-width: 640px) {
         .page-container {
             padding: 2rem 1.5rem;
         }
-
-        .ideal-title {
-            font-size: 3rem;
-        }
-
-        .logo-wrapper :global(svg) {
-            width: 72px;
-            height: 72px;
-        }
     }
-
 </style>
