@@ -90,8 +90,8 @@
     }
 
     .flower {
-        width: 60px;
-        height: 60px;
+        width: 100px;
+        height: 100px;
         image-rendering: pixelated;
     }
 
@@ -103,8 +103,8 @@
 
     @media (min-width: 640px) {
         .flower {
-            width: 90px;
-            height: 90px;
+            width: 120px;
+            height: 120px;
         }
     }
 
