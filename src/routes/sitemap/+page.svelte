@@ -183,17 +183,17 @@
 	}
 
 	function getSize(page: PageNode): string {
-		if (page.isWriting) return '0.75rem'; // writings are smaller
+		if (page.isWriting) return '0.45rem'; // writings are smaller
 		const count = getConnectionCount(page);
-		// Scale from 1rem (0 connections) to 2rem (10+ connections)
-		const size = Math.min(2, 1 + count * 0.12);
+		// Scale from 0.6rem (0 connections) to 1.2rem (10+ connections)
+		const size = Math.min(1.2, 0.6 + count * 0.072);
 		return `${size}rem`;
 	}
 
 	function getMobileSize(page: PageNode): string {
-		if (page.isWriting) return '0.6rem';
+		if (page.isWriting) return '0.36rem';
 		const count = getConnectionCount(page);
-		const size = Math.min(1.5, 0.85 + count * 0.08);
+		const size = Math.min(0.9, 0.51 + count * 0.048);
 		return `${size}rem`;
 	}
 

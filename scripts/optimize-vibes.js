@@ -12,6 +12,7 @@ const WEBP_QUALITY = 80;
 const files = readdirSync(vibesDir).filter((f) =>
 	/\.(png|jpg|jpeg|gif)$/i.test(f)
 );
+const BACKGROUND_FINE_GRAINEDNESS = 1.0; // adjust this value to change the fine/coarse grainedness
 
 if (files.length === 0) {
 	console.log('No images to optimize (all already WebP)');

@@ -6,7 +6,7 @@
         },
         {
             title: "autonomous",
-            description: "you control your tools, your data, your attention. decisions happen at the level where they matter."
+            description: "you control your tools, your data, your attention. you should have the power to build the world you want to live in."
         },
         {
             title: "playful",
@@ -14,15 +14,15 @@
         },
         {
             title: "alive",
-            description: "dynamic systems over static entities. things that grow, adapt, merge, and die when they need to."
+            description: "we believe in making things that grow, adapt, breathe, have imperfections, and die, when they need to."
         },
         {
             title: "cooperative",
-            description: "we cannot succeed alone. nor would we want to."
+            description: "we cannot succeed alone, nor would we want to!"
         },
         {
             title: "loving",
-            description: "don't compromise on your integrity. don't sell your soul. do everything with love."
+            description: "don't compromise on your integrity. don't sell your soul. do everything with love <3"
         }
     ];
 </script>
@@ -41,7 +41,7 @@
 
 <style>
     .section-header {
-        font-family: var(--font-sans);
+        font-family: var(--font-display);
         font-weight: bold;
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -56,53 +56,30 @@
         gap: 0.75rem;
     }
 
-    @media (min-width: 480px) {
+    @media (min-width: 768px) {
         .principles-grid {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .principles-grid {
+            grid-template-columns: repeat(6, 1fr);
         }
     }
 
     .principle-card {
         padding: 1rem 1.25rem;
         position: relative;
-        background: color-mix(in srgb, var(--text) 4%, transparent);
-        border-radius: 8px;
-        transition: background 0.3s, transform 0.2s;
+        border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+        border-radius: 0;
         overflow: hidden;
-    }
-
-    .principle-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 8px;
-        padding: 1px;
-        background: linear-gradient(
-            135deg,
-            color-mix(in srgb, var(--accent) 30%, transparent),
-            transparent 60%
-        );
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .principle-card:hover::before {
-        opacity: 1;
-    }
-
-    .principle-card:hover {
-        background: color-mix(in srgb, var(--accent) 8%, transparent);
-        transform: translateY(-1px);
     }
 
     .principle-title {
         display: block;
-        font-family: var(--font-serif);
-        font-style: italic;
+        font-family: 'Texturina', 'IM Fell DW Pica', 'Resistance', var(--font-display);
+        font-weight: 400;
         font-size: 1.15rem;
         margin-bottom: 0.35rem;
         color: var(--heading);
@@ -110,9 +87,10 @@
 
     .principle-desc {
         margin: 0;
-        font-family: var(--font-mono);
+        font-family: 'Sligoil Micro Medium', var(--font-grotesk);
         font-size: 0.7rem;
         line-height: 1.5;
-        opacity: 0.55;
+        opacity: 0.6;
+        text-transform: lowercase;
     }
 </style>

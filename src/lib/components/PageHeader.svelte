@@ -21,6 +21,7 @@
 	}
 
 	h1 {
+		font-family: var(--font-display);
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin-bottom: 1rem;

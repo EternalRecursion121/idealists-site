@@ -438,7 +438,7 @@
 	}
 
 	.hero-title {
-		font-family: var(--font-serif);
+		font-family: var(--font-display);
 		font-size: clamp(2.5rem, 8vw, 5rem);
 		font-weight: 400;
 		line-height: 1.1;
@@ -628,7 +628,7 @@
 	}
 
 	.event-name {
-		font-family: var(--font-serif);
+		font-family: var(--font-display);
 		font-size: 1.5rem;
 		font-weight: 400;
 		margin: 0.25rem 0;
@@ -727,7 +727,7 @@
 	}
 
 	.capsule-title {
-		font-family: var(--font-serif);
+		font-family: var(--font-display);
 		font-size: 1.5rem;
 		font-weight: 400;
 		margin: 0;

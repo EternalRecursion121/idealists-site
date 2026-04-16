@@ -1,2 +1,41 @@
 @import 'tailwindcss';
 
+@font-face {
+	font-family: 'Resistance';
+	src: url('/fonts/resistance.woff2') format('woff2'),
+	     url('/fonts/resistance.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Sligoil Micro Medium';
+	src: url('/fonts/sligoil-micromedium.woff2') format('woff2'),
+	     url('/fonts/sligoil-micromedium.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Sligoil Micro';
+	src: url('/fonts/sligoil-micro.woff2') format('woff2'),
+	     url('/fonts/sligoil-micro.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Diamond Grotesk';
+	src: url('/fonts/DiamondGrotesk-VF.ttf') format('truetype-variations'),
+	     url('/fonts/DiamondGrotesk-VF.ttf') format('truetype');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+html {
+	overflow-x: clip;
+}

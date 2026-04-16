@@ -1,7 +1,92 @@
 <script lang="ts">
-    import Definition from '$lib/components/Definition.svelte';
+    import { onMount } from 'svelte';
     import DNA from '$lib/components/DNA.svelte';
     import BottomNav from '$lib/components/BottomNav.svelte';
+    import Definition from '$lib/components/Definition.svelte';
+    import SiteMap from '$lib/components/SiteMap.svelte';
+    import type { PageData } from './$types';
+
+    let { data }: { data: PageData } = $props();
+
+    let definitionRevealed = $state(false);
+    const revealDefinition = () => { definitionRevealed = true; };
+
+    let titleEl: HTMLElement | undefined = $state();
+    let idealistsEl: HTMLElement | undefined = $state();
+    let definitionTopOffset = $state(0);
+
+    function measureDefinitionOffset() {
+        if (!idealistsEl || !titleEl) return;
+        const idealistsRect = idealistsEl.getBoundingClientRect();
+        const titleRect = titleEl.getBoundingClientRect();
+        definitionTopOffset = idealistsRect.top - titleRect.top;
+    }
+
+    onMount(() => {
+        measureDefinitionOffset();
+        const ro = new ResizeObserver(measureDefinitionOffset);
+        if (titleEl) ro.observe(titleEl);
+        window.addEventListener('resize', measureDefinitionOffset);
+        return () => {
+            ro.disconnect();
+            window.removeEventListener('resize', measureDefinitionOffset);
+        };
+    });
+
+    type Segment =
+        | { kind: 'text'; value: string }
+        | { kind: 'bracket'; ruleId: string }
+        | { kind: 'cycle'; index: number };
+
+    const cycleOptions = [
+        'worth fighting for',
+        'beautiful',
+        'ours to define'
+    ];
+
+    const expansions: Record<string, Segment[]> = {
+        a: [
+            { kind: 'text', value: 'philosophers ' },
+            { kind: 'bracket', ruleId: 'b' },
+            { kind: 'text', value: ' who believe that ' },
+            { kind: 'bracket', ruleId: 'c' }
+        ],
+        b: [
+            { kind: 'text', value: 'and artists ' },
+            { kind: 'bracket', ruleId: 'd' }
+        ],
+        c: [
+            { kind: 'text', value: 'the future ' },
+            { kind: 'bracket', ruleId: 'e' }
+        ],
+        d: [{ kind: 'text', value: 'and technologists' }]
+    };
+
+    let segments = $state<Segment[]>([
+        { kind: 'text', value: 'a community of <br>&nbsp;&nbsp;philosophers, <br>&nbsp;&nbsp;&nbsp;&nbsp;artists, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and technologists<br>who believe that the future is<br>' },
+        { kind: 'bracket', ruleId: 'e' }
+    ]);
+
+    function expand(index: number, ruleId: string) {
+        if (ruleId === 'e') {
+            segments = [
+                ...segments.slice(0, index),
+                { kind: 'cycle', index: 0 },
+                ...segments.slice(index + 1)
+            ];
+            return;
+        }
+        const exp = expansions[ruleId];
+        if (!exp) return;
+        segments = [...segments.slice(0, index), ...exp, ...segments.slice(index + 1)];
+    }
+
+    function cycle(index: number) {
+        const seg = segments[index];
+        if (seg.kind !== 'cycle') return;
+        const next = (seg.index + 1) % cycleOptions.length;
+        segments = segments.map((s, i) => (i === index ? { kind: 'cycle', index: next } : s));
+    }
 </script>
 
 <svelte:head>
@@ -9,50 +94,67 @@
 </svelte:head>
 
 <div class="page-container">
-    <div class="hero">
-        <div class="hero-logo">
-            <img src="/flower-logo.png" alt="The Idealists Collective" class="flower" />
+    <div class="hero-grid">
+        <div class="title-col">
+            <h1 class="title" bind:this={titleEl}>
+                <img class="flower-underlay" src="/flower-logo.png" alt="" aria-hidden="true" />
+                <span>THE</span>
+                <span bind:this={idealistsEl} class="with-footnote"
+                    >IDEALISTS<button
+                        type="button"
+                        class="footnote"
+                        aria-label="what is this?"
+                        onmouseenter={revealDefinition}
+                        onfocus={revealDefinition}
+                        onclick={revealDefinition}>&#123;?&#125;</button
+                    ></span
+                >
+                <span>COLLECTIVE</span>
+            </h1>
+
+            <p class="community-text">
+                {#each segments as seg, i (i)}
+                    {#if seg.kind === 'text'}<span>{@html seg.value}</span>{:else if seg.kind === 'bracket'}<button
+                            type="button"
+                            class="bracket"
+                            aria-label="reveal more"
+                            onclick={() => expand(i, seg.ruleId)}>&#123;?&#125;</button
+                        >{:else}<button
+                            type="button"
+                            class="bracket filled"
+                            aria-label="cycle phrase"
+                            onclick={() => cycle(i)}>&#123;{cycleOptions[seg.index]}&#125;</button
+                        >{/if}
+                {/each}
+            </p>
         </div>
-        <div class="hero-text">
-            <h1 class="title">THE IDEALISTS COLLECTIVE</h1>
-            <p class="tagline">a community of philosophers, artists and technologists who believe the future is worth fighting for</p>
+
+        <div
+            class="definition-col"
+            class:revealed={definitionRevealed}
+            style="--def-top: {definitionTopOffset}px;"
+        >
+            {#if definitionRevealed}
+                <Definition />
+            {/if}
         </div>
     </div>
 
     <div class="main-grid">
-        <div class="left-col">
-            <Definition />
-
-            <nav class="link-grid">
-                <a href="/writings" class="link-card">
-                    <span class="card-title">writings</span>
-                    <span class="card-desc">essays on technology, philosophy, and the future we want to build</span>
-                </a>
-                <a href="/projects" class="link-card">
-                    <span class="card-title">projects</span>
-                    <span class="card-desc">tools and experiments born from our principles</span>
-                </a>
-                <a href="/library" class="link-card">
-                    <span class="card-title">library</span>
-                    <span class="card-desc">books, talks, and resources that shape our thinking</span>
-                </a>
-                <a href="/members" class="link-card">
-                    <span class="card-title">members</span>
-                    <span class="card-desc">the people behind the collective</span>
-                </a>
-                <a href="/vibes" class="link-card">
-                    <span class="card-title">vibes</span>
-                    <span class="card-desc">visual fragments of the world we're reaching for</span>
-                </a>
-                <a href="/join" class="link-card accent">
-                    <span class="card-title">join us</span>
-                    <span class="card-desc">bring your idealism — we're better together</span>
-                </a>
-            </nav>
+        <div class="dna-row">
+            <DNA />
         </div>
 
-        <div class="right-col">
-            <DNA />
+        <aside class="random-page">
+            <a href={data.randomRoute}>here</a> is a random page from this site, just for you &lt;3
+        </aside>
+
+        <div class="index-col">
+            <SiteMap
+                pages={data.mainNavPages}
+                connections={data.mainNavConnections}
+                height={760}
+            />
         </div>
     </div>
 
@@ -61,7 +163,7 @@
 
 <style>
     .page-container {
-        max-width: 64rem;
+        max-width: 72rem;
         margin: 0 auto;
         padding: 1rem;
         min-height: 100vh;
@@ -69,155 +171,182 @@
         flex-direction: column;
     }
 
-    /* Hero — logo + title side by side */
-    .hero {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        margin-top: 2.5rem;
-        margin-bottom: 2rem;
+    /* Hero — two columns: giant title + interactive community text */
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 3.5rem;
+        align-items: start;
     }
 
-    @media (min-width: 640px) {
-        .hero {
-            margin-top: 1rem;
-            gap: 2rem;
+    @media (min-width: 1280px) {
+        .hero-grid {
+            grid-template-columns: 1.2fr 1fr;
+            gap: 6rem;
+            margin-top: 3.5rem;
         }
     }
 
-    .hero-logo {
-        flex-shrink: 0;
-    }
-
-    .flower {
-        width: 100px;
-        height: 100px;
-        image-rendering: pixelated;
-    }
-
-    :global([data-theme="night"]) .flower,
-    :global([data-theme="twilight"]) .flower,
-    :global([data-theme="forest"]) .flower {
-        filter: invert(1);
-    }
-
-    @media (min-width: 640px) {
-        .flower {
-            width: 120px;
-            height: 120px;
-        }
-    }
-
-    .hero-text {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
+    .title-col {
+        text-align: left;
     }
 
     .title {
-        font-family: var(--font-serif);
+        font-family: 'Texturina', 'IM Fell DW Pica', 'Resistance', var(--font-display);
         font-weight: 400;
-        font-size: 1.75rem;
-        letter-spacing: 0.08em;
+        font-size: clamp(4rem, 11vw, 6rem);
+        line-height: 1;
+        letter-spacing: 0.01em;
         color: var(--heading);
         margin: 0;
-        line-height: 1.15;
-    }
-
-    @media (min-width: 640px) {
-        .title {
-            font-size: 2.5rem;
-        }
-    }
-
-    .tagline {
-        font-family: var(--font-serif);
-        font-size: 0.95rem;
-        opacity: 0.65;
-        margin: 0;
-        font-style: italic;
-    }
-
-    @media (min-width: 640px) {
-        .tagline {
-            font-size: 1.1rem;
-        }
-    }
-
-    /* Two-column main grid */
-    .main-grid {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        position: relative;
+        isolation: isolate;
+    }
+
+    .title span {
+        display: block;
+        position: relative;
+        z-index: 1;
+    }
+
+    .flower-underlay {
+        position: absolute;
+        top: 0.5em;
+        left: 0.33em;
+        width: 5em;
+        height: 5em;
+        transform: translate(-50%, -50%);
+        opacity: 0.22;
+        pointer-events: none;
+        user-select: none;
+        z-index: 0;
+    }
+
+    .community-text {
+        font-family: 'Sligoil Micro Medium', var(--font-grotesk);
+        font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+        line-height: 1.55;
+        color: var(--text);
+        margin: 1.5rem 0 0 0;
+        text-transform: lowercase;
+        font-weight: 400;
+    }
+
+    .with-footnote {
+        position: relative;
+        display: inline-block;
+        width: fit-content;
+        align-self: flex-start;
+    }
+
+    .footnote {
+        position: absolute;
+        left: 100%;
+        top: 60%;
+        font-family: var(--font-body);
+        font-size: 1rem;
+        line-height: 1;
+        margin-left: 0.35rem;
+        padding: 0;
+        background: none;
+        border: none;
+        color: var(--accent);
+        cursor: help;
+        opacity: 0.85;
+        transition: opacity 0.2s;
+        white-space: nowrap;
+    }
+
+    @media (min-width: 640px) {
+        .footnote {
+            font-size: 1.2rem;
+        }
+    }
+
+    .footnote:hover,
+    .footnote:focus-visible {
+        opacity: 1;
+        outline: none;
+    }
+
+    .definition-col {
+        align-self: start;
+        min-height: 0;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .definition-col.revealed {
+        opacity: 1;
+    }
+
+    @media (min-width: 1280px) {
+        .definition-col {
+            padding-top: var(--def-top, 0);
+        }
+    }
+
+    .bracket {
+        font: inherit;
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        color: var(--accent);
+        cursor: pointer;
+        text-transform: lowercase;
+    }
+
+    .bracket:hover {
+        color: var(--heading);
+    }
+
+    .bracket.filled {
+        color: var(--heading);
+    }
+
+    /* Main grid — DNA row on top, index below, both full width */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        margin-top: 0;
         margin-bottom: 2rem;
     }
 
-    @media (min-width: 768px) {
-        .main-grid {
-            flex-direction: row;
-            gap: 3rem;
-        }
-    }
-
-    .left-col {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .right-col {
-        flex: 1;
+    .dna-row {
         min-width: 0;
     }
 
-    /* Navigation grid */
-    .link-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.6rem;
+    .index-col {
+        min-width: 0;
     }
 
-    .link-card {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-        padding: 0.85rem 1rem;
-        border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-        border-radius: 6px;
+    .random-page {
+        font-family: var(--font-body);
+        font-size: 0.8rem;
+        line-height: 1.55;
+        opacity: 0.7;
+        color: var(--text);
+        text-transform: lowercase;
+        margin: -1rem 0 0;
+        text-align: right;
+    }
+
+    .random-page a {
+        color: var(--accent);
         text-decoration: none;
-        color: inherit;
-        transition: border-color 0.2s, transform 0.15s, background 0.2s;
+        border-bottom: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+        transition: color 0.2s, border-color 0.2s;
     }
 
-    .link-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-2px);
-        background: color-mix(in srgb, var(--accent) 5%, transparent);
-    }
-
-    .link-card.accent {
-        border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-    }
-
-    .link-card.accent:hover {
-        border-color: var(--accent);
-        background: color-mix(in srgb, var(--accent) 10%, transparent);
-    }
-
-    .card-title {
-        font-family: var(--font-serif);
-        font-style: italic;
-        font-weight: 400;
-        font-size: 1.1rem;
-    }
-
-    .card-desc {
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        line-height: 1.45;
-        opacity: 0.5;
+    .random-page a:hover {
+        color: var(--heading);
+        border-bottom-color: var(--heading);
     }
 
     @media (min-width: 640px) {

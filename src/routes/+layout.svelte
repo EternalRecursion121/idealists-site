@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './layout.css';
-	import Constellation from '$lib/components/Constellation.svelte';
 	import FloatingLlama from '$lib/components/FloatingLlama.svelte';
 	import NavOverlay from '$lib/components/NavOverlay.svelte';
 	import { browser } from '$app/environment';
@@ -20,14 +19,11 @@
 	// Hide nav on index pages
 	let showNav = $derived(!$page.url.pathname.startsWith('/index'));
 
-	// Hide constellation on individual writing pages (not the /writings list)
-	let isWritingDetail = $derived(/^\/writings\/.+/.test($page.url.pathname));
-
 	const themes = {
-		dawn: { bg: '#FFF8F0', text: '#4A3728', accent: '#E07850', heading: '#C86840', star: '#FFD0A0', starAlt: '#FFA070' },
-		night: { bg: '#08090d', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', star: '#000000', starAlt: '#000000' },
-		twilight: { bg: '#141018', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', star: '#ffe8a0', starAlt: '#ffe8a0' },
-		forest: { bg: '#0e1512', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', star: '#b8ff7a', starAlt: '#b8ff7a' }
+		dawn: { bg: '#FFFBF3', text: '#4A3728', accent: '#E07850', heading: '#C86840', noise: 'rgba(232,118,60,1)' },
+		night: { bg: '#04050a', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', noise: 'rgba(175,158,235,1)' },
+		twilight: { bg: '#0b0812', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', noise: 'rgba(225,150,150,1)' },
+		forest: { bg: '#050b08', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', noise: 'rgba(160,240,100,1)' }
 	};
 
 	type ThemeName = 'dawn' | 'night' | 'twilight' | 'forest' | 'auto';
@@ -92,11 +88,9 @@
 		return () => clearInterval(interval);
 	});
 
-	let currentColors = $derived(theme === 'auto' ? themes[autoThemeName] : themes[theme]);
+	let activeTheme = $derived<BaseThemeName>(theme === 'auto' ? autoThemeName : theme);
+	let currentColors = $derived(themes[activeTheme]);
 
-	$effect(() => {
-		document.body.style.background = currentColors.bg;
-	});
 
 	$effect(() => {
 		if (browser) {
@@ -115,15 +109,20 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=IM+Fell+DW+Pica:ital@0;1&family=Manrope:wght@200..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Texturina:ital,opsz,wght@0,12..72,100..900;1,12..72,100..900&display=swap" rel="stylesheet" />
 </svelte:head>
 
 <div
+	class="bg-noise"
+	aria-hidden="true"
+	style="--bg: {currentColors.bg}; --noise: {currentColors.noise};"
+></div>
+
+<div
 	class="app"
-	data-theme={theme === 'auto' ? autoThemeName : theme}
-	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --star: {currentColors.star}; --star-alt: {currentColors.starAlt};"
+	data-theme={activeTheme}
+	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --noise: {currentColors.noise};"
 >
-	<Constellation theme={theme === 'auto' ? autoThemeName : theme} hidden={isWritingDetail} />
 	<FloatingLlama />
 
 	{#if showNav && data.navPages}
@@ -194,15 +193,50 @@
 	}
 
 	.app {
-		--font-serif: 'EB Garamond', serif;
-		--font-sans: 'Manrope', sans-serif;
+		--font-body: 'Sligoil Micro Medium', 'Diamond Grotesk', sans-serif;
+		--font-title: 'Texturina', 'IM Fell DW Pica', 'Resistance', serif;
+		--font-serif: var(--font-body);
+		--font-sans: var(--font-body);
+		--font-grotesk: var(--font-body);
+		--font-display: var(--font-title);
 		--font-mono: 'Source Code Pro', monospace;
-		font-family: var(--font-serif);
+		font-family: var(--font-body);
 		min-height: 100vh;
 		padding: 1rem;
 		background: transparent;
 		color: var(--text);
 		transition: color 0.3s;
+	}
+
+	.bg-noise {
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+		background-color: var(--bg);
+		background-image:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%),
+			url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.26' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+		background-size: 100% 100%, 360px 360px;
+		background-repeat: no-repeat, repeat;
+		background-blend-mode: screen, overlay;
+	}
+
+	.bg-noise::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		filter: contrast(170%) brightness(1000%);
+		background:
+			url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+		background-size: 360px 360px;
+		background-repeat: repeat;
+		opacity: 0.18;
+	}
+
+	.app {
+		position: relative;
+		z-index: 1;
 	}
 
 	@media (min-width: 640px) {

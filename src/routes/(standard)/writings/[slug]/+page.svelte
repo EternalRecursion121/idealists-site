@@ -234,6 +234,19 @@
 		margin-bottom: 2rem;
 	}
 
+	.header-centered h1 {
+		font-family: var(--font-display);
+	}
+
+	.writing-content :global(h1),
+	.writing-content :global(h2),
+	.writing-content :global(h3),
+	.writing-content :global(h4),
+	.writing-content :global(h5),
+	.writing-content :global(h6) {
+		font-family: var(--font-display);
+	}
+
 	.separator {
 		margin-top: 1.5rem;
 		letter-spacing: 0.2em;
