@@ -1,6 +1,19 @@
 <script lang="ts">
+    import Roots from './Roots.svelte';
+
     type Segment = { text: string; highlight?: boolean };
     type Item = { title: string; segments: Segment[] };
+
+    let aliveHovered = $state(false);
+    let aliveTapped = $state(false);
+    let aliveActive = $derived(aliveHovered || aliveTapped);
+    let accentColor = $state('');
+    let aliveCardEl: HTMLDivElement | undefined = $state();
+
+    function readAccentColor() {
+        if (!aliveCardEl) return;
+        accentColor = getComputedStyle(aliveCardEl).getPropertyValue('--accent').trim();
+    }
 
     const items: Item[] = [
         {
@@ -71,14 +84,35 @@
     <h2 class="section-header">our dna</h2>
     <div class="principles-grid">
         {#each items as item (item.title)}
-            <div class="principle-card">
-                <span class="principle-title">{item.title}</span>
-                <p class="principle-desc"
-                    >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
-                                >{seg.text}</span
-                            >{:else}{seg.text}{/if}{/each}</p
+            {#if item.title === 'alive'}
+                <div
+                    class="principle-card alive-card"
+                    bind:this={aliveCardEl}
+                    onmouseenter={() => { aliveHovered = true; readAccentColor(); }}
+                    onmouseleave={() => { aliveHovered = false; }}
+                    onclick={() => { aliveTapped = !aliveTapped; readAccentColor(); }}
+                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { aliveTapped = !aliveTapped; readAccentColor(); } }}
+                    role="button"
+                    tabindex="0"
                 >
-            </div>
+                    <span class="principle-title">{item.title}</span>
+                    <p class="principle-desc"
+                        >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
+                                    >{seg.text}</span
+                                >{:else}{seg.text}{/if}{/each}</p
+                    >
+                    <Roots active={aliveActive} color={accentColor} />
+                </div>
+            {:else}
+                <div class="principle-card">
+                    <span class="principle-title">{item.title}</span>
+                    <p class="principle-desc"
+                        >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
+                                    >{seg.text}</span
+                                >{:else}{seg.text}{/if}{/each}</p
+                    >
+                </div>
+            {/if}
         {/each}
     </div>
 </section>
@@ -121,11 +155,13 @@
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .alive-card {
+        overflow: visible;
+        cursor: pointer;
+    }
+
     .principle-card:hover {
         border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-        box-shadow:
-            0 0 18px color-mix(in srgb, var(--accent) 28%, transparent),
-            inset 0 0 24px color-mix(in srgb, var(--accent) 6%, transparent);
     }
 
     .principle-title {
@@ -138,10 +174,6 @@
         transition: color 0.3s ease, text-shadow 0.3s ease;
     }
 
-    .principle-card:hover .principle-title {
-        color: var(--accent);
-        text-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
-    }
 
     .principle-desc {
         margin: 0;

@@ -378,22 +378,27 @@
 	}
 
 	.link-description {
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		transform: translateX(-50%) translateY(-4px);
 		font-size: 0.7em;
+		font-weight: 400;
+		color: var(--text);
 		opacity: 0;
-		transform: translateY(-4px);
 		transition: opacity 0.2s, transform 0.2s;
 		white-space: nowrap;
+		pointer-events: none;
 	}
 
-	.sitemap-link:hover .link-description,
-	.sitemap-link.highlighted .link-description {
+	.sitemap-link:hover .link-description {
 		opacity: 0.6;
-		transform: translateY(0);
+		transform: translateX(-50%) translateY(0);
 	}
 
 	.sitemap-container.always-visible .link-description {
 		opacity: 0.55;
-		transform: translateY(0);
+		transform: translateX(-50%) translateY(0);
 	}
 
 	.sitemap-container.always-visible .sitemap-link:hover .link-description,
