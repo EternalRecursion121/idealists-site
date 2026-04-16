@@ -1,28 +1,68 @@
 <script lang="ts">
-    const items = [
+    type Segment = { text: string; highlight?: boolean };
+    type Item = { title: string; segments: Segment[] };
+
+    const items: Item[] = [
         {
             title: "utopian",
-            description: "we are not afraid to be ambitious in our visions of the future. and we are not afraid to try to make it a reality."
+            segments: [
+                { text: "we are not afraid to be " },
+                { text: "ambitious", highlight: true },
+                { text: " in our visions of the future. and we are not afraid to try to " },
+                { text: "make it a reality", highlight: true },
+                { text: "." }
+            ]
         },
         {
             title: "autonomous",
-            description: "you control your tools, your data, your attention. you should have the power to build the world you want to live in."
+            segments: [
+                { text: "you " },
+                { text: "control", highlight: true },
+                { text: " your tools, your data, your attention. you should have the power to " },
+                { text: "build the world you want to live in", highlight: true },
+                { text: "." }
+            ]
         },
         {
             title: "playful",
-            description: "we create with whimsy and joy. what is life without fun?"
+            segments: [
+                { text: "we create with " },
+                { text: "whimsy and joy", highlight: true },
+                { text: ". what is life without " },
+                { text: "fun", highlight: true },
+                { text: "?" }
+            ]
         },
         {
             title: "alive",
-            description: "we believe in making things that grow, adapt, breathe, have imperfections, and die, when they need to."
+            segments: [
+                { text: "we believe in making things that " },
+                { text: "grow, adapt, breathe", highlight: true },
+                { text: ", have " },
+                { text: "imperfections", highlight: true },
+                { text: ", and " },
+                { text: "die", highlight: true },
+                { text: " when they need to." }
+            ]
         },
         {
             title: "cooperative",
-            description: "we cannot succeed alone, nor would we want to!"
+            segments: [
+                { text: "we " },
+                { text: "cannot succeed alone", highlight: true },
+                { text: ", nor would we want to!" }
+            ]
         },
         {
             title: "loving",
-            description: "don't compromise on your integrity. don't sell your soul. do everything with love <3"
+            segments: [
+                { text: "don't compromise on your " },
+                { text: "integrity", highlight: true },
+                { text: ". don't sell your " },
+                { text: "soul", highlight: true },
+                { text: ". do everything with " },
+                { text: "love <3", highlight: true }
+            ]
         }
     ];
 </script>
@@ -33,7 +73,11 @@
         {#each items as item (item.title)}
             <div class="principle-card">
                 <span class="principle-title">{item.title}</span>
-                <p class="principle-desc">{item.description}</p>
+                <p class="principle-desc"
+                    >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
+                                >{seg.text}</span
+                            >{:else}{seg.text}{/if}{/each}</p
+                >
             </div>
         {/each}
     </div>
@@ -74,6 +118,14 @@
         border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
         border-radius: 0;
         overflow: hidden;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .principle-card:hover {
+        border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+        box-shadow:
+            0 0 18px color-mix(in srgb, var(--accent) 28%, transparent),
+            inset 0 0 24px color-mix(in srgb, var(--accent) 6%, transparent);
     }
 
     .principle-title {
@@ -83,6 +135,12 @@
         font-size: 1.15rem;
         margin-bottom: 0.35rem;
         color: var(--heading);
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .principle-card:hover .principle-title {
+        color: var(--accent);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
     }
 
     .principle-desc {
@@ -90,7 +148,21 @@
         font-family: 'Sligoil Micro Medium', var(--font-grotesk);
         font-size: 0.7rem;
         line-height: 1.5;
-        opacity: 0.6;
+        color: color-mix(in srgb, var(--text) 55%, transparent);
         text-transform: lowercase;
+        transition: color 0.3s ease;
+    }
+
+    .principle-card:hover .principle-desc {
+        color: color-mix(in srgb, var(--text) 65%, transparent);
+    }
+
+    .highlight {
+        color: inherit;
+        transition: color 0.3s ease;
+    }
+
+    .principle-card:hover .highlight {
+        color: var(--heading);
     }
 </style>

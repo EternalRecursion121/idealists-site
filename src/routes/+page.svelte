@@ -246,10 +246,11 @@
         background: none;
         border: none;
         color: var(--accent);
-        cursor: help;
+        cursor: pointer;
         opacity: 0.85;
-        transition: opacity 0.2s;
+        transition: opacity 0.2s ease, text-shadow 0.3s ease, color 0.3s ease;
         white-space: nowrap;
+        text-decoration: none;
     }
 
     @media (min-width: 640px) {
@@ -262,6 +263,9 @@
     .footnote:focus-visible {
         opacity: 1;
         outline: none;
+        text-shadow:
+            0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
+            0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
     }
 
     .definition-col {
