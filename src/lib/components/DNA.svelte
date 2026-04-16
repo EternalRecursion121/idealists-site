@@ -1,5 +1,6 @@
 <script lang="ts">
     import Roots from './Roots.svelte';
+    import Leaves from './Leaves.svelte';
 
     type Segment = { text: string; highlight?: boolean };
     type Item = { title: string; segments: Segment[] };
@@ -7,11 +8,14 @@
     let aliveActive = $state(false);
     let isTouch = $state(false);
     let accentColor = $state('');
+    let headingColor = $state('');
     let aliveCardEl: HTMLDivElement | undefined = $state();
 
     function readAccentColor() {
         if (!aliveCardEl) return;
-        accentColor = getComputedStyle(aliveCardEl).getPropertyValue('--accent').trim();
+        const style = getComputedStyle(aliveCardEl);
+        accentColor = style.getPropertyValue('--accent').trim();
+        headingColor = style.getPropertyValue('--heading').trim();
     }
 
     const items: Item[] = [
@@ -102,6 +106,11 @@
                                 >{:else}{seg.text}{/if}{/each}</p
                     >
                     <Roots active={aliveActive} color={accentColor} />
+                    <Leaves
+                        active={aliveActive}
+                        color={accentColor}
+                        altColor={headingColor}
+                    />
                 </div>
             {:else}
                 <div class="principle-card">
