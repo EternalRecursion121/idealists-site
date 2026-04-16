@@ -4,9 +4,8 @@
     type Segment = { text: string; highlight?: boolean };
     type Item = { title: string; segments: Segment[] };
 
-    let aliveHovered = $state(false);
-    let aliveTapped = $state(false);
-    let aliveActive = $derived(aliveHovered || aliveTapped);
+    let aliveActive = $state(false);
+    let isTouch = $state(false);
     let accentColor = $state('');
     let aliveCardEl: HTMLDivElement | undefined = $state();
 
@@ -80,7 +79,7 @@
     ];
 </script>
 
-<section>
+<section class="dna-section">
     <h2 class="section-header">our dna</h2>
     <div class="principles-grid">
         {#each items as item (item.title)}
@@ -88,10 +87,11 @@
                 <div
                     class="principle-card alive-card"
                     bind:this={aliveCardEl}
-                    onmouseenter={() => { aliveHovered = true; readAccentColor(); }}
-                    onmouseleave={() => { aliveHovered = false; }}
-                    onclick={() => { aliveTapped = !aliveTapped; readAccentColor(); }}
-                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { aliveTapped = !aliveTapped; readAccentColor(); } }}
+                    onmouseenter={() => { if (!isTouch) { aliveActive = true; readAccentColor(); } }}
+                    onmouseleave={() => { if (!isTouch) { aliveActive = false; } }}
+                    ontouchstart={() => { isTouch = true; }}
+                    onclick={() => { aliveActive = !aliveActive; readAccentColor(); }}
+                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { aliveActive = !aliveActive; readAccentColor(); } }}
                     role="button"
                     tabindex="0"
                 >
