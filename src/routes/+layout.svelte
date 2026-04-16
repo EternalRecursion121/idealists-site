@@ -20,7 +20,7 @@
 	let showNav = $derived(!$page.url.pathname.startsWith('/index'));
 
 	const themes = {
-		dawn: { bg: '#FFFBF3', text: '#4A3728', accent: '#E07850', heading: '#C86840', noise: 'rgba(232,118,60,1)' },
+		dawn: { bg: '#FFFBF3', text: '#4A3728', accent: '#D89A6A', heading: '#B8804E', noise: 'rgba(216,154,106,1)' },
 		night: { bg: '#04050a', text: '#d8dce8', accent: '#a08cd8', heading: '#d8c8a0', noise: 'rgba(175,158,235,1)' },
 		twilight: { bg: '#0b0812', text: '#e4dde6', accent: '#c79292', heading: '#d4b896', noise: 'rgba(225,150,150,1)' },
 		forest: { bg: '#050b08', text: '#d8e8dc', accent: '#7a9e7e', heading: '#c8b88c', noise: 'rgba(160,240,100,1)' }
