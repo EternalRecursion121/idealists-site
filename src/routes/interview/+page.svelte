@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { page } from '$app/stores';
-	import { interviewer as realInterviewer, InterviewerError, type TurnResponse } from '$lib/interviewer-client';
+	import { interviewer as realInterviewer, InterviewerError } from '$lib/interviewer-client';
 	import { mockInterviewer, mockControls } from '$lib/interviewer-client-mock';
 
 	const isPreview = $derived($page.url.searchParams.has('preview'));
@@ -36,7 +36,6 @@
 	let turns = $state<Turn[]>([]);
 	let inputText = $state('');
 	let inputEl: HTMLTextAreaElement | null = $state(null);
-	let scrollEl: HTMLDivElement | null = $state(null);
 	let composerFocused = $state(false);
 
 	let elapsedSeconds = $state(0);
@@ -284,25 +283,6 @@
 		phase = 'error';
 	}
 
-	function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
-		if (!scrollEl) return;
-		scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior });
-	}
-
-	// Pin the most recent participant turn to the top of the visible viewport,
-	// so the participant's question and the start of the model's reply are
-	// both in view.
-	function scrollLastUserToTop() {
-		if (!scrollEl) return;
-		const nodes = scrollEl.querySelectorAll('.turn-participant');
-		const last = nodes[nodes.length - 1] as HTMLElement | undefined;
-		if (!last) return;
-		const containerTop = scrollEl.getBoundingClientRect().top;
-		const elTop = last.getBoundingClientRect().top;
-		const target = scrollEl.scrollTop + (elTop - containerTop) - 16;
-		scrollEl.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
-	}
-
 	// Keep the composer pinned to the bottom of the viewport by following the
 	// page as it grows. Called on every typewriter tick during streaming so
 	// the scroll appears continuous (tiny deltas = visually smooth) instead
@@ -448,6 +428,10 @@
 
 	onMount(() => {
 		tryRestoreConversation();
+	});
+
+	onDestroy(() => {
+		clearAsideTimer();
 	});
 
 	function openHumanModal() {
@@ -653,6 +637,7 @@
 				<div
 					class="modal"
 					role="dialog"
+					tabindex="-1"
 					aria-modal="true"
 					aria-labelledby="human-modal-title"
 					onclick={(e) => e.stopPropagation()}
@@ -753,7 +738,7 @@
 				{/if}
 			</div>
 
-			<div class="transcript" bind:this={scrollEl}>
+			<div class="transcript">
 				<div class="transcript-inner">
 					{#each turns as turn, ti (ti)}
 						<article class="turn turn-{turn.role}" in:fly={{ y: 8, duration: 280 }}>

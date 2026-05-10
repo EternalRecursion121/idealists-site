@@ -1,12 +1,12 @@
 /**
  * Client for the interviewer FastAPI service.
  *
- * The base URL is set via the PUBLIC_INTERVIEWER_API environment variable at
- * build/dev time. For ngrok-hosted backends this points at the ngrok URL.
+ * The base URL is set via the PUBLIC_INTERVIEWER_API environment variable.
+ * For ngrok-hosted backends this points at the ngrok URL.
  */
-import { PUBLIC_INTERVIEWER_API } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
-const BASE = (PUBLIC_INTERVIEWER_API || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const BASE = (env.PUBLIC_INTERVIEWER_API || 'http://127.0.0.1:8000').replace(/\/$/, '');
 
 export interface CreateSessionRequest {
 	member_hint?: string | null;
