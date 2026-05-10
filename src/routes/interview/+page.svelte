@@ -440,6 +440,7 @@
 			elapsedSeconds = data.elapsedSeconds ?? 0;
 			timeBudgetSeconds = data.timeBudgetSeconds ?? null;
 			phase = 'conversation';
+			hasPersisted = true;
 			return true;
 		} catch {
 			return false;
@@ -485,6 +486,30 @@
 
 	function onModalKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') closeHumanModal();
+	}
+
+	// Hard-reset everything: component state + localStorage. Used by the
+	// error-phase "try again" button and the welcome-page "start fresh"
+	// escape hatch when a stale persisted session has restored into a
+	// broken state.
+	let hasPersisted = $state(false);
+	function resetEverything() {
+		clearPersistedConversation();
+		hasPersisted = false;
+		phase = 'welcome';
+		turns = [];
+		sessionId = null;
+		inputText = '';
+		notesContent = '';
+		notesOriginal = '';
+		notesPath = null;
+		writingNotes = false;
+		elapsedSeconds = 0;
+		timeBudgetSeconds = null;
+		interviewEnded = false;
+		endReason = null;
+		errorMessage = '';
+		busy = false;
 	}
 
 	// Preview-mode dev controls
@@ -639,6 +664,12 @@
 						screw ai, i want to talk to a human
 					</button>
 				</div>
+
+				{#if hasPersisted}
+					<button class="start-fresh" onclick={resetEverything} title="clear saved conversation and start over">
+						or — clear the saved conversation and start fresh
+					</button>
+				{/if}
 			</div>
 		</section>
 
@@ -789,6 +820,25 @@
 			</div>
 
 			<div class="composer-wrap">
+				{#if turns.length > 0}
+					<div class="end-row">
+						<button
+							class="reset-link"
+							onclick={resetEverything}
+							title="clear this conversation and start over (no notes filed)"
+						>
+							reset
+						</button>
+						<button
+							class="end-review"
+							onclick={leaveEarly}
+							disabled={busy}
+							title="end now and review your notes"
+						>
+							end & review notes →
+						</button>
+					</div>
+				{/if}
 				<div class="composer" class:composer-focused={composerFocused}>
 					<textarea
 						bind:this={inputEl}
@@ -861,7 +911,13 @@
 		<section class="error-state" in:fade>
 			<h1>something broke.</h1>
 			<p class="error">{errorMessage}</p>
-			<a href="/interview" class="link">try again</a>
+			<button type="button" class="link link-as-button" onclick={resetEverything}>
+				try again
+			</button>
+			<p class="sub error-help">
+				this clears the saved conversation and returns you to the start. if it keeps happening,
+				the interviewer backend may be down — try again in a few minutes.
+			</p>
 		</section>
 	{/if}
 
@@ -1742,6 +1798,101 @@
 
 	.error-state {
 		padding-top: 6rem;
+	}
+
+	.link-as-button {
+		background: transparent;
+		border: none;
+		cursor: pointer;
+	}
+	/* .link styles already cover the visual; .link-as-button just neutralizes
+	   default <button> chrome so it inherits .link's underline-on-hover look. */
+
+	.error-help {
+		margin-top: 1rem;
+		font-size: 0.82rem;
+		opacity: 0.55;
+		max-width: 36rem;
+	}
+
+	/* reset on the left, end-and-review pill on the right, above the composer */
+	.end-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0 0.5rem 0.4rem;
+		max-width: 44rem;
+		margin: 0 auto;
+		width: 100%;
+	}
+
+	.reset-link {
+		padding: 0;
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
+		opacity: 0.45;
+		background: transparent;
+		border: none;
+		color: var(--text);
+		cursor: pointer;
+		text-decoration: underline dotted;
+		text-underline-offset: 4px;
+		transition: opacity 0.15s ease;
+	}
+	.reset-link:hover {
+		opacity: 0.85;
+	}
+
+	.end-review {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.4rem 0.85rem;
+		font-family: var(--font-mono);
+		font-size: 0.74rem;
+		letter-spacing: 0.04em;
+		background: transparent;
+		border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+		border-radius: 999px;
+		color: var(--accent);
+		cursor: pointer;
+		opacity: 0.85;
+		transition:
+			opacity 0.15s ease,
+			background 0.15s ease,
+			border-color 0.15s ease;
+	}
+	.end-review:hover:not(:disabled) {
+		opacity: 1;
+		background: color-mix(in srgb, var(--accent) 12%, transparent);
+		border-color: var(--accent);
+	}
+	.end-review:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+
+	/* "start fresh" escape hatch on welcome (only when persisted state is loaded) */
+	.start-fresh {
+		display: block;
+		margin-top: 1.5rem;
+		padding: 0;
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
+		opacity: 0.45;
+		background: transparent;
+		border: none;
+		color: var(--text);
+		cursor: pointer;
+		text-decoration: underline dotted;
+		text-underline-offset: 4px;
+		transition: opacity 0.15s ease;
+	}
+	.start-fresh:hover {
+		opacity: 0.85;
 	}
 
 	/* ---------- preview-mode dev panel ---------- */
