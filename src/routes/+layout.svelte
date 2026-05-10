@@ -116,7 +116,11 @@
 	class="bg-noise"
 	aria-hidden="true"
 	style="--bg: {currentColors.bg}; --noise: {currentColors.noise};"
-></div>
+>
+	<div class="bg-noise-turbulence"></div>
+	<div class="bg-noise-tint"></div>
+	<div class="bg-noise-grain"></div>
+</div>
 
 <div
 	class="app"
@@ -213,22 +217,32 @@
 		inset: 0;
 		pointer-events: none;
 		background-color: var(--bg);
-		background-image:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%),
-			url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.26' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-		background-size: 100% 100%, 360px 360px;
-		background-repeat: no-repeat, repeat;
-		background-blend-mode: screen, overlay;
+		isolation: isolate;
 	}
 
-	.bg-noise::after {
-		content: '';
+	.bg-noise-tint,
+	.bg-noise-turbulence,
+	.bg-noise-grain {
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
+	}
+
+	.bg-noise-tint {
+		background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%);
+		mix-blend-mode: screen;
+	}
+
+	.bg-noise-turbulence {
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.26' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+		background-size: 360px 360px;
+		background-repeat: repeat;
+		mix-blend-mode: overlay;
+	}
+
+	.bg-noise-grain {
 		filter: contrast(170%) brightness(1000%);
-		background:
-			url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 		background-size: 360px 360px;
 		background-repeat: repeat;
 		opacity: 0.18;
