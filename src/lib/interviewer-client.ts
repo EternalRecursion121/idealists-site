@@ -32,8 +32,6 @@ export interface TurnResponse {
 	end_reason: string | null;
 	transcript_path: string | null;
 	notes_path: string | null;
-	consent: 'private' | 'ask_first' | 'public';
-	consent_locked: boolean;
 }
 
 export interface EndSessionResponse {

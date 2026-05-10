@@ -26,9 +26,8 @@
 	let inputText = $state('');
 	let inputEl: HTMLTextAreaElement | null = $state(null);
 	let scrollEl: HTMLDivElement | null = $state(null);
+	let composerFocused = $state(false);
 
-	let consent = $state<'private' | 'ask_first' | 'public'>('ask_first');
-	let consentLocked = $state(false);
 	let elapsedSeconds = $state(0);
 	let timeBudgetSeconds = $state<number | null>(null);
 	let interviewEnded = $state(false);
@@ -74,19 +73,6 @@
 		}
 	}
 
-	// Try to detect a time mention in the participant's reply ("30 min", "an hour")
-	// so the time-tag can update on the server side. Heuristic, not authoritative.
-	function detectTimeBudgetSeconds(text: string): number | null {
-		const t = text.toLowerCase();
-		const mMin = t.match(/(\d+)\s*(?:min|minutes|m\b)/);
-		if (mMin) return parseInt(mMin[1], 10) * 60;
-		const mHr = t.match(/(\d+(?:\.\d+)?)\s*(?:hr|hour|hours|h\b)/);
-		if (mHr) return Math.round(parseFloat(mHr[1]) * 3600);
-		if (/\bhalf\s*an?\s*hour\b/.test(t)) return 30 * 60;
-		if (/\ban?\s*hour\b/.test(t)) return 60 * 60;
-		return null;
-	}
-
 	async function send() {
 		if (!inputText.trim() || !sessionId || busy) return;
 		const text = inputText.trim();
@@ -96,19 +82,14 @@
 		scrollToBottom();
 		busy = true;
 		try {
-			// Heuristically detect a time budget the participant just stated
-			// ("about 30 min", "an hour"). If found, pass it so the server's
-			// time-tag updates. Otherwise leave server budget alone.
-			const detected = timeBudgetSeconds === null ? detectTimeBudgetSeconds(text) : null;
+			// Time budget is now owned by the model via update_time_budget tool —
+			// no client-side regex detection.
 			const res: TurnResponse = await interviewer.turn(sessionId, {
-				text,
-				time_budget_seconds: detected
+				text
 			});
 			turns = [...turns, { role: 'interviewer', text: res.text, elapsed: res.elapsed_seconds }];
 			elapsedSeconds = res.elapsed_seconds;
 			timeBudgetSeconds = res.time_budget_seconds;
-			consent = res.consent;
-			consentLocked = res.consent_locked;
 			interviewEnded = res.interview_ended;
 			endReason = res.end_reason;
 			await tick();
@@ -133,6 +114,7 @@
 			handleError(e);
 		} finally {
 			busy = false;
+			await tick();
 			inputEl?.focus();
 		}
 	}
@@ -209,14 +191,11 @@
 		return `${Math.floor(s / 60)}m`;
 	}
 
-	function consentLabel(c: string): string {
-		return c === 'private' ? 'private' : c === 'public' ? 'public' : 'ask first';
-	}
-
 	function autosize(el: HTMLTextAreaElement | null) {
 		if (!el) return;
 		el.style.height = 'auto';
-		el.style.height = Math.min(el.scrollHeight, 320) + 'px';
+		// Cap matches the .composer textarea max-height (14rem ≈ 224px at 16px root)
+		el.style.height = Math.min(el.scrollHeight, 224) + 'px';
 	}
 
 	$effect(() => {
@@ -270,8 +249,6 @@
 		notesContent = '';
 		notesOriginal = '';
 		notesPath = null;
-		consent = 'ask_first';
-		consentLocked = false;
 		elapsedSeconds = 0;
 		timeBudgetSeconds = null;
 		interviewEnded = false;
@@ -299,10 +276,6 @@
 			notesPath = '/mock/notes.md';
 			phase = 'done';
 		}
-	}
-	function devSetConsent(c: 'private' | 'ask_first' | 'public') {
-		mockControls.setConsent(c);
-		consent = c;
 	}
 
 	// Inline typewriter for the "* (honorary member of the collective)" reveal.
@@ -515,22 +488,18 @@
 			</div>
 		{/if}
 	{:else if phase === 'conversation'}
-		<section class="conversation-frame" in:fade={{ duration: 400 }}>
-			<aside class="margin">
-				<div class="margin-row">
-					<span class="margin-label">elapsed</span>
-					<span class="margin-value">{fmtTime(elapsedSeconds)}</span>
-				</div>
+		<section class="convo" in:fade={{ duration: 400 }}>
+			<div class="convo-meta">
+				<span class="meta-elapsed">{fmtTime(elapsedSeconds)}</span>
 				{#if timeBudgetSeconds}
-					<div class="margin-row">
-						<span class="margin-label">budget</span>
-						<span class="margin-value">{fmtTime(timeBudgetSeconds)}</span>
-					</div>
+					<span class="meta-divider">·</span>
+					<span class="meta-budget">{fmtTime(timeBudgetSeconds)}</span>
 				{/if}
-				<button class="margin-action" onclick={leaveEarly} disabled={busy} title="end the interview">
-					end now
+				<span class="meta-divider">·</span>
+				<button class="meta-end" onclick={leaveEarly} disabled={busy} title="end the interview">
+					end
 				</button>
-			</aside>
+			</div>
 
 			<div class="transcript" bind:this={scrollEl}>
 				<div class="transcript-inner">
@@ -543,7 +512,7 @@
 						</article>
 					{/each}
 					{#if busy}
-						<div class="thinking" in:fade={{ duration: 200 }}>
+						<div class="thinking turn-interviewer" in:fade={{ duration: 200 }}>
 							<span class="dot"></span><span class="dot"></span><span class="dot"></span>
 							{#if turns.length === 0}
 								<span class="thinking-label">warming up — reading the wiki, finding you in it</span>
@@ -553,18 +522,36 @@
 				</div>
 			</div>
 
-			<div class="composer">
-				<textarea
-					bind:this={inputEl}
-					bind:value={inputText}
-					onkeydown={onKeydown}
-					placeholder="say what's actually on your mind. cmd/ctrl+enter to send."
-					rows="2"
-					disabled={busy}
-				></textarea>
-				<button class="send-btn" onclick={send} disabled={!inputText.trim() || busy}>
-					{busy ? '…' : 'send'}
-				</button>
+			<div class="composer-wrap">
+				<div class="composer" class:composer-focused={composerFocused}>
+					<textarea
+						bind:this={inputEl}
+						bind:value={inputText}
+						onkeydown={onKeydown}
+						onfocus={() => (composerFocused = true)}
+						onblur={() => (composerFocused = false)}
+						placeholder="say what's on your mind…"
+						rows="1"
+					></textarea>
+					<button
+						class="send-btn"
+						onclick={send}
+						disabled={!inputText.trim() || busy}
+						title="send (⌘/ctrl + ↵)"
+						aria-label="send message"
+					>
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+							<path
+								d="M5 12h14M13 6l6 6-6 6"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					</button>
+				</div>
+				<div class="composer-hint">⌘ / ctrl + ↵ to send · ↵ for newline</div>
 			</div>
 		</section>
 	{:else if phase === 'notes'}
@@ -574,15 +561,6 @@
 				<p class="lede">
 					this is what i wrote about our conversation. read it. change anything that's wrong.
 					redact anything you don't want filed. it's yours.
-				</p>
-				<p class="meta">
-					{#if consent === 'private'}
-						<span class="consent-pill consent-private">private</span> nothing here will be shared. these notes stay as your internal record only.
-					{:else if consent === 'public'}
-						<span class="consent-pill consent-public">public</span> notes can be incorporated into the wiki freely; you can be quoted publicly.
-					{:else}
-						<span class="consent-pill consent-ask">ask first</span> these notes will be read internally; nothing public happens without checking with you per-quote.
-					{/if}
 				</p>
 			</header>
 
@@ -651,23 +629,6 @@
 							>
 							<button onclick={() => devGotoPhase('done')} class:active={phase === 'done'}
 								>done</button
-							>
-						</div>
-					</div>
-					<div class="dev-section">
-						<div class="dev-label">consent</div>
-						<div class="dev-row">
-							<button
-								onclick={() => devSetConsent('private')}
-								class:active={consent === 'private'}>private</button
-							>
-							<button
-								onclick={() => devSetConsent('ask_first')}
-								class:active={consent === 'ask_first'}>ask first</button
-							>
-							<button
-								onclick={() => devSetConsent('public')}
-								class:active={consent === 'public'}>public</button
 							>
 						</div>
 					</div>
@@ -1100,143 +1061,124 @@
 	}
 
 	/* ---------- conversation ---------- */
-	.conversation-frame {
-		display: grid;
-		grid-template-columns: 1fr;
-		grid-template-rows: 1fr auto;
-		grid-template-areas:
-			'transcript'
-			'composer';
-		gap: 1rem;
-		min-height: calc(100vh - 4rem);
-		padding-top: 1rem;
-	}
-
-	@media (min-width: 900px) {
-		.conversation-frame {
-			grid-template-columns: 9rem 1fr;
-			grid-template-areas:
-				'margin    transcript'
-				'margin    composer';
-		}
-	}
-
-	.margin {
-		grid-area: margin;
-		display: flex;
-		flex-direction: row;
-		gap: 1.5rem;
-		padding: 0.5rem 0;
-		font-size: 0.75rem;
-		opacity: 0.65;
-		font-family: var(--font-mono);
-	}
-
-	@media (min-width: 900px) {
-		.margin {
-			flex-direction: column;
-			gap: 0.6rem;
-			padding: 1rem 1rem 1rem 0;
-			border-right: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-		}
-	}
-
-	.margin-row {
+	.convo {
 		display: flex;
 		flex-direction: column;
-		gap: 0.1rem;
+		min-height: calc(100vh - 2rem);
+		padding-top: 0.75rem;
 	}
 
-	.margin-label {
-		opacity: 0.55;
-		font-size: 0.65rem;
-		text-transform: lowercase;
-		letter-spacing: 0.05em;
-	}
-
-	.margin-value {
-		opacity: 0.95;
-		font-size: 0.85rem;
-	}
-
-	.margin-value.locked::after {
-		content: ' ✓';
-		color: var(--accent);
-	}
-
-	.margin-action {
-		margin-top: auto;
-		padding: 0.4rem 0.6rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		background: transparent;
-		border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
-		border-radius: 2px;
+	.convo-meta {
+		position: fixed;
+		top: 1rem;
+		right: 1.25rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		letter-spacing: 0.04em;
+		opacity: 0.45;
 		color: var(--text);
-		cursor: pointer;
-		opacity: 0.7;
-		transition: all 0.15s;
+		z-index: 10;
+		transition: opacity 0.25s ease;
 	}
 
-	.margin-action:hover:not(:disabled) {
+	.convo-meta:hover {
+		opacity: 0.9;
+	}
+
+	.meta-divider {
+		opacity: 0.5;
+	}
+
+	.meta-end {
+		padding: 0;
+		font: inherit;
+		color: inherit;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		text-transform: lowercase;
+		opacity: 0.7;
+		transition: color 0.15s, opacity 0.15s;
+	}
+
+	.meta-end:hover:not(:disabled) {
 		opacity: 1;
-		border-color: var(--accent);
 		color: var(--accent);
+	}
+
+	.meta-end:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
 	}
 
 	.transcript {
-		grid-area: transcript;
+		flex: 1;
 		overflow-y: auto;
-		max-height: calc(100vh - 14rem);
-		padding-right: 1rem;
+		padding: 0 0.5rem;
 		scrollbar-width: thin;
-		scrollbar-color: color-mix(in srgb, var(--text) 20%, transparent) transparent;
+		scrollbar-color: color-mix(in srgb, var(--text) 18%, transparent) transparent;
 	}
 
 	.transcript-inner {
 		display: flex;
 		flex-direction: column;
-		gap: 2rem;
-		padding: 1rem 0 4rem;
-		max-width: 38rem;
+		gap: 2.25rem;
+		padding: 2.5rem 0 3rem;
+		max-width: 44rem;
+		margin: 0 auto;
 	}
 
 	.turn {
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 0.3rem;
+		max-width: 86%;
+	}
+
+	.turn-interviewer {
+		align-self: flex-start;
+		align-items: flex-start;
+		text-align: left;
+	}
+
+	.turn-participant {
+		align-self: flex-end;
+		align-items: flex-end;
+		text-align: right;
 	}
 
 	.turn-attr {
-		font-size: 0.7rem;
-		text-transform: lowercase;
-		letter-spacing: 0.06em;
-		opacity: 0.5;
 		font-family: var(--font-mono);
+		font-size: 0.66rem;
+		text-transform: lowercase;
+		letter-spacing: 0.08em;
+		opacity: 0.45;
 	}
 
 	.turn-interviewer .turn-attr {
 		color: var(--accent);
-		opacity: 0.7;
+		opacity: 0.75;
 	}
 
 	.turn-text {
 		white-space: pre-wrap;
-		font-size: 1rem;
-		line-height: 1.65;
-	}
-
-	.turn-participant {
-		padding-left: 1rem;
-		border-left: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
+		font-size: 1.02rem;
+		line-height: 1.6;
 	}
 
 	.thinking {
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
+		gap: 0.55rem;
 		padding: 0.5rem 0;
 		opacity: 0.55;
+	}
+
+	.thinking.turn-interviewer {
+		align-self: flex-start;
 	}
 
 	.thinking-label {
@@ -1275,58 +1217,96 @@
 		}
 	}
 
-	.composer {
-		grid-area: composer;
+	/* composer — soft rounded card sticking to the bottom, send arrow inside */
+	.composer-wrap {
+		max-width: 44rem;
+		width: 100%;
+		margin: 0 auto;
+		padding: 0.5rem 0.5rem 1.25rem;
 		display: flex;
-		gap: 0.6rem;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.composer {
+		position: relative;
+		display: flex;
 		align-items: flex-end;
-		padding: 0.5rem 0 0;
-		max-width: 38rem;
+		padding: 0.85rem 3.5rem 0.85rem 1.1rem;
+		background: color-mix(in srgb, var(--text) 4%, transparent);
+		border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+		border-radius: 14px;
+		transition:
+			border-color 0.18s ease,
+			background 0.18s ease,
+			box-shadow 0.18s ease;
+	}
+
+	.composer-focused {
+		border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+		background: color-mix(in srgb, var(--text) 2%, transparent);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 	}
 
 	.composer textarea {
 		flex: 1;
-		padding: 0.7rem 0.9rem;
 		font-family: inherit;
-		font-size: 1rem;
-		line-height: 1.5;
+		font-size: 1.02rem;
+		line-height: 1.55;
 		background: transparent;
-		border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
-		border-radius: 2px;
+		border: none;
 		color: var(--text);
 		outline: none;
 		resize: none;
-		min-height: 3rem;
-		transition: border-color 0.15s;
-	}
-
-	.composer textarea:focus {
-		border-color: var(--accent);
+		min-height: 1.55rem;
+		max-height: 14rem;
+		padding: 0;
 	}
 
 	.composer textarea::placeholder {
-		opacity: 0.35;
+		opacity: 0.4;
+		font-style: italic;
 	}
 
 	.send-btn {
-		padding: 0.7rem 1.4rem;
-		font-family: var(--font-display);
-		font-size: 0.95rem;
-		background: transparent;
-		border: 1px solid var(--accent);
-		border-radius: 2px;
-		color: var(--accent);
+		position: absolute;
+		right: 0.55rem;
+		bottom: 0.55rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0;
+		background: var(--accent);
+		border: none;
+		border-radius: 50%;
+		color: var(--bg, #fff);
 		cursor: pointer;
-		transition: all 0.15s;
+		transition: all 0.15s ease;
 	}
 
 	.send-btn:hover:not(:disabled) {
-		background: color-mix(in srgb, var(--accent) 14%, transparent);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent);
 	}
 
 	.send-btn:disabled {
-		opacity: 0.3;
+		background: color-mix(in srgb, var(--text) 18%, transparent);
+		color: color-mix(in srgb, var(--text) 50%, transparent);
 		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
+	}
+
+	.composer-hint {
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		text-transform: lowercase;
+		letter-spacing: 0.06em;
+		opacity: 0.4;
+		text-align: center;
+		padding: 0 0.5rem;
 	}
 
 	/* ---------- notes ---------- */
@@ -1336,27 +1316,6 @@
 
 	.notes-header {
 		max-width: 40rem;
-	}
-
-	.consent-pill {
-		display: inline-block;
-		padding: 0.15rem 0.55rem;
-		margin-right: 0.5rem;
-		font-family: var(--font-mono);
-		font-size: 0.7rem;
-		text-transform: lowercase;
-		letter-spacing: 0.06em;
-		border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
-		border-radius: 999px;
-		color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 10%, transparent);
-	}
-
-	.consent-pill.consent-private {
-		border-color: color-mix(in srgb, var(--text) 35%, transparent);
-		color: var(--text);
-		background: color-mix(in srgb, var(--text) 8%, transparent);
-		opacity: 0.75;
 	}
 
 	.notes-editor {

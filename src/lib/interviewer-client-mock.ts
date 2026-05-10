@@ -7,7 +7,7 @@
  * tokens.
  *
  * The mock supports a small "dev controls" surface (see `mockControls`) so the
- * preview page can scrub through phases / inject custom turns / change consent.
+ * preview page can scrub through phases / inject custom turns.
  */
 import type {
 	CreateSessionRequest,
@@ -23,9 +23,8 @@ import type {
 const FAKE_LATENCY_MS = 700;
 
 const SCRIPT: string[] = [
-	"hey — glad you're here. before i dive into anything, how long do you have? doesn't have to be a precise number — \"maybe 20 minutes\" is fine.",
-	"got it. and one quick thing before we get into substance — by default this conversation gets distilled into notes for the collective to learn from, but nothing goes anywhere public without checking with you first. you can lock it down further (private — no notes written) or open it up (notes can go on the public site freely). totally your call. you can change your mind at the end too.",
-	"okay. so — when you found your way to the collective, what was actually drawing you in? the writing, a person, a project, the vibe, all of it?",
+	"hey — glad you're here. how long do you have for this? about 15-20 minutes is the usual length, but i'll check in there if you want to keep going.",
+	"got it. so — when you found your way to the collective, what was actually drawing you in? the writing, a person, a project, the vibe, all of it?",
 	"that's a real answer. the bit about *the writing on idealism not landing for you the first read* is interesting — what would have made it land?",
 	"yeah, that maps. lydia's essay on against-commentary actually wrestles with the same thing from a different angle. want me to point you at it after?",
 	"before we wrap — anything about *this format* (an llm interviewing you on behalf of the collective) that landed wrong, or worked? not asking you to be polite about it.",
@@ -38,7 +37,6 @@ type: interview
 sources:
   - server/transcripts/example.json
 last_updated: 2026-05-10
-consent: ask_first
 ---
 
 # Notes
@@ -68,13 +66,11 @@ A 25-minute first conversation with someone new to the collective. Came in via a
 ## Open threads
 
 - Connect them with Lydia and with Ariel (autonomy stuff).
-- Their reaction to the consent question was warm — worth flagging that the signposting *did* land for at least this person.
+- Worth a follow-up in a few weeks once they've spent more time in the discord.
 `;
 
 class MockController {
 	private turnIndex = 0;
-	private consent: 'private' | 'ask_first' | 'public' = 'ask_first';
-	private consentLocked = false;
 	private elapsed = 0;
 	private timeBudget: number | null = null;
 	private ended = false;
@@ -82,8 +78,6 @@ class MockController {
 
 	reset() {
 		this.turnIndex = 0;
-		this.consent = 'ask_first';
-		this.consentLocked = false;
 		this.elapsed = 0;
 		this.timeBudget = null;
 		this.ended = false;
@@ -103,10 +97,6 @@ class MockController {
 		this.turnIndex = Math.min(this.turnIndex + 1, SCRIPT.length - 1);
 		this.elapsed += 60 + Math.floor(Math.random() * 90);
 		if (req.time_budget_seconds) this.timeBudget = req.time_budget_seconds;
-		// Capture consent on the second mock turn (after the consent signpost)
-		if (this.turnIndex === 2 && !this.consentLocked) {
-			this.consentLocked = true;
-		}
 		// Simulate end on the last scripted turn
 		if (this.turnIndex >= SCRIPT.length - 1) {
 			this.ended = true;
@@ -120,9 +110,7 @@ class MockController {
 			interview_ended: this.ended,
 			end_reason: this.endReason,
 			transcript_path: '/mock/transcript.json',
-			notes_path: this.ended ? '/mock/notes.md' : null,
-			consent: this.consent,
-			consent_locked: this.consentLocked
+			notes_path: this.ended ? '/mock/notes.md' : null
 		};
 	}
 
@@ -164,12 +152,6 @@ class MockController {
 	}
 
 	// Dev surface for the preview controls panel
-	setConsent(level: 'private' | 'ask_first' | 'public') {
-		this.consent = level;
-	}
-	getConsent() {
-		return this.consent;
-	}
 	getTurnIndex() {
 		return this.turnIndex;
 	}
@@ -192,8 +174,6 @@ export const mockInterviewer = {
 
 export const mockControls = {
 	reset: () => controller.reset(),
-	setConsent: (level: 'private' | 'ask_first' | 'public') => controller.setConsent(level),
-	getConsent: () => controller.getConsent(),
 	getTurnIndex: () => controller.getTurnIndex(),
 	getElapsed: () => controller.getElapsed(),
 	scriptLength: SCRIPT.length,
