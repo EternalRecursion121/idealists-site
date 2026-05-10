@@ -89,6 +89,72 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 	return (await res.json()) as T;
 }
 
+// ---- streaming -----------------------------------------------------------
+
+export type StreamEvent =
+	| { type: 'session_created'; session_id: string }
+	| { type: 'text_delta'; text: string }
+	| { type: 'tool_use'; id: string; name: string; label: string }
+	| { type: 'tool_done'; id: string; ok: boolean }
+	| {
+			type: 'turn_done';
+			elapsed_seconds: number;
+			time_budget_seconds: number | null;
+			interview_ended: boolean;
+			end_reason: string | null;
+	  }
+	| { type: 'transcript_saved'; path: string }
+	| { type: 'notes_writing' }
+	| { type: 'notes_written'; path: string }
+	| { type: 'error'; message: string };
+
+async function* readSSE(res: Response): AsyncGenerator<StreamEvent> {
+	if (!res.ok || !res.body) {
+		throw new InterviewerError(res.status, res.statusText || 'stream failed');
+	}
+	const reader = res.body.getReader();
+	const decoder = new TextDecoder();
+	let buf = '';
+	try {
+		while (true) {
+			const { value, done } = await reader.read();
+			if (done) break;
+			buf += decoder.decode(value, { stream: true });
+			// SSE messages are separated by blank lines (\n\n)
+			let idx;
+			while ((idx = buf.indexOf('\n\n')) !== -1) {
+				const raw = buf.slice(0, idx);
+				buf = buf.slice(idx + 2);
+				const lines = raw.split('\n');
+				let data = '';
+				for (const line of lines) {
+					if (line.startsWith('data:')) data += line.slice(5).trimStart();
+				}
+				if (!data) continue;
+				try {
+					yield JSON.parse(data) as StreamEvent;
+				} catch {
+					/* skip malformed */
+				}
+			}
+		}
+	} finally {
+		reader.releaseLock();
+	}
+}
+
+async function streamPost(path: string, body: unknown): Promise<Response> {
+	return fetch(`${BASE}${path}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'text/event-stream',
+			'ngrok-skip-browser-warning': 'true'
+		},
+		body: JSON.stringify(body)
+	});
+}
+
 export const interviewer = {
 	createSession: (req: CreateSessionRequest) =>
 		call<CreateSessionResponse>('/sessions', {
@@ -121,6 +187,12 @@ export const interviewer = {
 			method: 'POST',
 			body: JSON.stringify(req)
 		}),
+
+	startStream: async (req: CreateSessionRequest) =>
+		readSSE(await streamPost('/sessions/start-stream', req)),
+
+	turnStream: async (sessionId: string, req: TurnRequest) =>
+		readSSE(await streamPost(`/sessions/${sessionId}/turn-stream`, req)),
 
 	health: () =>
 		call<{ ok: boolean; anthropic_api_key: boolean; active_sessions: number }>('/health')

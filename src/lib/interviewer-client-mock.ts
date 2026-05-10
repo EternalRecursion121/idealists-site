@@ -16,6 +16,7 @@ import type {
 	HumanRequestPayload,
 	HumanRequestResponse,
 	NotesResponse,
+	StreamEvent,
 	TurnRequest,
 	TurnResponse
 } from './interviewer-client';
@@ -147,6 +148,65 @@ class MockController {
 		return { ok: true };
 	}
 
+	async *startStream(_req: CreateSessionRequest): AsyncGenerator<StreamEvent> {
+		this.reset();
+		const sid = 'mock-' + Math.random().toString(36).slice(2, 10);
+		yield { type: 'session_created', session_id: sid };
+		await delay(400);
+		// Pretend to look up the participant
+		yield { type: 'tool_use', id: 'mock-1', name: 'member', label: 'looking up samuel' };
+		await delay(450);
+		yield { type: 'tool_done', id: 'mock-1', ok: true };
+		await delay(150);
+		// Stream the opening message
+		yield* streamText(SCRIPT[0]);
+		yield {
+			type: 'turn_done',
+			elapsed_seconds: 0,
+			time_budget_seconds: null,
+			interview_ended: false,
+			end_reason: null
+		};
+	}
+
+	async *turnStream(_sid: string, req: TurnRequest): AsyncGenerator<StreamEvent> {
+		this.turnIndex = Math.min(this.turnIndex + 1, SCRIPT.length - 1);
+		this.elapsed += 60 + Math.floor(Math.random() * 90);
+		if (req.time_budget_seconds) this.timeBudget = req.time_budget_seconds;
+		await delay(300);
+		// Inject a tool indicator on some turns to demo
+		if (this.turnIndex === 2) {
+			yield { type: 'tool_use', id: 'mock-2', name: 'search', label: 'searching the wiki for "idealism"' };
+			await delay(380);
+			yield { type: 'tool_done', id: 'mock-2', ok: true };
+			await delay(120);
+		}
+		if (this.turnIndex === 3) {
+			yield { type: 'tool_use', id: 'mock-3', name: 'open', label: 'reading writings/against-commentary' };
+			await delay(420);
+			yield { type: 'tool_done', id: 'mock-3', ok: true };
+			await delay(100);
+		}
+		yield* streamText(SCRIPT[this.turnIndex]);
+		if (this.turnIndex >= SCRIPT.length - 1) {
+			this.ended = true;
+			this.endReason = 'natural close';
+		}
+		yield {
+			type: 'turn_done',
+			elapsed_seconds: this.elapsed,
+			time_budget_seconds: this.timeBudget,
+			interview_ended: this.ended,
+			end_reason: this.endReason
+		};
+		if (this.ended) {
+			await delay(300);
+			yield { type: 'notes_writing' };
+			await delay(800);
+			yield { type: 'notes_written', path: '/mock/notes.md' };
+		}
+	}
+
 	async health() {
 		return { ok: true, anthropic_api_key: false, active_sessions: 0 };
 	}
@@ -169,8 +229,26 @@ export const mockInterviewer = {
 	getNotes: (sid: string) => controller.getNotes(sid),
 	putNotes: (sid: string, content: string) => controller.putNotes(sid, content),
 	requestHuman: (req: HumanRequestPayload) => controller.requestHuman(req),
+	startStream: (req: CreateSessionRequest) => controller.startStream(req),
+	turnStream: (sid: string, req: TurnRequest) => controller.turnStream(sid, req),
 	health: () => controller.health()
 };
+
+async function* streamText(text: string): AsyncGenerator<StreamEvent> {
+	// Simulate streaming by yielding small chunks
+	const words = text.split(/(\s+)/);
+	let buf = '';
+	for (const w of words) {
+		buf += w;
+		// Emit roughly every 2-3 words
+		if (buf.length > 12 || w === words[words.length - 1]) {
+			yield { type: 'text_delta', text: buf };
+			buf = '';
+			await delay(30 + Math.floor(Math.random() * 30));
+		}
+	}
+	if (buf) yield { type: 'text_delta', text: buf };
+}
 
 export const mockControls = {
 	reset: () => controller.reset(),

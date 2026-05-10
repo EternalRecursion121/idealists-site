@@ -10,10 +10,21 @@
 
 	type Phase = 'welcome' | 'conversation' | 'notes' | 'done' | 'error';
 
+	type ToolPart = {
+		kind: 'tool';
+		id: string;
+		name: string;
+		label: string;
+		ok: boolean | null; // null = in flight
+	};
+	type TextPart = { kind: 'text'; text: string };
+	type Part = TextPart | ToolPart;
+
 	type Turn = {
 		role: 'interviewer' | 'participant';
-		text: string;
+		parts: Part[];
 		elapsed?: number;
+		streaming?: boolean;
 	};
 
 	let phase = $state<Phase>('welcome');
@@ -36,6 +47,7 @@
 	let notesContent = $state('');
 	let notesOriginal = $state('');
 	let notesPath = $state<string | null>(null);
+	let writingNotes = $state(false);
 
 	// Human-handoff modal state
 	let humanModalOpen = $state(false);
@@ -51,71 +63,170 @@
 		busy = true;
 		try {
 			const hint = memberHint.trim() || null;
-			// Move to conversation phase immediately so the participant sees the
-			// thinking indicator instead of a stuck "opening" button while the
-			// first turn (which can take several seconds) generates.
 			turns = [];
 			phase = 'conversation';
 			await tick();
 			inputEl?.focus();
-			const res = await interviewer.createSession({ member_hint: hint });
-			sessionId = res.session_id;
-			turns = [{ role: 'interviewer', text: res.opening_turn, elapsed: 0 }];
-			await tick();
-			scrollToBottom('instant');
-			inputEl?.focus();
+			// Start a streaming session — first event is session_created, then
+			// the opening turn streams in.
+			const events = await interviewer.startStream({ member_hint: hint });
+			await consumeStream(events);
 		} catch (e) {
 			handleError(e);
-			// fall back to welcome if the very first call failed
 			if (turns.length === 0) phase = 'welcome';
 		} finally {
 			busy = false;
+			await tick();
+			inputEl?.focus();
 		}
 	}
 
 	async function send() {
 		if (!inputText.trim() || !sessionId || busy) return;
 		const text = inputText.trim();
+		// Synchronously shrink the textarea BEFORE adding the new turn — this
+		// avoids a visible reflow where (a) we scroll, then (b) the autosize
+		// $effect fires later and the page jumps.
 		inputText = '';
-		turns = [...turns, { role: 'participant', text, elapsed: elapsedSeconds }];
+		if (inputEl) {
+			inputEl.value = '';
+			autosize(inputEl);
+		}
+		turns = [...turns, { role: 'participant', parts: [{ kind: 'text', text }], elapsed: elapsedSeconds }];
+		persistConversation();
 		await tick();
-		scrollToBottom();
+		ensureComposerVisible(true);
 		busy = true;
 		try {
-			// Time budget is now owned by the model via update_time_budget tool —
-			// no client-side regex detection.
-			const res: TurnResponse = await interviewer.turn(sessionId, {
-				text
-			});
-			turns = [...turns, { role: 'interviewer', text: res.text, elapsed: res.elapsed_seconds }];
-			elapsedSeconds = res.elapsed_seconds;
-			timeBudgetSeconds = res.time_budget_seconds;
-			interviewEnded = res.interview_ended;
-			endReason = res.end_reason;
-			await tick();
-			scrollToBottom();
-
-			if (res.interview_ended) {
-				// Auto-fetch the notes for the participant to review
-				if (res.notes_path) notesPath = res.notes_path;
-				try {
-					const notes = await interviewer.getNotes(sessionId);
-					notesContent = notes.notes_content;
-					notesOriginal = notes.notes_content;
-					notesPath = notes.notes_path;
-					phase = 'notes';
-				} catch (err) {
-					// If we can't fetch notes for some reason, still go to done
-					console.error('failed to fetch notes', err);
-					phase = 'done';
-				}
-			}
+			const events = await interviewer.turnStream(sessionId, { text });
+			await consumeStream(events);
 		} catch (e) {
 			handleError(e);
 		} finally {
 			busy = false;
 			await tick();
 			inputEl?.focus();
+		}
+	}
+
+	// Drains an SSE stream into the current conversation. Text chunks from
+	// Anthropic come in irregular sizes — to make the stream feel smooth we
+	// push them into a per-turn buffer and reveal characters on a timer.
+	async function consumeStream(events: AsyncIterable<import('$lib/interviewer-client').StreamEvent>) {
+		const turnIndex = turns.length;
+		turns = [
+			...turns,
+			{ role: 'interviewer', parts: [], elapsed: elapsedSeconds, streaming: true }
+		];
+		await tick();
+
+		// Buffered text that hasn't been flushed to the visible text part yet.
+		let pendingText = '';
+		let streamFinished = false;
+
+		const ensureTextPart = (): TextPart => {
+			const t = turns[turnIndex];
+			const last = t.parts[t.parts.length - 1];
+			if (last && last.kind === 'text') return last as TextPart;
+			const np: TextPart = { kind: 'text', text: '' };
+			t.parts.push(np);
+			return np;
+		};
+
+		// Reveal up to N chars per tick; tick rate adapts to buffer size so we
+		// never fall behind a fast model. Goal: feel typewriter-smooth without
+		// adding noticeable latency.
+		const TICK_MS = 12;
+		const ticker = setInterval(() => {
+			if (!pendingText) {
+				if (streamFinished) {
+					clearInterval(ticker);
+					turns = turns;
+				}
+				return;
+			}
+			// Drain faster when the buffer is large so we never lag visibly.
+			const stride = pendingText.length > 80 ? 4 : pendingText.length > 30 ? 2 : 1;
+			const chunk = pendingText.slice(0, stride);
+			pendingText = pendingText.slice(stride);
+			const part = ensureTextPart();
+			part.text += chunk;
+			turns = turns;
+			// Follow the growing text — tiny deltas per tick read as a smooth
+			// continuous scroll, not a jarring final jump.
+			ensureComposerVisible();
+		}, TICK_MS);
+
+		try {
+			for await (const evt of events) {
+				if (evt.type === 'session_created') {
+					sessionId = evt.session_id;
+					persistConversation();
+				} else if (evt.type === 'text_delta') {
+					pendingText += evt.text;
+				} else if (evt.type === 'tool_use') {
+					// Flush any pending text first so the tool indicator appears
+					// after the text it follows in the stream order.
+					if (pendingText) {
+						const part = ensureTextPart();
+						part.text += pendingText;
+						pendingText = '';
+					}
+					turns[turnIndex].parts.push({
+						kind: 'tool',
+						id: evt.id,
+						name: evt.name,
+						label: evt.label,
+						ok: null
+					});
+					turns = turns;
+				} else if (evt.type === 'tool_done') {
+					const tp = turns[turnIndex].parts.find(
+						(p) => p.kind === 'tool' && (p as ToolPart).id === evt.id
+					) as ToolPart | undefined;
+					if (tp) tp.ok = evt.ok;
+					turns = turns;
+				} else if (evt.type === 'turn_done') {
+					elapsedSeconds = evt.elapsed_seconds;
+					timeBudgetSeconds = evt.time_budget_seconds;
+					interviewEnded = evt.interview_ended;
+					endReason = evt.end_reason;
+					turns[turnIndex].elapsed = evt.elapsed_seconds;
+				} else if (evt.type === 'notes_writing') {
+					writingNotes = true;
+				} else if (evt.type === 'notes_written') {
+					writingNotes = false;
+					notesPath = evt.path;
+				} else if (evt.type === 'error') {
+					throw new InterviewerError(500, evt.message);
+				}
+			}
+		} finally {
+			streamFinished = true;
+		}
+
+		// Wait for the typewriter to drain before flipping streaming=false
+		while (pendingText) {
+			await new Promise((r) => setTimeout(r, 16));
+		}
+		clearInterval(ticker);
+		turns[turnIndex].streaming = false;
+		turns = turns;
+		persistConversation();
+
+		if (interviewEnded && sessionId) {
+			try {
+				const notes = await interviewer.getNotes(sessionId);
+				notesContent = notes.notes_content;
+				notesOriginal = notes.notes_content;
+				notesPath = notes.notes_path;
+				phase = 'notes';
+				clearPersistedConversation();
+			} catch (err) {
+				console.error('failed to fetch notes', err);
+				phase = 'done';
+				clearPersistedConversation();
+			}
 		}
 	}
 
@@ -178,12 +289,77 @@
 		scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior });
 	}
 
+	// Pin the most recent participant turn to the top of the visible viewport,
+	// so the participant's question and the start of the model's reply are
+	// both in view.
+	function scrollLastUserToTop() {
+		if (!scrollEl) return;
+		const nodes = scrollEl.querySelectorAll('.turn-participant');
+		const last = nodes[nodes.length - 1] as HTMLElement | undefined;
+		if (!last) return;
+		const containerTop = scrollEl.getBoundingClientRect().top;
+		const elTop = last.getBoundingClientRect().top;
+		const target = scrollEl.scrollTop + (elTop - containerTop) - 16;
+		scrollEl.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+	}
+
+	// Keep the composer pinned to the bottom of the viewport by following the
+	// page as it grows. Called on every typewriter tick during streaming so
+	// the scroll appears continuous (tiny deltas = visually smooth) instead
+	// of a single jarring jump at the end.
+	//
+	// Uses scrollIntoView({block:'end'}) on the composer-wrap so the *bottom
+	// edge of the composer* (padding included) lands at the viewport bottom —
+	// more reliable than scrolling to document.scrollHeight, which can lag
+	// behind layout changes from autosize.
+	//
+	// `force` ignores the user-intent guard. By default, if the user has
+	// scrolled up manually (>200px from bottom), we don't yank them back.
+	function ensureComposerVisible(force = false) {
+		if (typeof window === 'undefined') return;
+		// Defer to the next frame so any pending layout (autosize, new turn,
+		// streamed text) has actually been computed before we measure/scroll.
+		requestAnimationFrame(() => {
+			const docH = document.documentElement.scrollHeight;
+			const winH = window.innerHeight;
+			const y = window.scrollY;
+			const fromBottom = docH - winH - y;
+			if (!force && fromBottom > 200) return;
+			const composerEl = document.querySelector('.composer-wrap') as HTMLElement | null;
+			if (composerEl) {
+				composerEl.scrollIntoView({ block: 'end', behavior: 'auto' });
+			} else {
+				window.scrollTo({ top: docH, behavior: 'auto' });
+			}
+		});
+	}
+
 	function onKeydown(e: KeyboardEvent) {
-		// cmd/ctrl + enter sends; plain enter newlines
-		if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+		// Enter sends; Shift+Enter newlines. (IME composition pass-through.)
+		if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
 			e.preventDefault();
 			send();
 		}
+	}
+
+	// Linkify URLs in finished message text. Applied only to non-streaming
+	// turns so we don't accidentally break a half-streamed link mid-token.
+	const URL_RE = /\b((?:https?:\/\/|www\.)[^\s<]+[^\s<.,;:!?'")\]])/gi;
+	function linkify(s: string): { kind: 'text' | 'link'; value: string }[] {
+		const out: { kind: 'text' | 'link'; value: string }[] = [];
+		let last = 0;
+		let m: RegExpExecArray | null;
+		URL_RE.lastIndex = 0;
+		while ((m = URL_RE.exec(s)) !== null) {
+			if (m.index > last) out.push({ kind: 'text', value: s.slice(last, m.index) });
+			out.push({ kind: 'link', value: m[0] });
+			last = m.index + m[0].length;
+		}
+		if (last < s.length) out.push({ kind: 'text', value: s.slice(last) });
+		return out;
+	}
+	function hrefFor(url: string): string {
+		return /^https?:\/\//i.test(url) ? url : `https://${url}`;
 	}
 
 	function fmtTime(s: number): string {
@@ -193,13 +369,85 @@
 
 	function autosize(el: HTMLTextAreaElement | null) {
 		if (!el) return;
+		const before = el.style.height;
 		el.style.height = 'auto';
 		// Cap matches the .composer textarea max-height (14rem ≈ 224px at 16px root)
-		el.style.height = Math.min(el.scrollHeight, 224) + 'px';
+		const next = Math.min(el.scrollHeight, 224) + 'px';
+		el.style.height = next;
+		// If the composer just grew, pin the page to the bottom so the bottom
+		// of the textarea (where the cursor is) stays in view. Force-scroll
+		// because typing inherently means the user wants to see what they're
+		// typing, regardless of the user-intent guard.
+		if (before !== next) ensureComposerVisible(true);
 	}
 
 	$effect(() => {
 		if (inputText !== undefined) autosize(inputEl);
+	});
+
+	// ---- localStorage persistence ----
+	// Save the in-progress conversation so a refresh / browser crash doesn't
+	// wipe it. Restore on mount if the saved session still has turns. We don't
+	// try to verify the server still has the session in memory — if /turn
+	// returns 404 the user can still see their history and just start over.
+	const STORAGE_KEY = 'interviewer.conversation.v1';
+
+	function persistConversation() {
+		if (isPreview || phase !== 'conversation' || !sessionId) return;
+		try {
+			localStorage.setItem(
+				STORAGE_KEY,
+				JSON.stringify({
+					sessionId,
+					turns,
+					elapsedSeconds,
+					timeBudgetSeconds,
+					savedAt: Date.now()
+				})
+			);
+		} catch {
+			/* quota / private mode */
+		}
+	}
+
+	function clearPersistedConversation() {
+		try {
+			localStorage.removeItem(STORAGE_KEY);
+		} catch {
+			/* ignore */
+		}
+	}
+
+	function tryRestoreConversation() {
+		if (isPreview) return false;
+		try {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (!raw) return false;
+			const data = JSON.parse(raw);
+			// Reject anything older than 1 day to avoid resurrecting ancient state
+			if (!data?.sessionId || !Array.isArray(data?.turns)) return false;
+			if (Date.now() - (data.savedAt ?? 0) > 24 * 60 * 60 * 1000) {
+				clearPersistedConversation();
+				return false;
+			}
+			sessionId = data.sessionId;
+			turns = data.turns.map((t: any) => ({
+				role: t.role,
+				parts: t.parts ?? (t.text ? [{ kind: 'text', text: t.text }] : []),
+				elapsed: t.elapsed,
+				streaming: false
+			}));
+			elapsedSeconds = data.elapsedSeconds ?? 0;
+			timeBudgetSeconds = data.timeBudgetSeconds ?? null;
+			phase = 'conversation';
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	onMount(() => {
+		tryRestoreConversation();
 	});
 
 	function openHumanModal() {
@@ -339,7 +587,7 @@
 					onfocus={startAsideReveal}
 					onblur={stopAsideReveal}
 					><span class="ast">*</span><span class="aside-inline">{asideShown}</span></span
-				> for you to find out everything that's going on, and have your say on its future.
+				> for you to find out everything that's going on in the collective, and have your say on its future.
 			</p>
 
 			<div class="form">
@@ -496,22 +744,40 @@
 					<span class="meta-budget">{fmtTime(timeBudgetSeconds)}</span>
 				{/if}
 				<span class="meta-divider">·</span>
-				<button class="meta-end" onclick={leaveEarly} disabled={busy} title="end the interview">
+				<button class="meta-end" onclick={leaveEarly} disabled={busy} title="end and review notes">
 					end
 				</button>
+				{#if writingNotes}
+					<span class="meta-divider">·</span>
+					<span class="meta-writing">writing notes…</span>
+				{/if}
 			</div>
 
 			<div class="transcript" bind:this={scrollEl}>
 				<div class="transcript-inner">
-					{#each turns as turn, i (i)}
+					{#each turns as turn, ti (ti)}
 						<article class="turn turn-{turn.role}" in:fly={{ y: 8, duration: 280 }}>
 							<header class="turn-attr">
 								{turn.role === 'interviewer' ? 'interviewer' : 'you'}
 							</header>
-							<div class="turn-text">{turn.text}</div>
+							{#each turn.parts as part, pi (pi)}
+								{#if part.kind === 'tool'}
+									<div class="tool-line" class:tool-running={part.ok === null}>
+										<span class="tool-dash">—</span>
+										<span class="tool-label">{part.label}</span>
+										{#if part.ok === null}
+											<span class="tool-ellipsis">…</span>
+										{/if}
+									</div>
+								{:else if turn.streaming}
+									<div class="turn-text">{part.text}{#if turn.streaming && pi === turn.parts.length - 1}<span class="caret"></span>{/if}</div>
+								{:else}
+									<div class="turn-text">{#each linkify(part.text) as seg, si (si)}{#if seg.kind === 'link'}<a href={hrefFor(seg.value)} target="_blank" rel="noopener noreferrer">{seg.value}</a>{:else}{seg.value}{/if}{/each}</div>
+								{/if}
+							{/each}
 						</article>
 					{/each}
-					{#if busy}
+					{#if busy && (turns.length === 0 || (turns[turns.length - 1].role === 'interviewer' && turns[turns.length - 1].parts.length === 0))}
 						<div class="thinking turn-interviewer" in:fade={{ duration: 200 }}>
 							<span class="dot"></span><span class="dot"></span><span class="dot"></span>
 							{#if turns.length === 0}
@@ -537,7 +803,7 @@
 						class="send-btn"
 						onclick={send}
 						disabled={!inputText.trim() || busy}
-						title="send (⌘/ctrl + ↵)"
+						title="send (↵)"
 						aria-label="send message"
 					>
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -551,7 +817,7 @@
 						</svg>
 					</button>
 				</div>
-				<div class="composer-hint">⌘ / ctrl + ↵ to send · ↵ for newline</div>
+				<div class="composer-hint">↵ to send · shift + ↵ for new line</div>
 			</div>
 		</section>
 	{:else if phase === 'notes'}
@@ -571,15 +837,12 @@
 					{#if notesContent !== notesOriginal}
 						<span class="dirty">edited · the original draft is preserved</span>
 					{:else}
-						<span class="clean">unedited · save to file as-is</span>
+						<span class="clean">unedited</span>
 					{/if}
 				</div>
 				<div class="actions-buttons">
-					<button class="link-btn" onclick={() => fileNotes(false)} disabled={busy}>
-						file as-is
-					</button>
 					<button class="primary-btn" onclick={() => fileNotes(true)} disabled={busy}>
-						{notesContent !== notesOriginal ? 'save edits and file' : 'file'}
+						file
 					</button>
 				</div>
 			</div>
@@ -1114,6 +1377,11 @@
 		cursor: not-allowed;
 	}
 
+	.meta-writing {
+		color: var(--accent);
+		opacity: 0.85;
+	}
+
 	.transcript {
 		flex: 1;
 		overflow-y: auto;
@@ -1167,6 +1435,63 @@
 		white-space: pre-wrap;
 		font-size: 1.02rem;
 		line-height: 1.6;
+	}
+
+	.turn-text a {
+		color: var(--accent);
+		text-decoration: none;
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+		transition: border-color 0.15s, opacity 0.15s;
+	}
+	.turn-text a:hover {
+		border-bottom-color: var(--accent);
+		opacity: 0.85;
+	}
+
+	.tool-line {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.45rem;
+		font-family: var(--font-mono);
+		font-size: 0.74rem;
+		font-style: italic;
+		letter-spacing: 0.02em;
+		opacity: 0.55;
+		padding: 0.1rem 0;
+	}
+	.turn-interviewer .tool-line {
+		color: var(--accent);
+		opacity: 0.7;
+	}
+	.tool-dash {
+		opacity: 0.7;
+	}
+	.tool-running .tool-label::after {
+		content: '';
+	}
+	.tool-ellipsis {
+		display: inline-block;
+		width: 1ch;
+		animation: dot-pulse 1.4s ease-in-out infinite;
+	}
+	@keyframes dot-pulse {
+		0%, 100% { opacity: 0.3; }
+		50% { opacity: 1; }
+	}
+
+	/* tiny blinking caret at the tail of the streaming text */
+	.caret {
+		display: inline-block;
+		width: 0.5ch;
+		margin-left: 1px;
+		border-right: 2px solid currentColor;
+		opacity: 0.6;
+		animation: blink 1s steps(1, end) infinite;
+		vertical-align: text-bottom;
+		height: 1.05em;
+	}
+	@keyframes blink {
+		50% { opacity: 0; }
 	}
 
 	.thinking {
