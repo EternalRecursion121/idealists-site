@@ -7,6 +7,7 @@
 
     let aliveActive = $state(false);
     let isTouch = $state(false);
+    let playfulBouncing = $state(false);
     let accentColor = $state('');
     let headingColor = $state('');
     let aliveCardEl: HTMLDivElement | undefined = $state();
@@ -65,8 +66,8 @@
             title: "cooperative",
             segments: [
                 { text: "we " },
-                { text: "cannot succeed alone", highlight: true },
-                { text: ", nor would we want to!" }
+                { text: "cannot succeed alone,", highlight: true },
+                { text: " nor would we want to!" }
             ]
         },
         {
@@ -111,6 +112,46 @@
                         color={accentColor}
                         altColor={headingColor}
                     />
+                </div>
+            {:else if item.title === 'playful'}
+                <div
+                    class="principle-card playful-card"
+                    onmouseenter={() => { playfulBouncing = true; }}
+                    onclick={() => { playfulBouncing = true; }}
+                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { playfulBouncing = true; } }}
+                    role="button"
+                    tabindex="0"
+                >
+                    <span
+                        class="principle-title"
+                        class:bouncing={playfulBouncing}
+                        onanimationend={() => { playfulBouncing = false; }}
+                    >{item.title}</span>
+                    <p class="principle-desc"
+                        >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
+                                    >{seg.text}</span
+                                >{:else}{seg.text}{/if}{/each}</p
+                    >
+                </div>
+            {:else if item.title === 'autonomous'}
+                <div class="principle-card autonomous-card">
+                    <span class="principle-title">{item.title}</span>
+                    <p class="principle-desc"
+                        >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight chunk chunk-{i}"
+                                    >{seg.text}</span
+                                >{:else}<span class="chunk chunk-{i}">{seg.text}</span>{/if}{/each}</p
+                    >
+                </div>
+            {:else if item.title === 'cooperative'}
+                <div class="principle-card cooperative-card">
+                    <span class="principle-title">{item.title}</span>
+                    <p class="principle-desc"
+                        >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
+                                    >{seg.text}</span
+                                >{:else if i === item.segments.length - 1}<span class="tail"
+                                    >{seg.text}</span
+                                >{:else}{seg.text}{/if}{/each}</p
+                    >
                 </div>
             {:else}
                 <div class="principle-card">
@@ -205,5 +246,89 @@
 
     .principle-card:hover .highlight {
         color: var(--heading);
+    }
+
+    .playful-card {
+        cursor: pointer;
+    }
+
+    .playful-card .principle-title.bouncing {
+        display: inline-block;
+        animation: playful-bounce 0.6s ease-in-out;
+        transform-origin: bottom center;
+    }
+
+    @keyframes playful-bounce {
+        0%, 100% { transform: translateY(0) rotate(-2deg); }
+        25% { transform: translateY(-6px) rotate(2deg); }
+        50% { transform: translateY(0) rotate(-2deg); }
+        75% { transform: translateY(-3px) rotate(2deg); }
+    }
+
+    .autonomous-card .principle-title {
+        display: inline-block;
+        will-change: transform;
+    }
+
+    .autonomous-card:hover .principle-title {
+        animation: autonomous-wander 2.4s ease-out 1 both;
+    }
+
+    @keyframes autonomous-wander {
+        0%   { transform: translate(0, 0) rotate(0deg); }
+        30%  { transform: translate(5px, -2px) rotate(2deg); }
+        65%  { transform: translate(-3px, 2px) rotate(-2deg); }
+        100% { transform: translate(2px, 0) rotate(1deg); }
+    }
+
+    .autonomous-card .chunk {
+        display: inline;
+        transition: margin 1.2s ease-out, padding 1.2s ease-out;
+    }
+
+    .autonomous-card:hover .chunk-0 { padding-right: 0.25em; }
+    .autonomous-card:hover .chunk-1 { padding-right: 0.5em; padding-left: 0.1em; }
+    .autonomous-card:hover .chunk-2 { padding-right: 0.4em; }
+    .autonomous-card:hover .chunk-3 { padding-right: 0.3em; padding-left: 0.2em; }
+    .autonomous-card:hover .chunk-4 { padding-left: 0.15em; }
+
+    .cooperative-card .principle-title {
+        display: inline-block;
+        transition: transform 0.4s ease;
+    }
+
+    .cooperative-card .highlight {
+        display: inline-block;
+        transition: transform 0.4s ease;
+    }
+
+    .cooperative-card:hover .principle-title {
+        transform: translateY(8px) translateX(6px) rotate(7deg);
+    }
+
+    .cooperative-card:hover .highlight {
+        transform: translateY(-6px) translateX(-4px) rotate(-7deg);
+    }
+
+    .cooperative-card .tail {
+        display: inline-block;
+        transition: transform 0.4s ease;
+    }
+
+    .cooperative-card:hover .tail {
+        transform: translateY(-6px) translateX(-4px) rotate(-7deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .playful-card .principle-title.bouncing,
+        .autonomous-card .principle-title,
+        .autonomous-card .chunk,
+        .cooperative-card .principle-title,
+        .cooperative-card .highlight,
+        .cooperative-card .tail {
+            animation: none;
+            transform: none !important;
+            transition: none;
+        }
     }
 </style>
