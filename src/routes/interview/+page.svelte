@@ -2293,17 +2293,13 @@
 		cursor: pointer;
 		user-select: none;
 	}
-	.s1-section > summary {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-	}
 	.s1-hint {
 		font-family: var(--font-mono);
 		font-size: 0.65rem;
 		text-transform: lowercase;
 		letter-spacing: 0.1em;
 		opacity: 0.4;
+		margin-left: 0.5rem;
 	}
 	.s1-section-lede {
 		font-family: var(--font-mono);
