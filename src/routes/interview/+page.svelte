@@ -37,6 +37,10 @@
 	let inputText = $state('');
 	let inputEl: HTMLTextAreaElement | null = $state(null);
 	let composerFocused = $state(false);
+	// Coarse pointer ≈ touch device with a soft keyboard. Drives Enter behaviour:
+	// on touch, Enter must newline (the send button sends) so people can write
+	// multi-line replies and don't fire half-finished messages by accident.
+	let isTouch = $state(false);
 
 	let elapsedSeconds = $state(0);
 	let timeBudgetSeconds = $state<number | null>(null);
@@ -315,8 +319,18 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		// Enter sends; Shift+Enter newlines. (IME composition pass-through.)
-		if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+		if (e.isComposing) return; // let IME composition commit normally
+		// Cmd/Ctrl+Enter always sends — power-user shortcut, and an escape hatch
+		// if a touchscreen laptop gets misclassified as touch-only.
+		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			send();
+			return;
+		}
+		// Plain Enter sends only with a physical keyboard. On touch the on-screen
+		// Return key falls through to its default (newline); the send button is
+		// the only way to send there.
+		if (e.key === 'Enter' && !e.shiftKey && !isTouch) {
 			e.preventDefault();
 			send();
 		}
@@ -429,6 +443,11 @@
 
 	onMount(() => {
 		tryRestoreConversation();
+		const mq = window.matchMedia('(pointer: coarse)');
+		isTouch = mq.matches;
+		const onPointerChange = (e: MediaQueryListEvent) => (isTouch = e.matches);
+		mq.addEventListener('change', onPointerChange);
+		return () => mq.removeEventListener('change', onPointerChange);
 	});
 
 	onDestroy(() => {
@@ -852,7 +871,9 @@
 						</svg>
 					</button>
 				</div>
-				<div class="composer-hint">↵ to send · shift + ↵ for new line</div>
+				<div class="composer-hint">
+					{isTouch ? 'tap → to send' : '↵ to send · shift + ↵ for new line'}
+				</div>
 			</div>
 		</section>
 	{:else if phase === 'notes'}
