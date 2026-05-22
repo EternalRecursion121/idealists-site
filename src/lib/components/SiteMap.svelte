@@ -101,8 +101,9 @@
 	function calculatePositions(width: number, h: number, mobile: boolean): PositionedPage[] {
 		const centerX = width / 2;
 		const centerY = h / 2;
-		const baseRadius = Math.min(width, h) * (mobile ? 0.25 : 0.30);
-		const orbitRadii = [0, baseRadius, baseRadius * 1.6, baseRadius * 3];
+		const baseRadius = Math.min(width, h) * (mobile ? 0.26 : 0.30);
+		const outerMultiplier = mobile ? 2.2 : 3;
+		const orbitRadii = [0, baseRadius, baseRadius * 1.6, baseRadius * outerMultiplier];
 
 		const angles = assignAngles(pages);
 
@@ -125,12 +126,20 @@
 		});
 	}
 
+	function resolveHeight(width: number, mobile: boolean): number {
+		if (mobile) {
+			const target = Math.min(width * 0.82, height ?? 760);
+			return Math.max(320, target);
+		}
+		return height ?? Math.max(500, window.innerHeight - 100);
+	}
+
 	function calculateLayout() {
 		if (!containerRef) return;
 		const width = containerRef.clientWidth;
-		const h = height ?? Math.max(500, window.innerHeight - 100);
-		measuredHeight = h;
 		const mobile = window.innerWidth < MOBILE_BREAKPOINT;
+		const h = resolveHeight(width, mobile);
+		measuredHeight = h;
 		isMobile = mobile;
 		positions = calculatePositions(width, h, mobile);
 	}
@@ -142,7 +151,7 @@
 			time += 0.002;
 			if (containerRef) {
 				const width = containerRef.clientWidth;
-				const h = height ?? Math.max(500, window.innerHeight - 100);
+				const h = resolveHeight(width, isMobile);
 				positions = calculatePositions(width, h, isMobile);
 			}
 		}, 50);
@@ -198,14 +207,14 @@
 	}
 
 	function getSize(page: PageNode): string {
-		if (page.isWriting) return '0.45rem';
+		if (page.isWriting) return '0.65rem';
 		const count = getConnectionCount(page);
 		const size = Math.min(1.2, 0.6 + count * 0.072);
 		return `${size}rem`;
 	}
 
 	function getMobileSize(page: PageNode): string {
-		if (page.isWriting) return '0.36rem';
+		if (page.isWriting) return '0.55rem';
 		const count = getConnectionCount(page);
 		const size = Math.min(0.9, 0.51 + count * 0.048);
 		return `${size}rem`;
@@ -271,16 +280,6 @@
 			/>
 		{/each}
 
-		{#each positions as page (page.path + '-dot')}
-			<circle
-				cx={page.x}
-				cy={page.y}
-				r={page.path === '/' ? 4 : 2.5}
-				fill="var(--text)"
-				opacity={hoveredPage === page.path ? 0.6 : 0.25}
-				class="node-dot"
-			/>
-		{/each}
 	</svg>
 
 	{#each positions as page (page.path)}
@@ -359,7 +358,7 @@
 	}
 
 	.sitemap-link.writing {
-		opacity: 0.7;
+		opacity: 0.85;
 	}
 
 	.sitemap-link.writing .link-name {

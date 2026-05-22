@@ -308,7 +308,7 @@
         grid-template-columns: 1fr;
         gap: 3rem;
         margin-top: 0;
-        margin-bottom: 2rem;
+        margin-bottom: 0.5rem;
     }
 
     .dna-row {

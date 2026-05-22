@@ -104,6 +104,13 @@
 			return () => mediaQuery.removeEventListener('change', handler);
 		}
 	});
+
+	$effect(() => {
+		if (browser) {
+			document.documentElement.style.backgroundColor = currentColors.bg;
+			document.body.style.backgroundColor = currentColors.bg;
+		}
+	});
 </script>
 
 <svelte:head>
