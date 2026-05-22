@@ -34,12 +34,39 @@
 	let s1FallingShort = $state('');
 	let s1Ideas = $state('');
 	let s1Involvement = $state('');
+	let s1OpenQuestions = $state({ membership: '', growth: '', roles: '', action: '' });
 	let s1TimeMinutes = $state<number | null>(20);
 	let s1NoTimeLimit = $state(false);
 	let s1WantsNewsletter = $state(false);
 	let s1NlEmail = $state('');
 	let s1NlInterested = $state(''); // free text: "how often + what in it"
 	const TIME_CHOICES = [15, 20, 30, 45, 60];
+	const OPEN_QUESTIONS = [
+		{
+			key: 'membership',
+			label: 'how should new membership be handled?',
+			context:
+				"samuel reads every application solo and decides who's invited. it's worked for ~130 applications, but it isn't scalable or democratic."
+		},
+		{
+			key: 'growth',
+			label: 'should the collective grow — and if so, how?',
+			context:
+				'growth so far is referral-driven. is more reach worth wanting? if so, how — and at what cost to coherence?'
+		},
+		{
+			key: 'roles',
+			label: "what roles of responsibility should exist, and who'd want them?",
+			context:
+				'the collective has no formal roles — things happen because someone decides to do them.'
+		},
+		{
+			key: 'action',
+			label: 'how do we shift from talking to actually doing?',
+			context:
+				"long threads, a deferred unconference, drafts, projects 'in planning'. what's the practical lever?"
+		}
+	] as const;
 	let busy = $state(false);
 	let errorMessage = $state('');
 
@@ -91,6 +118,13 @@
 						interested_in: t(s1NlInterested)
 					}
 				: null;
+		const oq = {
+			membership: t(s1OpenQuestions.membership),
+			growth: t(s1OpenQuestions.growth),
+			roles: t(s1OpenQuestions.roles),
+			action: t(s1OpenQuestions.action)
+		};
+		const open_questions = Object.values(oq).some((v) => v !== null) ? oq : null;
 		return {
 			value: t(s1Value),
 			falling_short: t(s1FallingShort),
@@ -98,7 +132,8 @@
 			involvement: t(s1Involvement),
 			time_minutes: s1NoTimeLimit ? null : s1TimeMinutes,
 			no_time_limit: s1NoTimeLimit,
-			newsletter
+			newsletter,
+			open_questions
 		};
 	}
 
@@ -877,6 +912,26 @@
 					<textarea class="s1-input" rows="2" bind:value={s1Involvement} disabled={busy}
 					></textarea>
 				</label>
+
+				<details class="s1-section">
+					<summary>
+						<span class="field-label">open questions</span>
+						<span class="s1-hint">optional</span>
+					</summary>
+					<p class="s1-section-lede">braindump on as many as you like.</p>
+					{#each OPEN_QUESTIONS as q}
+						<details class="s1-q">
+							<summary>{q.label}</summary>
+							<p class="s1-q-context">{q.context}</p>
+							<textarea
+								class="s1-input"
+								rows="2"
+								bind:value={s1OpenQuestions[q.key]}
+								disabled={busy}
+							></textarea>
+						</details>
+					{/each}
+				</details>
 
 				<label class="field newsletter-toggle">
 					<input type="checkbox" bind:checked={s1WantsNewsletter} disabled={busy} />
@@ -2228,5 +2283,55 @@
 	}
 	.skip-btn:hover {
 		opacity: 1;
+	}
+	.s1-section {
+		border-top: 1px solid var(--rule, rgba(0, 0, 0, 0.15));
+		padding-top: 0.9rem;
+	}
+	.s1-section > summary,
+	.s1-q > summary {
+		cursor: pointer;
+		user-select: none;
+	}
+	.s1-section > summary {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+	}
+	.s1-hint {
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		text-transform: lowercase;
+		letter-spacing: 0.1em;
+		opacity: 0.4;
+	}
+	.s1-section-lede {
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
+		opacity: 0.55;
+		margin: 0.7rem 0 0.2rem;
+	}
+	.s1-q {
+		margin-top: 0.7rem;
+		padding-left: 1rem;
+		border-left: 1px solid var(--rule, rgba(0, 0, 0, 0.12));
+	}
+	.s1-q > summary {
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		text-transform: lowercase;
+		letter-spacing: 0.08em;
+		opacity: 0.7;
+		color: var(--heading);
+	}
+	.s1-q-context {
+		font-size: 0.85rem;
+		opacity: 0.5;
+		line-height: 1.55;
+		margin: 0.5rem 0;
+	}
+	.s1-q .s1-input {
+		margin-top: 0.2rem;
 	}
 </style>
