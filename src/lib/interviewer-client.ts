@@ -12,6 +12,23 @@ export interface CreateSessionRequest {
 	member_hint?: string | null;
 	fast?: boolean;
 	model?: string | null;
+	stage1?: Stage1 | null;
+}
+
+export interface Stage1Newsletter {
+	email?: string | null;
+	frequency?: string | null;
+	interested_in?: string | null;
+}
+
+export interface Stage1 {
+	value?: string | null;
+	falling_short?: string | null;
+	ideas?: string | null;
+	involvement?: string | null;
+	time_minutes?: number | null;
+	no_time_limit?: boolean;
+	newsletter?: Stage1Newsletter | null;
 }
 
 export interface CreateSessionResponse {
