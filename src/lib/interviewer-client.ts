@@ -21,6 +21,13 @@ export interface Stage1Newsletter {
 	interested_in?: string | null;
 }
 
+export interface Stage1OpenQuestions {
+	membership?: string | null;
+	growth?: string | null;
+	roles?: string | null;
+	action?: string | null;
+}
+
 export interface Stage1 {
 	value?: string | null;
 	falling_short?: string | null;
@@ -29,6 +36,7 @@ export interface Stage1 {
 	time_minutes?: number | null;
 	no_time_limit?: boolean;
 	newsletter?: Stage1Newsletter | null;
+	open_questions?: Stage1OpenQuestions | null;
 }
 
 export interface CreateSessionResponse {
