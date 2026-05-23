@@ -950,7 +950,7 @@
 						/>
 					</label>
 					<label class="field">
-						<span class="field-label">how often, and what would you want in it?</span>
+						<span class="field-label">how often, and is there anything in particular you'd want in it?</span>
 						<textarea
 							class="s1-input"
 							rows="2"
