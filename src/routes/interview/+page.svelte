@@ -933,10 +933,14 @@
 					{/each}
 				</details>
 
-				<label class="field newsletter-toggle">
-					<input type="checkbox" bind:checked={s1WantsNewsletter} disabled={busy} />
-					<span class="field-label">i'd like a personalised newsletter</span>
-				</label>
+				<button
+					type="button"
+					class="chip newsletter-chip"
+					class:active={s1WantsNewsletter}
+					aria-pressed={s1WantsNewsletter}
+					disabled={busy}
+					onclick={() => (s1WantsNewsletter = !s1WantsNewsletter)}
+				>i'd like a personalised newsletter</button>
 				{#if s1WantsNewsletter}
 					<label class="field">
 						<span class="field-label">email</span>
@@ -2274,10 +2278,8 @@
 	.chip.active {
 		border-color: currentColor;
 	}
-	.newsletter-toggle {
-		flex-direction: row;
-		align-items: center;
-		gap: 0.5rem;
+	.newsletter-chip {
+		align-self: flex-start;
 	}
 	.skip-btn {
 		background: none;
