@@ -46,7 +46,7 @@
 			key: 'membership',
 			label: 'how should new membership be handled?',
 			context:
-				"samuel reads every application solo and decides who's invited. it's worked for ~130 applications, but it isn't scalable or democratic."
+				"samuel reads every application and basically lets everyone in. it's worked for ~130 applications, but it isn't scalable or democratic."
 		},
 		{
 			key: 'growth',
@@ -920,8 +920,8 @@
 					</summary>
 					<p class="s1-section-lede">braindump on as many as you like.</p>
 					{#each OPEN_QUESTIONS as q}
-						<details class="s1-q">
-							<summary>{q.label}</summary>
+						<label class="field s1-q">
+							<span class="field-label">{q.label}</span>
 							<p class="s1-q-context">{q.context}</p>
 							<textarea
 								class="s1-input"
@@ -929,7 +929,7 @@
 								bind:value={s1OpenQuestions[q.key]}
 								disabled={busy}
 							></textarea>
-						</details>
+						</label>
 					{/each}
 				</details>
 
@@ -951,7 +951,12 @@
 					</label>
 					<label class="field">
 						<span class="field-label">how often, and what would you want in it?</span>
-						<textarea class="s1-input" rows="2" bind:value={s1NlInterested} disabled={busy}
+						<textarea
+							class="s1-input"
+							rows="2"
+							placeholder="e.g. monthly — new essays and member projects"
+							bind:value={s1NlInterested}
+							disabled={busy}
 						></textarea>
 					</label>
 				{/if}
@@ -2287,10 +2292,12 @@
 		border-top: 1px solid var(--rule, rgba(0, 0, 0, 0.15));
 		padding-top: 0.9rem;
 	}
-	.s1-section > summary,
-	.s1-q > summary {
+	.s1-section > summary {
 		cursor: pointer;
 		user-select: none;
+	}
+	.stage1 .underline-input {
+		font-size: 1rem;
 	}
 	.s1-hint {
 		font-family: var(--font-mono);
@@ -2311,14 +2318,6 @@
 		margin-top: 0.7rem;
 		padding-left: 1rem;
 		border-left: 1px solid var(--rule, rgba(0, 0, 0, 0.12));
-	}
-	.s1-q > summary {
-		font-family: var(--font-mono);
-		font-size: 0.7rem;
-		text-transform: lowercase;
-		letter-spacing: 0.08em;
-		opacity: 0.7;
-		color: var(--heading);
 	}
 	.s1-q-context {
 		font-size: 0.85rem;
