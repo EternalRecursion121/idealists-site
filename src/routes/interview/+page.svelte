@@ -891,7 +891,7 @@
 				</div>
 
 				<label class="field">
-					<span class="field-label">what do you value about the collective?</span>
+					<span class="field-label">what do you like about the collective? why did you join?</span>
 					<textarea class="s1-input" rows="2" bind:value={s1Value} disabled={busy}></textarea>
 				</label>
 				<label class="field">
@@ -2265,7 +2265,6 @@
 	}
 	.chip.active {
 		border-color: currentColor;
-		font-weight: 600;
 	}
 	.newsletter-toggle {
 		flex-direction: row;
