@@ -892,24 +892,24 @@
 
 				<label class="field">
 					<span class="field-label">what do you like about the collective? why did you join?</span>
-					<textarea class="s1-input" rows="2" bind:value={s1Value} disabled={busy}></textarea>
+					<textarea class="s1-input" rows="3" bind:value={s1Value} disabled={busy}></textarea>
 				</label>
 				<label class="field">
 					<span class="field-label">where do you think we're falling short?</span>
-					<textarea class="s1-input" rows="2" bind:value={s1FallingShort} disabled={busy}
+					<textarea class="s1-input" rows="3" bind:value={s1FallingShort} disabled={busy}
 					></textarea>
 				</label>
 				<label class="field">
 					<span class="field-label"
 						>any ideas for things we could do differently, or things you wish existed?</span
 					>
-					<textarea class="s1-input" rows="2" bind:value={s1Ideas} disabled={busy}></textarea>
+					<textarea class="s1-input" rows="3" bind:value={s1Ideas} disabled={busy}></textarea>
 				</label>
 				<label class="field">
 					<span class="field-label"
 						>would you like to get more involved? if so, what would you want to do?</span
 					>
-					<textarea class="s1-input" rows="2" bind:value={s1Involvement} disabled={busy}
+					<textarea class="s1-input" rows="3" bind:value={s1Involvement} disabled={busy}
 					></textarea>
 				</label>
 
@@ -925,7 +925,7 @@
 							<p class="s1-q-context">{q.context}</p>
 							<textarea
 								class="s1-input"
-								rows="2"
+								rows="3"
 								bind:value={s1OpenQuestions[q.key]}
 								disabled={busy}
 							></textarea>
@@ -953,7 +953,7 @@
 						<span class="field-label">how often, and is there anything in particular you'd want in it?</span>
 						<textarea
 							class="s1-input"
-							rows="2"
+							rows="3"
 							placeholder="e.g. monthly — new essays and member projects"
 							bind:value={s1NlInterested}
 							disabled={busy}
@@ -2248,6 +2248,9 @@
 		color: inherit;
 		resize: vertical;
 		padding: 0.35rem 0;
+		/* Auto-grow as the user types (Chromium 123+ / Safari 17.4+);
+		   Firefox falls back to rows=3 + the resize handle. */
+		field-sizing: content;
 	}
 	.s1-input:focus {
 		outline: none;
