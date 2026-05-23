@@ -860,8 +860,8 @@
 			</h1>
 			<div class="rule"></div>
 			<p class="lede">
-				a couple of minutes of rough notes — all optional, a sentence is plenty. it lets the
-				conversation go deeper instead of starting cold. skip anything, or skip the whole thing.
+				a couple of minutes of rough notes — all optional, a sentence is plenty. skip
+				anything, or skip the whole thing.
 			</p>
 
 			<div class="form">
