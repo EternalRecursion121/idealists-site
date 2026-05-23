@@ -457,6 +457,22 @@
 		if (before !== next) ensureComposerVisible(true);
 	}
 
+	// Action: auto-grow a stage-1 textarea to fit its content. Works in every
+	// modern browser (no reliance on the still-uneven `field-sizing` CSS).
+	function autogrowS1(el: HTMLTextAreaElement) {
+		const fit = () => {
+			el.style.height = 'auto';
+			el.style.height = el.scrollHeight + 'px';
+		};
+		fit();
+		el.addEventListener('input', fit);
+		return {
+			destroy() {
+				el.removeEventListener('input', fit);
+			}
+		};
+	}
+
 	$effect(() => {
 		if (inputText !== undefined) autosize(inputEl);
 	});
@@ -892,24 +908,36 @@
 
 				<label class="field">
 					<span class="field-label">what do you like about the collective? why did you join?</span>
-					<textarea class="s1-input" rows="3" bind:value={s1Value} disabled={busy}></textarea>
+					<textarea class="s1-input" rows="3" bind:value={s1Value} use:autogrowS1 disabled={busy}
+					></textarea>
 				</label>
 				<label class="field">
 					<span class="field-label">where do you think we're falling short?</span>
-					<textarea class="s1-input" rows="3" bind:value={s1FallingShort} disabled={busy}
+					<textarea
+						class="s1-input"
+						rows="3"
+						bind:value={s1FallingShort}
+						use:autogrowS1
+						disabled={busy}
 					></textarea>
 				</label>
 				<label class="field">
 					<span class="field-label"
 						>any ideas for things we could do differently, or things you wish existed?</span
 					>
-					<textarea class="s1-input" rows="3" bind:value={s1Ideas} disabled={busy}></textarea>
+					<textarea class="s1-input" rows="3" bind:value={s1Ideas} use:autogrowS1 disabled={busy}
+					></textarea>
 				</label>
 				<label class="field">
 					<span class="field-label"
 						>would you like to get more involved? if so, what would you want to do?</span
 					>
-					<textarea class="s1-input" rows="3" bind:value={s1Involvement} disabled={busy}
+					<textarea
+						class="s1-input"
+						rows="3"
+						bind:value={s1Involvement}
+						use:autogrowS1
+						disabled={busy}
 					></textarea>
 				</label>
 
@@ -927,20 +955,17 @@
 								class="s1-input"
 								rows="3"
 								bind:value={s1OpenQuestions[q.key]}
+								use:autogrowS1
 								disabled={busy}
 							></textarea>
 						</label>
 					{/each}
 				</details>
 
-				<button
-					type="button"
-					class="chip newsletter-chip"
-					class:active={s1WantsNewsletter}
-					aria-pressed={s1WantsNewsletter}
-					disabled={busy}
-					onclick={() => (s1WantsNewsletter = !s1WantsNewsletter)}
-				>i'd like a personalised newsletter</button>
+				<label class="field newsletter-toggle">
+					<input type="checkbox" bind:checked={s1WantsNewsletter} disabled={busy} />
+					<span class="field-label">i'd like a personalised newsletter</span>
+				</label>
 				{#if s1WantsNewsletter}
 					<label class="field">
 						<span class="field-label">email</span>
@@ -960,6 +985,7 @@
 							rows="3"
 							placeholder="e.g. monthly — new essays and member projects"
 							bind:value={s1NlInterested}
+							use:autogrowS1
 							disabled={busy}
 						></textarea>
 					</label>
@@ -2250,11 +2276,12 @@
 		border-bottom: 1px solid var(--rule, rgba(0, 0, 0, 0.2));
 		font: inherit;
 		color: inherit;
-		resize: vertical;
 		padding: 0.35rem 0;
-		/* Auto-grow as the user types (Chromium 123+ / Safari 17.4+);
-		   Firefox falls back to rows=3 + the resize handle. */
-		field-sizing: content;
+		/* Auto-grow happens via the `use:autogrowS1` action, which sets
+		   inline height to scrollHeight on every input. overflow: hidden
+		   keeps the brief height=auto step from flashing a scrollbar. */
+		overflow: hidden;
+		resize: none;
 	}
 	.s1-input:focus {
 		outline: none;
@@ -2278,8 +2305,32 @@
 	.chip.active {
 		border-color: currentColor;
 	}
-	.newsletter-chip {
+	.newsletter-toggle {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.6rem;
+		cursor: pointer;
 		align-self: flex-start;
+	}
+	.newsletter-toggle input[type='checkbox'] {
+		appearance: none;
+		-webkit-appearance: none;
+		width: 1rem;
+		height: 1rem;
+		margin: 0;
+		border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+		border-radius: 2px;
+		background: transparent;
+		cursor: pointer;
+		transition: border-color 0.15s, background-color 0.15s;
+	}
+	.newsletter-toggle input[type='checkbox']:checked {
+		border-color: currentColor;
+		background-color: currentColor;
+	}
+	.newsletter-toggle input[type='checkbox']:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
 	}
 	.skip-btn {
 		background: none;
@@ -2302,7 +2353,10 @@
 		user-select: none;
 	}
 	.stage1 .underline-input {
-		font-size: 1rem;
+		font: inherit;
+	}
+	.stage1 .field-label {
+		font-size: 0.8rem;
 	}
 	.s1-hint {
 		font-family: var(--font-mono);
@@ -2317,18 +2371,18 @@
 		font-size: 0.7rem;
 		letter-spacing: 0.06em;
 		opacity: 0.55;
-		margin: 0.7rem 0 0.2rem;
+		margin: 1rem 0 0.4rem;
 	}
 	.s1-q {
-		margin-top: 0.7rem;
-		padding-left: 1rem;
+		margin-top: 1.6rem;
+		padding-left: 1.2rem;
 		border-left: 1px solid var(--rule, rgba(0, 0, 0, 0.12));
 	}
 	.s1-q-context {
 		font-size: 0.85rem;
 		opacity: 0.5;
 		line-height: 1.55;
-		margin: 0.5rem 0;
+		margin: 0.55rem 0 0.75rem;
 	}
 	.s1-q .s1-input {
 		margin-top: 0.2rem;
