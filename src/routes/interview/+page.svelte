@@ -8,7 +8,7 @@
 	const isPreview = $derived($page.url.searchParams.has('preview'));
 	const interviewer = $derived(isPreview ? mockInterviewer : realInterviewer);
 
-	type Phase = 'welcome' | 'conversation' | 'notes' | 'done' | 'error';
+	type Phase = 'welcome' | 'form' | 'conversation' | 'notes' | 'done' | 'error';
 
 	type ToolPart = {
 		kind: 'tool';
@@ -29,6 +29,44 @@
 
 	let phase = $state<Phase>('welcome');
 	let memberHint = $state('');
+	// Stage-1 form state
+	let s1Value = $state('');
+	let s1FallingShort = $state('');
+	let s1Ideas = $state('');
+	let s1Involvement = $state('');
+	let s1OpenQuestions = $state({ membership: '', growth: '', roles: '', action: '' });
+	let s1TimeMinutes = $state<number | null>(20);
+	let s1NoTimeLimit = $state(false);
+	let s1WantsNewsletter = $state(false);
+	let s1NlEmail = $state('');
+	let s1NlInterested = $state(''); // free text: "how often + what in it"
+	const TIME_CHOICES = [15, 20, 30, 45, 60];
+	const OPEN_QUESTIONS = [
+		{
+			key: 'membership',
+			label: 'how should new membership be handled?',
+			context:
+				"samuel reads every application solo and decides who's invited. it's worked for ~130 applications, but it isn't scalable or democratic."
+		},
+		{
+			key: 'growth',
+			label: 'should the collective grow — and if so, how?',
+			context:
+				'growth so far is referral-driven. is more reach worth wanting? if so, how — and at what cost to coherence?'
+		},
+		{
+			key: 'roles',
+			label: "what roles of responsibility should exist, and who'd want them?",
+			context:
+				'the collective has no formal roles — things happen because someone decides to do them.'
+		},
+		{
+			key: 'action',
+			label: 'how do we shift from talking to actually doing?',
+			context:
+				"long threads, a deferred unconference, drafts, projects 'in planning'. what's the practical lever?"
+		}
+	] as const;
 	let busy = $state(false);
 	let errorMessage = $state('');
 
@@ -37,6 +75,10 @@
 	let inputText = $state('');
 	let inputEl: HTMLTextAreaElement | null = $state(null);
 	let composerFocused = $state(false);
+	// Coarse pointer ≈ touch device with a soft keyboard. Drives Enter behaviour:
+	// on touch, Enter must newline (the send button sends) so people can write
+	// multi-line replies and don't fire half-finished messages by accident.
+	let isTouch = $state(false);
 
 	let elapsedSeconds = $state(0);
 	let timeBudgetSeconds = $state<number | null>(null);
@@ -57,7 +99,45 @@
 	let humanSubmitted = $state(false);
 	let humanError = $state('');
 
-	async function begin() {
+	function begin() {
+		// Welcome → stage-1 form. (No network yet; the session starts after the form.)
+		errorMessage = '';
+		phase = 'form';
+	}
+
+	function buildStage1() {
+		const t = (s: string) => {
+			const v = s.trim();
+			return v ? v : null;
+		};
+		const newsletter =
+			s1WantsNewsletter && s1NlEmail.trim()
+				? {
+						email: s1NlEmail.trim(),
+						frequency: null,
+						interested_in: t(s1NlInterested)
+					}
+				: null;
+		const oq = {
+			membership: t(s1OpenQuestions.membership),
+			growth: t(s1OpenQuestions.growth),
+			roles: t(s1OpenQuestions.roles),
+			action: t(s1OpenQuestions.action)
+		};
+		const open_questions = Object.values(oq).some((v) => v !== null) ? oq : null;
+		return {
+			value: t(s1Value),
+			falling_short: t(s1FallingShort),
+			ideas: t(s1Ideas),
+			involvement: t(s1Involvement),
+			time_minutes: s1NoTimeLimit ? null : s1TimeMinutes,
+			no_time_limit: s1NoTimeLimit,
+			newsletter,
+			open_questions
+		};
+	}
+
+	async function startConversation(stage1: import('$lib/interviewer-client').Stage1 | null) {
 		errorMessage = '';
 		busy = true;
 		try {
@@ -66,18 +146,24 @@
 			phase = 'conversation';
 			await tick();
 			inputEl?.focus();
-			// Start a streaming session — first event is session_created, then
-			// the opening turn streams in.
-			const events = await interviewer.startStream({ member_hint: hint });
+			const events = await interviewer.startStream({ member_hint: hint, stage1 });
 			await consumeStream(events);
 		} catch (e) {
 			handleError(e);
-			if (turns.length === 0) phase = 'welcome';
+			if (turns.length === 0) phase = 'form';
 		} finally {
 			busy = false;
 			await tick();
 			inputEl?.focus();
 		}
+	}
+
+	function submitForm() {
+		startConversation(buildStage1());
+	}
+
+	function skipForm() {
+		startConversation(null);
 	}
 
 	async function send() {
@@ -315,8 +401,18 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		// Enter sends; Shift+Enter newlines. (IME composition pass-through.)
-		if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+		if (e.isComposing) return; // let IME composition commit normally
+		// Cmd/Ctrl+Enter always sends — power-user shortcut, and an escape hatch
+		// if a touchscreen laptop gets misclassified as touch-only.
+		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			send();
+			return;
+		}
+		// Plain Enter sends only with a physical keyboard. On touch the on-screen
+		// Return key falls through to its default (newline); the send button is
+		// the only way to send there.
+		if (e.key === 'Enter' && !e.shiftKey && !isTouch) {
 			e.preventDefault();
 			send();
 		}
@@ -429,6 +525,11 @@
 
 	onMount(() => {
 		tryRestoreConversation();
+		const mq = window.matchMedia('(pointer: coarse)');
+		isTouch = mq.matches;
+		const onPointerChange = (e: MediaQueryListEvent) => (isTouch = e.matches);
+		mq.addEventListener('change', onPointerChange);
+		return () => mq.removeEventListener('change', onPointerChange);
 	});
 
 	onDestroy(() => {
@@ -519,7 +620,7 @@
 		}
 		if (p === 'conversation') {
 			devReset();
-			await begin();
+			await startConversation(null);
 			return;
 		}
 		if (p === 'notes') {
@@ -751,6 +852,122 @@
 				</div>
 			</div>
 		{/if}
+	{:else if phase === 'form'}
+		<section class="welcome stage1" in:fade={{ duration: 400 }}>
+			<h1 class="display-title">
+				<span class="title-line-1">before</span>
+				<span class="title-line-2">we talk</span>
+			</h1>
+			<div class="rule"></div>
+			<p class="lede">
+				a couple of minutes of rough notes — all optional, a sentence is plenty. it lets the
+				conversation go deeper instead of starting cold. skip anything, or skip the whole thing.
+			</p>
+
+			<div class="form">
+				<div class="field">
+					<span class="field-label">how long do you want the conversation to be?</span>
+					<div class="chips">
+						{#each TIME_CHOICES as m}
+							<button
+								type="button"
+								class="chip"
+								class:active={!s1NoTimeLimit && s1TimeMinutes === m}
+								aria-pressed={!s1NoTimeLimit && s1TimeMinutes === m}
+								onclick={() => {
+									s1TimeMinutes = m;
+									s1NoTimeLimit = false;
+								}}>{m} min</button
+							>
+						{/each}
+						<button
+							type="button"
+							class="chip"
+							class:active={s1NoTimeLimit}
+							aria-pressed={s1NoTimeLimit}
+							onclick={() => (s1NoTimeLimit = true)}>no fixed limit</button
+						>
+					</div>
+				</div>
+
+				<label class="field">
+					<span class="field-label">what do you value about the collective?</span>
+					<textarea class="s1-input" rows="2" bind:value={s1Value} disabled={busy}></textarea>
+				</label>
+				<label class="field">
+					<span class="field-label">where do you think we're falling short?</span>
+					<textarea class="s1-input" rows="2" bind:value={s1FallingShort} disabled={busy}
+					></textarea>
+				</label>
+				<label class="field">
+					<span class="field-label"
+						>any ideas for things we could do differently, or things you wish existed?</span
+					>
+					<textarea class="s1-input" rows="2" bind:value={s1Ideas} disabled={busy}></textarea>
+				</label>
+				<label class="field">
+					<span class="field-label"
+						>would you like to get more involved? if so, what would you want to do?</span
+					>
+					<textarea class="s1-input" rows="2" bind:value={s1Involvement} disabled={busy}
+					></textarea>
+				</label>
+
+				<details class="s1-section">
+					<summary>
+						<span class="field-label">open questions</span>
+						<span class="s1-hint">optional</span>
+					</summary>
+					<p class="s1-section-lede">braindump on as many as you like.</p>
+					{#each OPEN_QUESTIONS as q}
+						<details class="s1-q">
+							<summary>{q.label}</summary>
+							<p class="s1-q-context">{q.context}</p>
+							<textarea
+								class="s1-input"
+								rows="2"
+								bind:value={s1OpenQuestions[q.key]}
+								disabled={busy}
+							></textarea>
+						</details>
+					{/each}
+				</details>
+
+				<label class="field newsletter-toggle">
+					<input type="checkbox" bind:checked={s1WantsNewsletter} disabled={busy} />
+					<span class="field-label">i'd like a personalised newsletter</span>
+				</label>
+				{#if s1WantsNewsletter}
+					<label class="field">
+						<span class="field-label">email</span>
+						<input
+							class="underline-input"
+							type="email"
+							bind:value={s1NlEmail}
+							spellcheck="false"
+							autocomplete="off"
+							disabled={busy}
+						/>
+					</label>
+					<label class="field">
+						<span class="field-label">how often, and what would you want in it?</span>
+						<textarea class="s1-input" rows="2" bind:value={s1NlInterested} disabled={busy}
+						></textarea>
+					</label>
+				{/if}
+
+				{#if errorMessage}
+					<p class="error" in:fade>{errorMessage}</p>
+				{/if}
+
+				<div class="actions">
+					<button class="begin-btn" onclick={submitForm} disabled={busy} aria-busy={busy}>
+						<span class="begin-text">{busy ? 'opening' : 'start the conversation'}</span>
+					</button>
+					<button class="skip-btn" onclick={skipForm} disabled={busy}>skip straight to it</button>
+				</div>
+			</div>
+		</section>
 	{:else if phase === 'conversation'}
 		<section class="convo" in:fade={{ duration: 400 }}>
 			<div class="convo-meta">
@@ -852,7 +1069,9 @@
 						</svg>
 					</button>
 				</div>
-				<div class="composer-hint">↵ to send · shift + ↵ for new line</div>
+				<div class="composer-hint">
+					{isTouch ? 'tap → to send' : '↵ to send · shift + ↵ for new line'}
+				</div>
 			</div>
 		</section>
 	{:else if phase === 'notes'}
@@ -2010,5 +2229,105 @@
 		border-style: solid;
 		color: color-mix(in srgb, var(--accent) 80%, #c44 20%);
 		border-color: currentColor;
+	}
+
+	.stage1 .form {
+		max-width: 36rem;
+	}
+	.s1-input {
+		width: 100%;
+		background: transparent;
+		border: none;
+		border-bottom: 1px solid var(--rule, rgba(0, 0, 0, 0.2));
+		font: inherit;
+		color: inherit;
+		resize: vertical;
+		padding: 0.35rem 0;
+	}
+	.s1-input:focus {
+		outline: none;
+		border-bottom-color: currentColor;
+	}
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.4rem;
+	}
+	.chip {
+		padding: 0.3rem 0.7rem;
+		border: 1px solid var(--rule, rgba(0, 0, 0, 0.25));
+		border-radius: 999px;
+		background: transparent;
+		font: inherit;
+		color: inherit;
+		cursor: pointer;
+	}
+	.chip.active {
+		border-color: currentColor;
+		font-weight: 600;
+	}
+	.newsletter-toggle {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.skip-btn {
+		background: none;
+		border: none;
+		font: inherit;
+		color: inherit;
+		opacity: 0.6;
+		cursor: pointer;
+		text-decoration: underline;
+	}
+	.skip-btn:hover {
+		opacity: 1;
+	}
+	.s1-section {
+		border-top: 1px solid var(--rule, rgba(0, 0, 0, 0.15));
+		padding-top: 0.9rem;
+	}
+	.s1-section > summary,
+	.s1-q > summary {
+		cursor: pointer;
+		user-select: none;
+	}
+	.s1-hint {
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		text-transform: lowercase;
+		letter-spacing: 0.1em;
+		opacity: 0.4;
+		margin-left: 0.5rem;
+	}
+	.s1-section-lede {
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
+		opacity: 0.55;
+		margin: 0.7rem 0 0.2rem;
+	}
+	.s1-q {
+		margin-top: 0.7rem;
+		padding-left: 1rem;
+		border-left: 1px solid var(--rule, rgba(0, 0, 0, 0.12));
+	}
+	.s1-q > summary {
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		text-transform: lowercase;
+		letter-spacing: 0.08em;
+		opacity: 0.7;
+		color: var(--heading);
+	}
+	.s1-q-context {
+		font-size: 0.85rem;
+		opacity: 0.5;
+		line-height: 1.55;
+		margin: 0.5rem 0;
+	}
+	.s1-q .s1-input {
+		margin-top: 0.2rem;
 	}
 </style>
