@@ -2,6 +2,7 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { page } from '$app/stores';
+	import { marked } from 'marked';
 	import { interviewer as realInterviewer, InterviewerError } from '$lib/interviewer-client';
 	import { mockInterviewer, mockControls } from '$lib/interviewer-client-mock';
 
@@ -47,6 +48,16 @@
 	let notesOriginal = $state('');
 	let notesPath = $state<string | null>(null);
 	let writingNotes = $state(false);
+	let notesView = $state<'read' | 'edit'>('read');
+
+	// The notes are markdown with a YAML frontmatter block. Strip the frontmatter
+	// for the rendered preview (it's filing metadata, not something to read), but
+	// keep it in the editable source so it's preserved when filed.
+	function stripFrontmatter(md: string): string {
+		const m = md.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
+		return m ? md.slice(m[0].length) : md;
+	}
+	const notesHtml = $derived(marked.parse(stripFrontmatter(notesContent.trim())) as string);
 
 	// Human-handoff modal state
 	let humanModalOpen = $state(false);
@@ -500,6 +511,7 @@
 	let devOpen = $state(true);
 	function devReset() {
 		mockControls.reset();
+		devReplyIndex = 0;
 		phase = 'welcome';
 		turns = [];
 		sessionId = null;
@@ -533,6 +545,33 @@
 			notesPath = '/mock/notes.md';
 			phase = 'done';
 		}
+	}
+
+	// Canned participant replies for stepping through the conversation without
+	// typing. Cycles if we run past the end.
+	const DEV_CANNED_REPLIES = [
+		'about 20 minutes, sounds good.',
+		'mostly the writing, honestly — a friend sent me one of the essays and it stuck with me.',
+		'i think if it had led with a concrete example instead of the abstract framing.',
+		'yeah, point me at it.',
+		'the format worked better than i expected — felt less stiff than a form.',
+		"that's me, thanks."
+	];
+	let devReplyIndex = $state(0);
+
+	// Advance one conversation turn using a canned reply (mock only — no typing,
+	// no real server call). Starts the conversation first if needed.
+	async function devStepTurn() {
+		if (busy) return;
+		if (phase !== 'conversation') {
+			await devGotoPhase('conversation');
+			devReplyIndex = 0;
+			return;
+		}
+		const reply = DEV_CANNED_REPLIES[devReplyIndex % DEV_CANNED_REPLIES.length];
+		devReplyIndex += 1;
+		inputText = reply;
+		await send();
 	}
 
 	// Inline typewriter for the "* (honorary member of the collective)" reveal.
@@ -861,11 +900,37 @@
 				<h1>your notes</h1>
 				<p class="lede">
 					this is what i wrote about our conversation. read it. change anything that's wrong.
-					redact anything you don't want filed. it's yours.
+					redact anything you don't want filed.
 				</p>
 			</header>
 
-			<textarea class="notes-editor" bind:value={notesContent} spellcheck="false"></textarea>
+			<div class="notes-viewtabs" role="tablist" aria-label="notes view">
+				<button
+					class="viewtab"
+					class:active={notesView === 'read'}
+					role="tab"
+					aria-selected={notesView === 'read'}
+					onclick={() => (notesView = 'read')}
+				>
+					read
+				</button>
+				<button
+					class="viewtab"
+					class:active={notesView === 'edit'}
+					role="tab"
+					aria-selected={notesView === 'edit'}
+					onclick={() => (notesView = 'edit')}
+				>
+					edit
+				</button>
+			</div>
+
+			{#if notesView === 'read'}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				<article class="notes-rendered prose">{@html notesHtml}</article>
+			{:else}
+				<textarea class="notes-editor" bind:value={notesContent} spellcheck="false"></textarea>
+			{/if}
 
 			<div class="notes-actions">
 				<div class="actions-info">
@@ -935,6 +1000,18 @@
 								>done</button
 							>
 						</div>
+					</div>
+					<div class="dev-section">
+						<div class="dev-label">step conversation</div>
+						<div class="dev-row">
+							<button onclick={devStepTurn} disabled={busy}>
+								{phase === 'conversation' ? '＋ canned reply →' : 'start & step'}
+							</button>
+							<button onclick={leaveEarly} disabled={busy || phase !== 'conversation'}
+								>→ end & notes</button
+							>
+						</div>
+						<p class="dev-hint">sends a canned answer — no typing, no server</p>
 					</div>
 					<div class="dev-section dev-stats">
 						elapsed {elapsedSeconds}s · turns {turns.length} · busy {busy ? 'y' : 'n'}
@@ -1149,23 +1226,6 @@
 		cursor: pointer;
 		position: relative;
 		transition: color 0.2s ease;
-	}
-
-	.begin-btn::after {
-		content: '';
-		position: absolute;
-		left: 0;
-		bottom: 0.15rem;
-		width: 100%;
-		height: 1px;
-		background: currentColor;
-		opacity: 0.35;
-		transform-origin: left;
-		transition: opacity 0.2s ease, transform 0.3s ease;
-	}
-
-	.begin-btn:hover:not(:disabled)::after {
-		opacity: 1;
 	}
 
 	.begin-btn:hover:not(:disabled) .begin-arrow {
@@ -1704,6 +1764,145 @@
 
 	.notes-editor:focus {
 		border-color: var(--accent);
+	}
+
+	/* read / edit toggle */
+	.notes-viewtabs {
+		display: inline-flex;
+		gap: 0.25rem;
+		margin-top: 2rem;
+		padding: 0.2rem;
+		background: color-mix(in srgb, var(--text) 5%, transparent);
+		border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+		border-radius: 999px;
+	}
+
+	.viewtab {
+		padding: 0.3rem 1rem;
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		text-transform: lowercase;
+		letter-spacing: 0.08em;
+		background: transparent;
+		border: none;
+		border-radius: 999px;
+		color: var(--text);
+		opacity: 0.55;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.viewtab:hover {
+		opacity: 0.85;
+	}
+
+	.viewtab.active {
+		opacity: 1;
+		color: var(--accent);
+		background: color-mix(in srgb, var(--bg, #fff) 90%, var(--text) 10%);
+		box-shadow: 0 1px 3px color-mix(in srgb, #000 10%, transparent);
+	}
+
+	/* rendered markdown preview */
+	.notes-rendered {
+		margin-top: 1.25rem;
+		padding: 2rem 2.25rem;
+		background: color-mix(in srgb, var(--text) 3%, transparent);
+		border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+		border-radius: 6px;
+		font-size: 1rem;
+		line-height: 1.65;
+		max-width: 44rem;
+	}
+
+	.notes-rendered :global(h1),
+	.notes-rendered :global(h2),
+	.notes-rendered :global(h3) {
+		font-family: var(--font-display);
+		font-weight: 600;
+		color: var(--heading);
+		line-height: 1.2;
+	}
+
+	.notes-rendered :global(h1) {
+		font-size: 1.6rem;
+		margin: 0 0 1rem;
+	}
+
+	.notes-rendered :global(h2) {
+		font-size: 1.2rem;
+		margin: 2rem 0 0.6rem;
+		padding-bottom: 0.35rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+	}
+
+	.notes-rendered :global(h3) {
+		font-size: 1.02rem;
+		margin: 1.5rem 0 0.4rem;
+		color: var(--accent);
+	}
+
+	.notes-rendered :global(p) {
+		margin: 0 0 1rem;
+	}
+
+	.notes-rendered :global(ul),
+	.notes-rendered :global(ol) {
+		margin: 0 0 1rem;
+		padding-left: 1.4rem;
+	}
+
+	.notes-rendered :global(li) {
+		margin: 0.3rem 0;
+	}
+
+	.notes-rendered :global(li::marker) {
+		color: color-mix(in srgb, var(--accent) 70%, transparent);
+	}
+
+	.notes-rendered :global(strong) {
+		color: var(--heading);
+		font-weight: 600;
+	}
+
+	.notes-rendered :global(em) {
+		color: color-mix(in srgb, var(--text) 85%, var(--accent) 15%);
+	}
+
+	.notes-rendered :global(blockquote) {
+		margin: 0 0 1rem;
+		padding: 0.25rem 0 0.25rem 1rem;
+		border-left: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+		opacity: 0.85;
+		font-style: italic;
+	}
+
+	.notes-rendered :global(code) {
+		font-family: var(--font-mono);
+		font-size: 0.85em;
+		padding: 0.1rem 0.35rem;
+		background: color-mix(in srgb, var(--text) 8%, transparent);
+		border-radius: 3px;
+	}
+
+	.notes-rendered :global(a) {
+		color: var(--accent);
+		text-decoration: none;
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+	}
+
+	.notes-rendered :global(hr) {
+		border: none;
+		border-top: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+		margin: 1.5rem 0;
+	}
+
+	.notes-rendered :global(> *:first-child) {
+		margin-top: 0;
+	}
+
+	.notes-rendered :global(> *:last-child) {
+		margin-bottom: 0;
 	}
 
 	.notes-actions {
