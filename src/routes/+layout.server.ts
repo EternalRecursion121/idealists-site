@@ -19,10 +19,13 @@ const mainPages: PageNode[] = [
 
 const writings: PageNode[] = [
 	{ name: 'aliveness', path: '/writings/aliveness', linksTo: ['/writings'], isWriting: true },
+	{ name: 'an-introduction-to-neo-fatalism', path: '/writings/an-introduction-to-neo-fatalism', linksTo: ['/writings'], isWriting: true },
 	{ name: 'delight-in-the-details', path: '/writings/delight-in-the-details', linksTo: ['/writings'], isWriting: true },
+	{ name: 'eigenslop', path: '/writings/eigenslop', linksTo: ['/writings'], isWriting: true },
 	{ name: 'everything-everywhere-all-at-once', path: '/writings/everything-everywhere-all-at-once', linksTo: ['/writings'], isWriting: true },
 	{ name: 'full-stack-futurism-apparently', path: '/writings/full-stack-futurism-apparently', linksTo: ['/writings'], isWriting: true },
 	{ name: 'high-bandwidth-communication', path: '/writings/high-bandwidth-communication', linksTo: ['/writings'], isWriting: true },
+	{ name: 'hyperslopification', path: '/writings/hyperslopification', linksTo: ['/writings'], isWriting: true },
 	{ name: 'i-want-to-write-code-like-im-playing-jazz', path: '/writings/i-want-to-write-code-like-im-playing-jazz', linksTo: ['/writings'], isWriting: true },
 	{ name: 'taste', path: '/writings/taste', linksTo: ['/writings'], isWriting: true },
 	{ name: 'there-are-two-types-of-work', path: '/writings/there-are-two-types-of-work', linksTo: ['/writings'], isWriting: true },
