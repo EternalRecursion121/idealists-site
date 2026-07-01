@@ -91,7 +91,6 @@
 	let activeTheme = $derived<BaseThemeName>(theme === 'auto' ? autoThemeName : theme);
 	let currentColors = $derived(themes[activeTheme]);
 
-
 	$effect(() => {
 		if (browser) {
 			const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -122,6 +121,7 @@
 <div
 	class="bg-noise"
 	aria-hidden="true"
+	data-theme={activeTheme}
 	style="--bg: {currentColors.bg}; --noise: {currentColors.noise};"
 >
 	<div class="bg-noise-turbulence"></div>
@@ -235,6 +235,16 @@
 		pointer-events: none;
 	}
 
+	/* Dawn (light theme) renders zero noise: the additive stack is invisible on
+	   a near-white background anyway, so we remove the layers entirely rather
+	   than risk any browser mis-compositing them. Guarantees one always-clean
+	   theme. Its solid `background-color` (var(--bg)) is all that remains. */
+	.bg-noise[data-theme='dawn'] .bg-noise-turbulence,
+	.bg-noise[data-theme='dawn'] .bg-noise-tint,
+	.bg-noise[data-theme='dawn'] .bg-noise-grain {
+		display: none;
+	}
+
 	.bg-noise-tint {
 		background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%);
 		mix-blend-mode: screen;
@@ -247,9 +257,15 @@
 		mix-blend-mode: overlay;
 	}
 
+	/* Film grain. The amplification that turns the muddy `feTurbulence` cloud
+	   into sparse near-white speckle is baked into the SVG as a single linear
+	   transfer (feComponentTransfer, out = 17·in − 3.5) instead of a CSS
+	   `filter: contrast(170%) brightness(1000%)`. The two are mathematically
+	   identical, but the SVG form rasterises reliably in WebKit, whereas the
+	   extreme CSS `brightness()` posterised into blocky splotches on iOS
+	   Safari's dark themes. */
 	.bg-noise-grain {
-		filter: contrast(170%) brightness(1000%);
-		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='17' intercept='-3.5'/%3E%3CfeFuncG type='linear' slope='17' intercept='-3.5'/%3E%3CfeFuncB type='linear' slope='17' intercept='-3.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 		background-size: 360px 360px;
 		background-repeat: repeat;
 		opacity: 0.18;
