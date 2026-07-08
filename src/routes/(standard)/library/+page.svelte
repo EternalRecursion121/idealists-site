@@ -46,5 +46,11 @@
 				<p class="text-sm opacity-60 mb-2">Nick Sousanis</p>
 			</a>
 		</li>
+		<li>
+			<div class="block">
+				<h2 class="font-semibold mb-1">The World Beyond Your Head</h2>
+				<p class="text-sm opacity-60 mb-2">Matthew B. Crawford, 2015</p>
+			</div>
+		</li>
 	</ul>
 </section>
