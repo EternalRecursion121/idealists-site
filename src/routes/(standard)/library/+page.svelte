@@ -46,5 +46,35 @@
 				<p class="text-sm opacity-60 mb-2">Nick Sousanis</p>
 			</a>
 		</li>
+		<li>
+			<div class="block">
+				<h2 class="font-semibold mb-1">The World Beyond Your Head</h2>
+				<p class="text-sm opacity-60 mb-2">Matthew B. Crawford, 2015</p>
+			</div>
+		</li>
+		<li>
+			<a href="https://en.wikipedia.org/wiki/Tools_for_Conviviality" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">Tools for Conviviality</h2>
+				<p class="text-sm opacity-60 mb-2">Ivan Illich, 1973</p>
+			</a>
+		</li>
+		<li>
+			<a href="https://en.wikipedia.org/wiki/The_Master_and_His_Emissary" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">The Master and His Emissary</h2>
+				<p class="text-sm opacity-60 mb-2">Iain McGilchrist, 2009</p>
+			</a>
+		</li>
+		<li>
+			<a href="https://whatisintelligence.antikythera.org/" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">What Is Intelligence?</h2>
+				<p class="text-sm opacity-60 mb-2">Blaise Agüera y Arcas, Antikythera</p>
+			</a>
+		</li>
+		<li>
+			<a href="https://www.amherstlecture.org/dennett2019/dennett2019_ALP.pdf" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">Autonomy, Consciousness, and Freedom</h2>
+				<p class="text-sm opacity-60 mb-2">Daniel C. Dennett, 2019</p>
+			</a>
+		</li>
 	</ul>
 </section>
