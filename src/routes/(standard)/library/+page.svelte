@@ -52,5 +52,17 @@
 				<p class="text-sm opacity-60 mb-2">Matthew B. Crawford, 2015</p>
 			</div>
 		</li>
+		<li>
+			<a href="https://en.wikipedia.org/wiki/Tools_for_Conviviality" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">Tools for Conviviality</h2>
+				<p class="text-sm opacity-60 mb-2">Ivan Illich, 1973</p>
+			</a>
+		</li>
+		<li>
+			<a href="https://en.wikipedia.org/wiki/The_Master_and_His_Emissary" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">The Master and His Emissary</h2>
+				<p class="text-sm opacity-60 mb-2">Iain McGilchrist, 2009</p>
+			</a>
+		</li>
 	</ul>
 </section>
