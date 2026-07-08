@@ -64,5 +64,17 @@
 				<p class="text-sm opacity-60 mb-2">Iain McGilchrist, 2009</p>
 			</a>
 		</li>
+		<li>
+			<a href="https://whatisintelligence.antikythera.org/" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">What Is Intelligence?</h2>
+				<p class="text-sm opacity-60 mb-2">Blaise Agüera y Arcas, Antikythera</p>
+			</a>
+		</li>
+		<li>
+			<a href="https://www.amherstlecture.org/dennett2019/dennett2019_ALP.pdf" target="_blank" rel="noopener" class="block group">
+				<h2 class="font-semibold mb-1 group-hover:opacity-70">Autonomy, Consciousness, and Freedom</h2>
+				<p class="text-sm opacity-60 mb-2">Daniel C. Dennett, 2019</p>
+			</a>
+		</li>
 	</ul>
 </section>
