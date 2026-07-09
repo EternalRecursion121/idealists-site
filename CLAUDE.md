@@ -41,7 +41,7 @@ Use these after adding/removing files under `static/vibes/`.
 
 - `src/routes/+layout.svelte`
   - Global theme system (`dawn`, `twilight`, `night`, `forest`, `auto`).
-  - Global chrome: `Constellation`, `FloatingLlama`, `NavOverlay`.
+  - Global chrome: `FloatingLlama`, `NavOverlay`, and a hidden settings panel (unlocked by cycling the theme toggle through all five themes).
 - `src/routes/+layout.server.ts`
   - Hardcoded `mainPages` and `writings` graph used by nav overlay/sitemap.
   - Must be updated when adding pages/writings that should appear in graph nav.
