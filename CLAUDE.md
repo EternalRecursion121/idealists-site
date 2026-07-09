@@ -1,6 +1,12 @@
 # CLAUDE.md
 
-This file is a practical guide for Claude Code when working in this repository.
+This file is a guide for Claude Code when working in this repository.
+
+## Spirit
+
+Some context, not rules: this is the home of the Idealists Collective, and the site is jazz coded (see README.md) — improvised, alive, built by many hands without a conductor. The collective's DNA is utopian, autonomous, playful, alive, cooperative, love.
+
+Useful to know while working here: the infrastructure is part of the art (git history is the revision timeline, annotations are commits, navigation is a constellation), and the whimsy is intentional — the floating llama is a feature. You're welcome to add to any of it if the mood strikes; there's no obligation to.
 
 ## Project snapshot
 
@@ -16,17 +22,18 @@ npm install
 npm run dev          # local dev server
 npm run check        # type-check via svelte-check
 npm run check:watch  # watch mode for type-checking
-npm run build        # production build (+ vibes manifest generation)
+npm run build        # production build (+ vibes image optimization and manifest generation)
 npm run preview      # preview build output
 ```
 
-Useful one-off script:
+Useful one-off scripts:
 
 ```bash
-node scripts/generate-vibes-manifest.js
+node scripts/optimize-vibes.js           # convert static/vibes PNG/JPG/GIF to WebP (deletes originals)
+node scripts/generate-vibes-manifest.js  # rebuild static/vibes/images.json
 ```
 
-Use this after adding/removing files under `static/vibes/`.
+Use these after adding/removing files under `static/vibes/`.
 
 ## High-signal file map
 
@@ -52,6 +59,7 @@ Use this after adding/removing files under `static/vibes/`.
 - `src/routes/(standard)/writings/[slug]/+page.svelte` - markdown rendering, timeline, annotations UI.
 - `src/routes/vibes/+page.server.ts` - reads `/vibes/images.json`.
 - `src/routes/sitemap/+page.server.ts` - per-route descriptions for graph page.
+- `src/routes/interview/+page.svelte` - talks to an external interviewer backend (`PUBLIC_INTERVIEWER_API`); not part of the nav graph.
 
 ### Data and server logic
 
@@ -96,9 +104,11 @@ Use this after adding/removing files under `static/vibes/`.
 ### Add vibe images
 
 1. Add files under `static/vibes/`.
-2. Regenerate `static/vibes/images.json` with:
-   - `node scripts/generate-vibes-manifest.js` or
-   - `npm run build` (runs generation automatically).
+2. Optimize and regenerate `static/vibes/images.json` with:
+   - `node scripts/optimize-vibes.js && node scripts/generate-vibes-manifest.js` or
+   - `npm run build` (runs both automatically).
+
+Note: optimization converts PNG/JPG/GIF to WebP (max 1200px) and deletes the originals.
 
 ## Environment variables
 
@@ -117,6 +127,10 @@ Needed for GitHub OAuth annotation login:
 
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
+
+Needed for `/interview`:
+
+- `PUBLIC_INTERVIEWER_API` (falls back to `http://127.0.0.1:8000` when unset).
 
 ## Gotchas
 

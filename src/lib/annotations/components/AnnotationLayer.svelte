@@ -43,8 +43,11 @@
 	let isLoggedIn = $state(false);
 	let store = $state<AnnotationStore>(new FilesystemStore());
 
-	onMount(async () => {
-		if (browser) {
+	onMount(() => {
+		if (!browser) return;
+
+		// Auth resolves asynchronously; onMount stays sync so the cleanup below actually runs
+		(async () => {
 			// Check GitHub auth first if enabled
 			if (useGitHub) {
 				githubUser = await githubAuth.getUser();
@@ -59,24 +62,24 @@
 			if (!isLoggedIn) {
 				username = anonAuth.getName() || '';
 			}
+		})();
 
-			// Parse annotations from markdown (server-provided from local filesystem)
-			if (annotationsMarkdown) {
-				annotations = parseAnnotationsMarkdown(annotationsMarkdown);
-			}
-
-			// Defer highlighting to next tick after DOM is ready
-			setTimeout(() => renderHighlights(), 100);
-
-			// Listen for text selection
-			document.addEventListener('mouseup', handleMouseUp);
-			document.addEventListener('mousedown', handleMouseDown);
-
-			return () => {
-				document.removeEventListener('mouseup', handleMouseUp);
-				document.removeEventListener('mousedown', handleMouseDown);
-			};
+		// Parse annotations from markdown (server-provided from local filesystem)
+		if (annotationsMarkdown) {
+			annotations = parseAnnotationsMarkdown(annotationsMarkdown);
 		}
+
+		// Defer highlighting to next tick after DOM is ready
+		setTimeout(() => renderHighlights(), 100);
+
+		// Listen for text selection
+		document.addEventListener('mouseup', handleMouseUp);
+		document.addEventListener('mousedown', handleMouseDown);
+
+		return () => {
+			document.removeEventListener('mouseup', handleMouseUp);
+			document.removeEventListener('mousedown', handleMouseDown);
+		};
 	});
 
 	function handleMouseDown(e: MouseEvent) {

@@ -20,6 +20,7 @@ const mainPages: PageNode[] = [
 const writings: PageNode[] = [
 	{ name: 'aliveness', path: '/writings/aliveness', linksTo: ['/writings'], isWriting: true },
 	{ name: 'an-introduction-to-neo-fatalism', path: '/writings/an-introduction-to-neo-fatalism', linksTo: ['/writings'], isWriting: true },
+	{ name: 'cautious-technooptimism', path: '/writings/cautious-technooptimism', linksTo: ['/writings'], isWriting: true },
 	{ name: 'delight-in-the-details', path: '/writings/delight-in-the-details', linksTo: ['/writings'], isWriting: true },
 	{ name: 'eigenslop', path: '/writings/eigenslop', linksTo: ['/writings'], isWriting: true },
 	{ name: 'everything-everywhere-all-at-once', path: '/writings/everything-everywhere-all-at-once', linksTo: ['/writings'], isWriting: true },
@@ -29,6 +30,7 @@ const writings: PageNode[] = [
 	{ name: 'i-want-to-write-code-like-im-playing-jazz', path: '/writings/i-want-to-write-code-like-im-playing-jazz', linksTo: ['/writings'], isWriting: true },
 	{ name: 'taste', path: '/writings/taste', linksTo: ['/writings'], isWriting: true },
 	{ name: 'there-are-two-types-of-work', path: '/writings/there-are-two-types-of-work', linksTo: ['/writings'], isWriting: true },
+	{ name: 'webring-topology', path: '/writings/webring-topology', linksTo: ['/writings'], isWriting: true },
 	{ name: 'what-is-this', path: '/writings/what-is-this', linksTo: ['/writings'], isWriting: true }
 ];
 
