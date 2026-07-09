@@ -4,7 +4,19 @@
 	import NavOverlay from '$lib/components/NavOverlay.svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
+	import { fade, slide } from 'svelte/transition';
+	import {
+		preferences,
+		persistPreferences,
+		discovery,
+		unlockSettings,
+		FONT_CHOICES,
+		QUOTE_CHOICES,
+		LLAMA_CHOICES
+	} from '$lib/preferences.svelte';
 
 	interface Props {
 		children: any;
@@ -67,6 +79,10 @@
 	let theme = $state<ThemeName>(getSavedTheme() ?? getSystemPreference());
 	let autoThemeName = $state<BaseThemeName>(getTimeBasedTheme());
 
+	// Cycle the theme toggle through a full revolution and a settings icon appears
+	let themeClicks = 0;
+	let settingsOpen = $state(false);
+
 	function cycleTheme() {
 		const currentIndex = themeOrder.indexOf(theme);
 		const nextIndex = (currentIndex + 1) % themeOrder.length;
@@ -74,6 +90,40 @@
 		if (browser) {
 			localStorage.setItem('theme', theme);
 		}
+		themeClicks += 1;
+		if (themeClicks >= themeOrder.length && !discovery.unlocked) {
+			unlockSettings();
+		}
+	}
+
+	function choose<K extends 'font' | 'quote' | 'llama'>(key: K, value: (typeof preferences)[K]) {
+		preferences[key] = value;
+		persistPreferences();
+		// Font and llama changes are visible wherever you stand; quotes may not be —
+		// hop somewhere quote-rich so the change is instantly seen (panel stays open).
+		if (key === 'quote') showQuoteEffect();
+	}
+
+	async function showQuoteEffect() {
+		if (!document.querySelector('.writing-content blockquote')) {
+			// 'taste' has multiple quotes — and where else would you audition aesthetics?
+			await goto(resolve('/(standard)/writings/[slug]', { slug: 'taste' }));
+		}
+		document
+			.querySelector('.writing-content blockquote')
+			?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	}
+
+	function handleWindowPointerDown(e: MouseEvent) {
+		if (!settingsOpen) return;
+		const target = e.target as HTMLElement;
+		if (!target.closest('.settings-panel') && !target.closest('.settings-toggle-wrap')) {
+			settingsOpen = false;
+		}
+	}
+
+	function handleWindowKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') settingsOpen = false;
 	}
 
 	// Update auto theme every minute
@@ -129,12 +179,18 @@
 	<div class="bg-noise-grain"></div>
 </div>
 
+<svelte:window onmousedown={handleWindowPointerDown} onkeydown={handleWindowKeydown} />
+
 <div
 	class="app"
 	data-theme={activeTheme}
+	data-font={preferences.font}
+	data-quote={preferences.quote}
 	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --noise: {currentColors.noise};"
 >
-	<FloatingLlama />
+	{#if preferences.llama === 'roams'}
+		<FloatingLlama />
+	{/if}
 
 	{#if showNav && data.navPages}
 		<NavOverlay pages={data.navPages} connections={data.navConnections} />
@@ -182,6 +238,73 @@
 			{/if}
 		</button>
 	</div>
+
+	{#if discovery.unlocked}
+		<div class="settings-toggle-wrap" transition:fade={{ duration: 600 }}>
+			<span class="theme-tooltip">customise</span>
+			<button
+				class="theme-toggle settings-toggle"
+				onclick={() => (settingsOpen = !settingsOpen)}
+				aria-label="Customise the site"
+				aria-expanded={settingsOpen}
+			>
+				<!-- Gear: a small sun of spokes, kin to the dawn icon -->
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="3.5"/>
+					<line x1="12" y1="2.5" x2="12" y2="5.5"/>
+					<line x1="12" y1="18.5" x2="12" y2="21.5"/>
+					<line x1="2.5" y1="12" x2="5.5" y2="12"/>
+					<line x1="18.5" y1="12" x2="21.5" y2="12"/>
+					<line x1="5.3" y1="5.3" x2="7.4" y2="7.4"/>
+					<line x1="16.6" y1="16.6" x2="18.7" y2="18.7"/>
+					<line x1="5.3" y1="18.7" x2="7.4" y2="16.6"/>
+					<line x1="16.6" y1="7.4" x2="18.7" y2="5.3"/>
+				</svg>
+			</button>
+		</div>
+	{/if}
+
+	{#if settingsOpen}
+		<div class="settings-panel" transition:slide={{ duration: 200 }}>
+			<div class="settings-row">
+				<span class="settings-label">voice</span>
+				<div class="settings-options">
+					{#each FONT_CHOICES as font (font)}
+						<button
+							class="settings-option settings-font-{font}"
+							class:active={preferences.font === font}
+							onclick={() => choose('font', font)}
+						>{font}</button>
+					{/each}
+				</div>
+			</div>
+			<div class="settings-row">
+				<span class="settings-label">quotes</span>
+				<div class="settings-options">
+					{#each QUOTE_CHOICES as quote (quote)}
+						<button
+							class="settings-option"
+							class:active={preferences.quote === quote}
+							onclick={() => choose('quote', quote)}
+						>{quote}</button>
+					{/each}
+				</div>
+			</div>
+			<div class="settings-row">
+				<span class="settings-label">llama</span>
+				<div class="settings-options">
+					{#each LLAMA_CHOICES as llama (llama)}
+						<button
+							class="settings-option"
+							class:active={preferences.llama === llama}
+							onclick={() => choose('llama', llama)}
+						>{llama}</button>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	{@render children()}
 </div>
 
@@ -217,6 +340,19 @@
 		background: transparent;
 		color: var(--text);
 		transition: color 0.3s;
+	}
+
+	/* Voice (body font) preferences — all faces already loaded for the site */
+	.app[data-font='garamond'] {
+		--font-body: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
+	}
+
+	.app[data-font='manrope'] {
+		--font-body: 'Manrope', system-ui, sans-serif;
+	}
+
+	.app[data-font='mono'] {
+		--font-body: 'Source Code Pro', monospace;
 	}
 
 	.bg-noise {
@@ -321,6 +457,93 @@
 
 	.theme-toggle:hover {
 		opacity: 1;
+	}
+
+	.settings-toggle-wrap {
+		position: fixed;
+		top: 3.25rem;
+		right: 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.settings-toggle-wrap:hover .theme-tooltip {
+		opacity: 0.5;
+	}
+
+	.settings-toggle svg {
+		transition: transform 0.4s ease;
+	}
+
+	.settings-toggle:hover svg,
+	.settings-toggle[aria-expanded='true'] svg {
+		transform: rotate(45deg);
+	}
+
+	.settings-panel {
+		position: fixed;
+		top: 5.75rem;
+		right: 1rem;
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 0.9rem 1rem;
+		background: var(--bg);
+		border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+		border-radius: 6px;
+		font-size: 0.75rem;
+	}
+
+	.settings-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.25rem;
+	}
+
+	.settings-label {
+		opacity: 0.5;
+	}
+
+	.settings-options {
+		display: flex;
+		gap: 0.25rem;
+	}
+
+	.settings-option {
+		background: transparent;
+		border: none;
+		color: var(--text);
+		font-family: inherit;
+		font-size: inherit;
+		cursor: pointer;
+		opacity: 0.45;
+		padding: 0.15rem 0.35rem;
+		transition: opacity 0.2s, color 0.2s;
+	}
+
+	.settings-option:hover {
+		opacity: 1;
+	}
+
+	.settings-option.active {
+		opacity: 1;
+		color: var(--accent);
+	}
+
+	/* Each voice option previews its own face */
+	.settings-font-garamond {
+		font-family: 'EB Garamond', Georgia, serif;
+	}
+
+	.settings-font-manrope {
+		font-family: 'Manrope', system-ui, sans-serif;
+	}
+
+	.settings-font-mono {
+		font-family: 'Source Code Pro', monospace;
 	}
 
 	:global(a) {
