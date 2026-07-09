@@ -451,11 +451,12 @@
 	}
 
 	.writing-content :global(blockquote) {
-		margin: 1.5rem 0;
-		padding: 1rem 1.5rem;
-		border-left: 2px solid var(--accent);
+		margin: 1.75rem 0;
+		padding: 0.5rem 2rem;
+		text-align: center;
 		font-style: italic;
-		opacity: 0.85;
+		font-size: 0.95em;
+		opacity: 0.8;
 	}
 
 	.writing-content :global(blockquote p) {
