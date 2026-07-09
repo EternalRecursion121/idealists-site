@@ -210,15 +210,15 @@
 				const titleAttr = title ? ` title="${title}"` : '';
 				return `<a href="${href}"${titleAttr} target="_blank" rel="noopener">${text}</a>`;
 			},
-			strong({ text }) {
-				return `<strong class="fancy-bold">${text}</strong>`;
+			strong(token) {
+				return `<strong class="fancy-bold">${this.parser.parseInline(token.tokens)}</strong>`;
 			},
 			heading({ text, depth }) {
 				const slug = text.toLowerCase().replace(/\s+/g, '-');
-				return `<h${depth} style="${styles[depth]}" id="${slug}">${text}</h${depth}>`;
+				return `<h${depth} style="${styles[depth - 1]}" id="${slug}">${text}</h${depth}>`;
 			},
-			em({ text }) {
-				return `<em class="italic">${text}</em>`;
+			em(token) {
+				return `<em class="italic">${this.parser.parseInline(token.tokens)}</em>`;
 			},
 		}
 	});

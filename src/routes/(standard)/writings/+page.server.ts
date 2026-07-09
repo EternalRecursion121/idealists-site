@@ -1,3 +1,5 @@
+import { dev } from '$app/environment';
+import { readFile } from 'fs/promises';
 import { getWritingSlugs, getWritingPath, getFileHistory, getFileAtCommit, extractFrontmatter } from '$lib/server/git-history';
 import type { WritingMetadata } from '$lib/types/writing';
 
@@ -15,9 +17,19 @@ export async function load({ setHeaders }) {
 			const history = await getFileHistory(filePath);
 
 			// Get current content for title extraction
-			const currentContent = history.length > 0
+			let currentContent = history.length > 0
 				? await getFileAtCommit(history[0].hash, filePath)
 				: null;
+
+			// In dev, fall back to the local file for writings with no GitHub history yet
+			// (mirrors the dev draft behaviour of the detail page loader)
+			if (!currentContent && dev) {
+				try {
+					currentContent = await readFile(filePath, 'utf-8');
+				} catch {
+					// no local file either; fall through to slug-derived title
+				}
+			}
 
 			const { title, description } = currentContent
 				? extractFrontmatter(currentContent)
