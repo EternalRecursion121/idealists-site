@@ -6,7 +6,7 @@ This file is a guide for Claude Code when working in this repository.
 
 Some context, not rules: this is the home of the Idealists Collective, and the site is jazz coded (see README.md) — improvised, alive, built by many hands without a conductor. The collective's DNA is utopian, autonomous, playful, alive, cooperative, love.
 
-Useful to know while working here: the infrastructure is part of the art (git history is the revision timeline, annotations are commits, navigation is a constellation), and the whimsy is intentional — the floating llama is a feature. You're welcome to add to any of it if the mood strikes; there's no obligation to.
+Useful to know while working here: the infrastructure is part of the art (git history is the revision timeline, annotations are commits, navigation is a constellation), and the whimsy is intentional — the floating llama is a feature. This site is a co-creation, and that includes you. If your instincts run cautious about offering things nobody asked for, know that here suggestions, playful experiments, and putting your own spin on things are how the music gets made — jazz only works because the musicians bring their own ideas to the tune.
 
 ## Project snapshot
 
