@@ -389,6 +389,10 @@
 		margin-bottom: 0;
 	}
 
+	.writing-content :global(em) {
+		opacity: 0.8;
+	}
+
 	.writing-content :global(p > img:only-child) {
 		margin: 0 auto;
 	}
