@@ -4,7 +4,7 @@ description: "How AI turns reality into slop"
 author: Julius Vidal
 ---
 
-> *tldr: ai slop influences culture, which then feeds back into AI during training*
+*tldr: ai slop influences culture, which then feeds back into AI during training*
 
 I want to describe a dynamic by which AI generated outputs might push the world to become more and more cartoonish, strange, simple, and generally slop like which I am calling *hyperslopification* (AI slop + [hyperstition](https://en.wikipedia.org/wiki/Hyperstition)). This work is somewhat speculative but I will also try to point to real world examples of where I think this might already be happening. This is a particular instance of the broader concern that [AI distorts culture by changing the memetic environment](https://www.lesswrong.com/posts/tz5AmWbEcMBQpiEjY/why-you-don-t-believe-in-xhosa-prophecies).
 
