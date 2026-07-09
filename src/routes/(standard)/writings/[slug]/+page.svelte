@@ -389,6 +389,21 @@
 		margin-bottom: 0;
 	}
 
+	.writing-content :global(p > img:only-child) {
+		margin: 0 auto;
+	}
+
+	.writing-content :global(p:has(> img:only-child)) {
+		margin-bottom: 0.6rem;
+	}
+
+	/* An italic-only paragraph directly after an image is a caption */
+	.writing-content :global(p:has(> img:only-child) + p:has(> em:only-child)) {
+		text-align: center;
+		font-size: 0.85rem;
+		opacity: 0.65;
+	}
+
 	.writing-content :global(a) {
 		color: var(--accent);
 		text-decoration: underline;
