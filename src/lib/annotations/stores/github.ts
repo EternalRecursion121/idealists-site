@@ -51,8 +51,7 @@ export class GitHubStore implements AnnotationStore {
 					user: {
 						id: session.user.id,
 						login: session.user.login,
-						name: session.user.name || session.user.login,
-						email: session.user.email
+						name: session.user.name || session.user.login
 					}
 				})
 			});

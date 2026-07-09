@@ -26,7 +26,7 @@ npm run dev
 ## Stack
 
 - **Svelte 5** with runes
-- **SvelteKit** with adapter-auto
+- **SvelteKit** with adapter-vercel
 - **Tailwind CSS v4**
 - **TypeScript**
 
@@ -34,15 +34,19 @@ npm run dev
 
 - `/` — Homepage with animated star logo, cycling definitions, and DNA principles
 - `/writings` — Essays with git-tracked revision history
+- `/projects` — Things we're building together
 - `/vibes` — Scattered image gallery
 - `/library` — Reading list
+- `/members` — The people
 - `/join` — Membership page with animated llama
+- `/sitemap` — Constellation graph of the whole site
+- `/unconference` — The Idealists Unconference
 
 ## Commands
 
 ```sh
 npm run dev          # Start development server
-npm run build        # Production build
+npm run build        # Production build (optimizes vibes images + regenerates manifest)
 npm run preview      # Preview production build
 npm run check        # Type-check with svelte-check
 ```

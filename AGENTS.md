@@ -35,6 +35,7 @@ You can use the Svelte MCP server for Svelte 5/SvelteKit guidance. Follow this s
 - `src/lib/components/BottomNav.svelte` - ring order and prev/next behavior.
 - `src/lib/server/git-history.ts` - GitHub API integration for writings revisions and annotations.
 - `src/routes/api/annotations/+server.ts` - annotation read/write API.
+- `scripts/optimize-vibes.js` - converts `static/vibes/` PNG/JPG/GIF to WebP (deletes originals).
 - `scripts/generate-vibes-manifest.js` - rebuilds `static/vibes/images.json`.
 
 ## Common workflows
@@ -57,9 +58,9 @@ You can use the Svelte MCP server for Svelte 5/SvelteKit guidance. Follow this s
 ### Add vibes images
 
 1. Add files to `static/vibes/`.
-2. Regenerate `static/vibes/images.json` using:
-   - `node scripts/generate-vibes-manifest.js`, or
-   - `npm run build` (runs manifest generation automatically).
+2. Optimize and regenerate `static/vibes/images.json` using:
+   - `node scripts/optimize-vibes.js && node scripts/generate-vibes-manifest.js`, or
+   - `npm run build` (runs both automatically).
 
 ## Validation checklist before finishing
 
@@ -74,6 +75,7 @@ See `.env.example`.
 - Core: `GITHUB_OWNER`, `GITHUB_REPO`
 - Recommended: `GITHUB_TOKEN` (rate limits + collaborator checks)
 - OAuth (annotation login): `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+- Interview page: `PUBLIC_INTERVIEWER_API` (falls back to `http://127.0.0.1:8000`)
 
 ## Common pitfalls
 

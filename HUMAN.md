@@ -1,6 +1,10 @@
 # Human Developer Guide
 
-This is a practical guide for people contributing to this repo.
+Welcome, fellow idealist. This repo is the home of the collective, and it is jazz coded (see README.md): make the changes you want to see, don't wait for permission, and don't be precious about what's already here — git remembers everything, which is rather the point of this site.
+
+Worth knowing: the infrastructure here is part of the art. Revision history is a timeline you can scrub, annotations are commits, the sitemap is a constellation, and the llama floats on purpose. Whimsy is welcome — change the colours just because.
+
+Now, the practicalities.
 
 ## Quick start
 
@@ -15,7 +19,7 @@ Useful commands:
 
 ```sh
 npm run check     # type-check
-npm run build     # production build (also regenerates vibes manifest)
+npm run build     # production build (also optimizes vibes images + regenerates manifest)
 npm run preview   # preview production build
 ```
 
@@ -33,6 +37,10 @@ GitHub OAuth variables (for annotation login flow):
 
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
+
+Interview page (optional):
+
+- `PUBLIC_INTERVIEWER_API` — external interviewer backend for `/interview`; falls back to `http://127.0.0.1:8000` when unset.
 
 ## Project map (important files)
 
@@ -55,6 +63,7 @@ src/
           +page.svelte           markdown render + timeline + annotations UI
     vibes/+page.server.ts        reads static/vibes/images.json
     sitemap/+page.server.ts      nav descriptions
+    interview/+page.svelte       external interviewer backend UI
     api/
       auth/github/*              OAuth entry + callback
       annotations/+server.ts     annotation API
@@ -64,6 +73,7 @@ src/
     writings/<slug>/content.md   writing source files
     writings/<slug>/annotations.md (optional)
     data/members.csv             members source
+scripts/optimize-vibes.js
 scripts/generate-vibes-manifest.js
 static/vibes/images.json
 ```
@@ -119,8 +129,7 @@ Notes:
 
 ### Update projects list
 
-- Edit `src/routes/(standard)/projects/+page.server.ts`.
-- `src/lib/data/projects.csv` currently exists but is not used by the route.
+- Edit the hardcoded array in `src/routes/(standard)/projects/+page.server.ts`.
 
 ### Update library links
 
@@ -129,13 +138,14 @@ Notes:
 ### Add vibes images
 
 1. Add images to `static/vibes/`.
-2. Regenerate metadata:
+2. Optimize and regenerate metadata:
 
 ```sh
+node scripts/optimize-vibes.js           # converts PNG/JPG/GIF to WebP and deletes originals
 node scripts/generate-vibes-manifest.js
 ```
 
-`npm run build` also regenerates this manifest.
+`npm run build` also runs both steps.
 
 ## Adding new routes (do not skip this)
 
