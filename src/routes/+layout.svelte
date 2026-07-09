@@ -79,6 +79,8 @@
 	// Cycle the theme toggle through a full revolution and a settings icon appears
 	let themeClicks = 0;
 	let settingsOpen = $state(false);
+	// Once discovered, the gear is a true sixth position in the cycle, after 'auto'
+	let onGearStop = $state(false);
 	// Closing the panel nudges the world one theme forward — unless you already
 	// picked a theme from inside it this visit (you got what you came for).
 	let themePickedThisVisit = false;
@@ -98,14 +100,23 @@
 		}
 	}
 
-	function handleToggleClick() {
+	function handleToggleClick(e: MouseEvent) {
+		// Don't let this click reach the window handler: opening swaps the icon,
+		// detaching the event's target mid-bubble, which broke its exclusion check
+		// and closed the panel in the same click.
+		e.stopPropagation();
 		if (settingsOpen) {
 			closeSettings();
 			return;
 		}
-		// Once discovered, the gear is the cycle's hidden last stop, after 'auto'
-		if (discovery.unlocked && theme === themeOrder[themeOrder.length - 1]) {
+		// Pressing the customise icon opens the panel
+		if (onGearStop) {
 			openSettings();
+			return;
+		}
+		// Once discovered, the stop after 'auto' is the customise icon itself
+		if (discovery.unlocked && theme === themeOrder[themeOrder.length - 1]) {
+			onGearStop = true;
 			return;
 		}
 		cycleTheme();
@@ -127,6 +138,7 @@
 	function closeSettings() {
 		if (!settingsOpen) return;
 		settingsOpen = false;
+		onGearStop = false;
 		if (!themePickedThisVisit) cycleTheme();
 	}
 
@@ -247,30 +259,23 @@
 
 	<div class="theme-toggle-wrap">
 		<span class="theme-tooltip">
-			{settingsOpen
-				? 'customise'
-				: discovery.unlocked && theme === themeOrder[themeOrder.length - 1]
-					? `${themeDescriptions[theme]} · customise next`
-					: themeDescriptions[theme]}
+			{settingsOpen || onGearStop ? 'customise' : themeDescriptions[theme]}
 		</span>
 		<button
 			class="theme-toggle"
 			onclick={handleToggleClick}
-			aria-label={settingsOpen ? 'Close customisation' : 'Cycle theme'}
+			aria-label={settingsOpen ? 'Close customisation' : onGearStop ? 'Customise the site' : 'Cycle theme'}
 			aria-expanded={discovery.unlocked ? settingsOpen : undefined}
 		>
-			{#if settingsOpen}
-				<!-- Gear: the cycle's hidden last stop, a small sun of spokes kin to dawn's -->
+			{#if settingsOpen || onGearStop}
+				<!-- Sliders: the cycle's hidden last stop -->
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<circle cx="12" cy="12" r="3.5"/>
-					<line x1="12" y1="2.5" x2="12" y2="5.5"/>
-					<line x1="12" y1="18.5" x2="12" y2="21.5"/>
-					<line x1="2.5" y1="12" x2="5.5" y2="12"/>
-					<line x1="18.5" y1="12" x2="21.5" y2="12"/>
-					<line x1="5.3" y1="5.3" x2="7.4" y2="7.4"/>
-					<line x1="16.6" y1="16.6" x2="18.7" y2="18.7"/>
-					<line x1="5.3" y1="18.7" x2="7.4" y2="16.6"/>
-					<line x1="16.6" y1="7.4" x2="18.7" y2="5.3"/>
+					<line x1="4" y1="7" x2="20" y2="7"/>
+					<circle cx="14" cy="7" r="2.5" fill="currentColor" stroke="none"/>
+					<line x1="4" y1="12" x2="20" y2="12"/>
+					<circle cx="8" cy="12" r="2.5" fill="currentColor" stroke="none"/>
+					<line x1="4" y1="17" x2="20" y2="17"/>
+					<circle cx="16" cy="17" r="2.5" fill="currentColor" stroke="none"/>
 				</svg>
 			{:else if theme === 'dawn'}
 				<!-- Sunrise -->
