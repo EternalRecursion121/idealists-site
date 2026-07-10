@@ -415,6 +415,7 @@
 					{/each}
 				</div>
 			</div>
+			<button class="settings-close" onclick={closeSettings}>close</button>
 		</div>
 	{/if}
 
@@ -702,6 +703,27 @@
 
 	.settings-casing-loud {
 		text-transform: uppercase;
+	}
+
+	.settings-close {
+		align-self: stretch;
+		margin-top: 0.35rem;
+		padding: 0.55rem 0.5rem 0.05rem;
+		background: transparent;
+		border: none;
+		border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+		color: var(--text);
+		font-family: inherit;
+		font-size: 0.7rem;
+		letter-spacing: 0.15em;
+		text-align: center;
+		cursor: pointer;
+		opacity: 0.35;
+		transition: opacity 0.2s;
+	}
+
+	.settings-close:hover {
+		opacity: 0.8;
 	}
 
 	:global(a) {
