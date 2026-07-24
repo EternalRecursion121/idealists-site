@@ -467,6 +467,24 @@
 		margin-bottom: 0;
 	}
 
+	/* Quote-style preferences from the hidden settings panel ('centered' is the base style above) */
+	:global(.app[data-quote='ruled']) .writing-content :global(blockquote) {
+		text-align: left;
+		padding: 1rem 1.5rem;
+		border-left: 2px solid var(--accent);
+	}
+
+	:global(.app[data-quote='wash']) .writing-content :global(blockquote) {
+		text-align: left;
+		padding: 1rem 1.5rem 1rem 1.75rem;
+		border-radius: 4px;
+		background: linear-gradient(
+			to right,
+			color-mix(in srgb, var(--accent) 10%, transparent),
+			transparent 75%
+		);
+	}
+
 	.writing-content :global(strong) {
 		font-weight: 600;
 		color: var(--heading);
