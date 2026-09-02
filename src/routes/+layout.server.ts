@@ -20,6 +20,7 @@ const mainPages: PageNode[] = [
 const writings: PageNode[] = [
 	{ name: 'aliveness', path: '/writings/aliveness', linksTo: ['/writings'], isWriting: true },
 	{ name: 'an-introduction-to-neo-fatalism', path: '/writings/an-introduction-to-neo-fatalism', linksTo: ['/writings'], isWriting: true },
+	{ name: 'autonomy-freedom-and-control', path: '/writings/autonomy-freedom-and-control', linksTo: ['/writings'], isWriting: true },
 	{ name: 'cautious-technooptimism', path: '/writings/cautious-technooptimism', linksTo: ['/writings'], isWriting: true },
 	{ name: 'delight-in-the-details', path: '/writings/delight-in-the-details', linksTo: ['/writings'], isWriting: true },
 	{ name: 'eigenslop', path: '/writings/eigenslop', linksTo: ['/writings'], isWriting: true },
