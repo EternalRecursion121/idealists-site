@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 
 	// Llama state
@@ -67,7 +68,7 @@
 	function handleClick() {
 		visible = false;
 		if (animationFrame) cancelAnimationFrame(animationFrame);
-		goto('/join');
+		goto(resolve('/join'));
 	}
 
 	onMount(() => {
@@ -86,8 +87,13 @@
 			}
 		}, CHECK_INTERVAL);
 
+		// The settings panel can summon the llama on demand
+		const summon = () => spawnLlama();
+		window.addEventListener('summon-llama', summon);
+
 		return () => {
 			clearInterval(interval);
+			window.removeEventListener('summon-llama', summon);
 			if (animationFrame) cancelAnimationFrame(animationFrame);
 		};
 	});
