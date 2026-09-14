@@ -376,15 +376,11 @@
 		margin-bottom: 1.25rem;
 	}
 
-	/* Drop cap: set in the title serif so it reads as an initial, not a stray
-	   monospace glyph. Sized to sit on the second baseline (2 × 1.7 line-height). */
 	.writing-content:not(.no-dropcap) > :global(p:first-child::first-letter) {
 		float: left;
-		font-family: var(--font-display);
-		font-size: 3.4rem;
-		line-height: 1;
-		margin-top: -0.1em;
-		padding-right: 0.1em;
+		font-size: 3.5rem;
+		line-height: 0.8;
+		padding-right: 0.15em;
 		color: var(--heading);
 		font-weight: 600;
 	}
