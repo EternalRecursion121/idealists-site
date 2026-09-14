@@ -7,6 +7,7 @@ export interface WritingMetadata {
 	updatedAt: string; // ISO 8601
 	revisionCount: number;
 	style?: 'default' | 'notebook';  // visual style for the writing
+	dropcap?: boolean;  // set `dropcap: false` in frontmatter to skip the opening initial
 	branches?: {
 		url: string;
 		label: string;

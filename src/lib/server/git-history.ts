@@ -346,7 +346,7 @@ export async function getExternalFileHistory(repo: string, filePath: string): Pr
 	}
 }
 
-export function extractFrontmatter(content: string): { title?: string; description?: string; authors?: string[]; style?: 'default' | 'notebook'; branches?: { url: string; label: string; repo?: string; path?: string }[]; body: string } {
+export function extractFrontmatter(content: string): { title?: string; description?: string; authors?: string[]; style?: 'default' | 'notebook'; dropcap?: boolean; branches?: { url: string; label: string; repo?: string; path?: string }[]; body: string } {
 	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 
 	if (!frontmatterMatch) {
@@ -431,11 +431,16 @@ export function extractFrontmatter(content: string): { title?: string; descripti
 	const styleMatch = frontmatter.match(/^style:\s*(.+?)\s*$/m);
 	const style = styleMatch?.[1] as 'default' | 'notebook' | undefined;
 
+	// Parse dropcap (defaults to on; only `dropcap: false` turns it off)
+	const dropcapMatch = frontmatter.match(/^dropcap:[ \t]*(true|false)[ \t]*$/m);
+	const dropcap = dropcapMatch ? dropcapMatch[1] === 'true' : undefined;
+
 	return {
 		title: titleMatch?.[1],
 		description: descMatch?.[1],
 		authors: authors?.length ? authors : undefined,
 		style,
+		dropcap,
 		branches: branches?.length ? branches : undefined,
 		body: body.trim()
 	};

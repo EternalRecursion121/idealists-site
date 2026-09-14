@@ -65,7 +65,7 @@ Use these after adding/removing files under `static/vibes/`.
 
 - `src/lib/server/git-history.ts`
   - GitHub API access for writings history and annotations persistence.
-  - Frontmatter extraction (`title`, `description`, `author`/`authors`, `style`, `branches`).
+  - Frontmatter extraction (`title`, `description`, `author`/`authors`, `style`, `dropcap`, `branches`).
   - `PATH_RENAMES` for historical file rename continuity.
 - `src/lib/writings/<slug>/content.md`
   - Writing source files.
@@ -87,7 +87,7 @@ Use these after adding/removing files under `static/vibes/`.
 ### Add a writing
 
 1. Create `src/lib/writings/<slug>/content.md`.
-2. Include frontmatter (`title`, optional `description`, `author` or `authors`, optional `style`, optional `branches`).
+2. Include frontmatter (`title`, optional `description`, `author` or `authors`, optional `style`, optional `dropcap: false` to skip the opening initial, optional `branches`).
 3. Update hardcoded writings in `src/routes/+layout.server.ts` if you want it represented in graph navigation.
 4. Optional: add `annotations.md` seed file in the same folder.
 

@@ -48,7 +48,7 @@ export async function load({ params, setHeaders }) {
 		currentContent = revisions[0].content;
 	}
 
-	const { title, description, authors, branches, style, body } = extractFrontmatter(currentContent);
+	const { title, description, authors, branches, style, dropcap, body } = extractFrontmatter(currentContent);
 
 	// Fetch revision history for external branches
 	let branchesWithRevisions = branches;
@@ -73,6 +73,7 @@ export async function load({ params, setHeaders }) {
 		updatedAt: revisions[0].date,
 		revisionCount: revisions.length,
 		style,
+		dropcap,
 		branches: branchesWithRevisions
 	};
 

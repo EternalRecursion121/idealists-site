@@ -1,6 +1,7 @@
 ---
 title: How to correctly delegate
 author: Lou
+dropcap: false
 ---
 
 Let claude code run, give it a long, complicated task, so it's *really* busy (it likes that, trust).\

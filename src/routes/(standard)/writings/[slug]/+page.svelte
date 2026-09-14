@@ -124,7 +124,7 @@
 		</div>
 	</header>
 
-	<article class="writing-content">
+	<article class="writing-content" class:no-dropcap={data.writing.metadata.dropcap === false}>
 		{@html renderMarkdown(getBody(currentRevision.content))}
 	</article>
 
@@ -378,7 +378,7 @@
 
 	/* Drop cap: set in the title serif so it reads as an initial, not a stray
 	   monospace glyph. Sized to sit on the second baseline (2 × 1.7 line-height). */
-	.writing-content > :global(p:first-child::first-letter) {
+	.writing-content:not(.no-dropcap) > :global(p:first-child::first-letter) {
 		float: left;
 		font-family: var(--font-display);
 		font-size: 3.4rem;
