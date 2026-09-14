@@ -24,16 +24,18 @@ export async function load({ params, setHeaders }) {
 	if (dev) {
 		try {
 			currentContent = await readFile(getWritingPath(slug), 'utf-8');
-			// If no revisions from GitHub, create a draft revision from local file
-			if (revisions.length === 0) {
+			// The page renders revisions[0], so surface the working-tree file as a
+			// draft revision whenever it differs from what GitHub has. Otherwise
+			// local edits (and local-only writings) would be invisible in dev.
+			if (revisions.length === 0 || revisions[0].content !== currentContent) {
 				revisions = [{
 					hash: 'local-draft',
 					shortHash: 'draft',
 					date: new Date().toISOString(),
 					author: 'local',
-					message: 'Local draft (not yet committed)',
+					message: 'Local draft (not yet pushed)',
 					content: currentContent
-				}];
+				}, ...revisions];
 			}
 		} catch {
 			if (revisions.length === 0) {

@@ -137,7 +137,7 @@ Needed for `/interview`:
 - Docs historically drifted from implementation; trust source files over old docs.
 - Nav graph is intentionally hardcoded for production reliability on Vercel.
 - Annotation saves currently commit to branch `"main"` in `git-history.ts`.
-- In dev, writing detail loader can synthesize a local draft revision if GitHub has no history yet.
+- In dev, the writing detail loader surfaces the working-tree file as a "local draft" revision whenever it differs from GitHub, so unpushed edits are what you see.
 - Build wipes `.vercel/output` and `.svelte-kit` before rebuilding.
 
 ## Completion checklist for code changes
