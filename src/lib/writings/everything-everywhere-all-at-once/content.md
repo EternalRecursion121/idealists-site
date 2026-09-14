@@ -2,6 +2,7 @@
 title: Everything, Everywhere, All at Once
 description: The future is ADHD
 author: Samuel Ratnam
+dropcap: false
 ---
 
 **February 2020**
