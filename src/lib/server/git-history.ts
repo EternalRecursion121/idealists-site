@@ -358,8 +358,9 @@ export function extractFrontmatter(content: string): { title?: string; descripti
 	}
 
 	const [, frontmatter, body] = frontmatterMatch;
-	const titleMatch = frontmatter.match(/^title:\s*["']?(.+?)["']?\s*$/m);
-	const descMatch = frontmatter.match(/^description:\s*["']?(.+?)["']?\s*$/m);
+	// [ \t]* (not \s*) so an empty field can't swallow the following line
+	const titleMatch = frontmatter.match(/^title:[ \t]*["']?(.+?)["']?[ \t]*$/m);
+	const descMatch = frontmatter.match(/^description:[ \t]*["']?(.+?)["']?[ \t]*$/m);
 
 	// Parse authors - supports multiple formats:
 	// 1. Single author: author: Name
@@ -376,7 +377,7 @@ export function extractFrontmatter(content: string): { title?: string; descripti
 			.filter(Boolean);
 	} else {
 		// Try single line (authors: or author:)
-		const authorsMatch = frontmatter.match(/^authors?:\s*["']?(.+?)["']?\s*$/m);
+		const authorsMatch = frontmatter.match(/^authors?:[ \t]*["']?(.+?)["']?[ \t]*$/m);
 		if (authorsMatch) {
 			authors = authorsMatch[1].split(/,\s*/).map(a => a.trim()).filter(Boolean);
 		}
