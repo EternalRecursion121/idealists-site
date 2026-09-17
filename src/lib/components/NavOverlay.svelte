@@ -316,7 +316,9 @@
 
 	@media (max-width: 640px) {
 		.nav-overlay.expanded {
-			width: min(calc(100vw - 2rem), 300px);
+			/* stop short of the fixed theme toggle (top right, same z-index), or on
+			   ~320px phones it sits on top of this panel's close button */
+			width: min(calc(100vw - 5rem), 300px);
 			height: 220px;
 		}
 
