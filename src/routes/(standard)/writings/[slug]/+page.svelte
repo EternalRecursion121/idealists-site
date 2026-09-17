@@ -485,6 +485,12 @@
 		opacity: 0.8;
 	}
 
+	/* Footnote jumps (both directions) land below the fixed toggles, not at y=0 */
+	.writing-content :global([data-footnote-ref]),
+	.writing-content :global(section[data-footnotes] li) {
+		scroll-margin-top: 5.5rem;
+	}
+
 	/* The quote is already italic and dimmed; don't dim *emphasis* inside it a
 	   second time (0.85 x 0.8 x 0.8 came out around 3:1 on dawn). */
 	.writing-content :global(blockquote em) {
