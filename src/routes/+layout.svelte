@@ -191,7 +191,9 @@
 			{/if}
 		</button>
 	</div>
-	{@render children()}
+	<main>
+		{@render children()}
+	</main>
 </div>
 
 <style>

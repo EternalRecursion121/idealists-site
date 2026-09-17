@@ -256,6 +256,7 @@
 </svelte:head>
 
 <div class="index-page">
+	<h1 class="sr-only">index</h1>
 	<div bind:this={containerRef} class="index-container" style="height: {containerHeight}px;">
 		<svg class="connections" style="height: {containerHeight}px;">
 			{#if positions.length > 0}

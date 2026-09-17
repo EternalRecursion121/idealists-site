@@ -8,7 +8,7 @@
 	<title>{page.status} — The Idealists Collective</title>
 </svelte:head>
 
-<main class="error-page">
+<div class="error-page">
 	<p class="status">{page.status}</p>
 	<h1>
 		{#if notFound}
@@ -25,7 +25,7 @@
 		<a href="/writings">writings</a>
 		<a href="/sitemap">index</a>
 	</nav>
-</main>
+</div>
 
 <style>
 	.error-page {
