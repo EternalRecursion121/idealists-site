@@ -547,9 +547,10 @@
 		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 	}
 
-	/* On phones a fixed 260px pill permanently covers the reading column and
-	   the footer links, so it joins the flow at the end of the piece instead. */
-	@media (max-width: 640px) {
+	/* The reading column is 65ch centred, so a fixed 260px pill at the right
+	   only clears it from ~1270px up. Below that it covered body text (and, on
+	   phones, the footer links), so it joins the flow at the end of the piece. */
+	@media (max-width: 80rem) {
 		.annotation-controls {
 			position: static;
 			align-self: center;
