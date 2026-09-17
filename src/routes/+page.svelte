@@ -263,10 +263,16 @@
         }
     }
 
+    /* the glow alone is nearly invisible on dawn, so keyboard focus also gets a ring */
+    .footnote:focus-visible,
+    .random-bracket:focus-visible {
+        outline: 1px dotted var(--accent);
+        outline-offset: 3px;
+    }
+
     .footnote:hover,
     .footnote:focus-visible {
         opacity: 1;
-        outline: none;
         text-shadow:
             0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
             0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
@@ -340,7 +346,6 @@
     .random-bracket:hover,
     .random-bracket:focus-visible {
         color: var(--heading);
-        outline: none;
         text-shadow:
             0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
             0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
