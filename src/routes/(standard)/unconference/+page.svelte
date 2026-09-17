@@ -396,10 +396,16 @@
 		opacity: 1;
 	}
 
-	.unconference :is(a, button, summary, input, textarea, select):focus,
-	.unconference :is(a, button, summary, input, textarea, select):focus-visible {
+	/* No ring on mouse/touch focus, but keyboard users still get one. */
+	.unconference :is(a, button, summary, input, textarea, select):focus:not(:focus-visible) {
 		outline: none;
 		box-shadow: none;
+	}
+
+	.unconference :is(a, button, summary, input, textarea, select):focus-visible {
+		outline: 1px solid var(--accent);
+		outline-offset: 3px;
+		border-radius: 2px;
 	}
 
 	.unconference :is(a, button, summary, input, textarea, select) {
