@@ -184,6 +184,12 @@
         }
     }
 
+    /* let the columns shrink below their longest word instead of pinning the
+       whole page to it */
+    .hero-grid > :global(*) {
+        min-width: 0;
+    }
+
     .title-col {
         text-align: left;
     }
@@ -191,7 +197,9 @@
     .title {
         font-family: 'Texturina', 'IM Fell DW Pica', 'Resistance', var(--font-display);
         font-weight: 400;
-        font-size: clamp(4rem, 11vw, 6rem);
+        /* 4rem floor as before, except on phones narrower than the word
+           COLLECTIVE at that size (~6.3em wide), where it scales to fit */
+        font-size: clamp(2.4rem, max(11vw, min(4rem, calc((100vw - 4rem) / 6.3))), 6rem);
         line-height: 1;
         letter-spacing: 0.01em;
         color: var(--heading);
