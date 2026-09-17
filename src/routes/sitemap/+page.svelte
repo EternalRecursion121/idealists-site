@@ -107,7 +107,11 @@
 
 	function needsList(width: number, viewportLeft: number, mobile: boolean): boolean {
 		if (mobile) return true;
-		const baseRadius = Math.min(width, Math.max(500, window.innerHeight - 100)) * 0.18;
+		const height = Math.max(500, window.innerHeight - 100);
+		// short windows shrink the whole arc (radius follows height) while the
+		// labels stay the same size, so they pile up again
+		if (height < 560) return true;
+		const baseRadius = Math.min(width, height) * 0.18;
 		// room between the graph centre and the viewport edge for arc + outward label
 		const room = width / 2 + viewportLeft - WRITING_LABEL_WIDTH;
 		return room < baseRadius * WRITING_ORBIT;
@@ -129,6 +133,8 @@
 			baseRadius: Math.min(width, graphHeight) * (mobile ? 0.25 : list ? 0.24 : 0.18)
 		};
 	}
+
+	let viewportLeft = 0; // container's offset from the viewport edge, set in calculateLayout
 
 	function calculatePositions(width: number, height: number, mobile: boolean, list: boolean): PositionedPage[] {
 		const { centerX, centerY, baseRadius } = getGeometry(width, height, mobile, list);
@@ -160,7 +166,15 @@
 					if (writingIndex++ % 2 === 1 && anchor === 'center') radius += baseRadius * 0.55;
 				}
 				const angleOffset = Math.sin(time + angle * 2) * 0.03;
-				x = centerX + Math.cos(angle + angleOffset) * radius;
+				// Height limits the orbit's radius, but writings have the full window
+				// width to play with: stretch their arc sideways so labels get room
+				// on shorter windows too.
+				let stretch = 1;
+				if (orbit === 3) {
+					const room = width / 2 + viewportLeft - WRITING_LABEL_WIDTH;
+					stretch = Math.max(1, Math.min(1.45, room / (baseRadius * WRITING_ORBIT)));
+				}
+				x = centerX + Math.cos(angle + angleOffset) * radius * stretch;
 				y = centerY + Math.sin(angle + angleOffset) * radius;
 			}
 
@@ -173,7 +187,8 @@
 		const width = containerRef.clientWidth;
 		const mobile = window.innerWidth < MOBILE_BREAKPOINT;
 		isMobile = mobile;
-		listMode = needsList(width, containerRef.getBoundingClientRect().left, mobile);
+		viewportLeft = containerRef.getBoundingClientRect().left;
+		listMode = needsList(width, viewportLeft, mobile);
 		containerHeight = getHeight(listMode, mobile);
 		positions = calculatePositions(width, containerHeight, mobile, listMode);
 	}
