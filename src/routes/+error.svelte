@@ -29,13 +29,14 @@
 
 <style>
 	.error-page {
-		min-height: 100vh;
+		/* the root layout's .app adds 1rem of padding top and bottom */
+		min-height: calc(100vh - 2rem);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-		padding: 5rem 1.5rem;
+		padding: 4rem 1.5rem;
 		text-align: center;
 	}
 
@@ -78,6 +79,10 @@
 	}
 
 	@media (min-width: 640px) {
+		.error-page {
+			min-height: calc(100vh - 4rem); /* .app padding is 2rem here */
+		}
+
 		h1 {
 			font-size: 1.875rem;
 			max-width: 28rem;

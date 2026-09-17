@@ -107,7 +107,7 @@
 
 	function needsList(width: number, viewportLeft: number, mobile: boolean): boolean {
 		if (mobile) return true;
-		const height = Math.max(500, window.innerHeight - 100);
+		const height = Math.max(500, window.innerHeight - 140);
 		// short windows shrink the whole arc (radius follows height) while the
 		// labels stay the same size, so they pile up again
 		if (height < 560) return true;
@@ -118,7 +118,7 @@
 	}
 
 	function getHeight(list: boolean, mobile: boolean): number {
-		const base = Math.max(500, window.innerHeight - 100);
+		const base = Math.max(500, window.innerHeight - 140);
 		if (!list) return base;
 		const listHeight = LIST_TOP + Math.ceil(writingCount / 2) * LIST_ROW_HEIGHT;
 		return Math.max(base, listHeight + (mobile ? LIST_GRAPH_HEIGHT : LIST_GRAPH_HEIGHT_WIDE));
@@ -134,7 +134,9 @@
 		};
 	}
 
-	let viewportLeft = 0; // container's offset from the viewport edge, set in calculateLayout
+	// container's offset from the viewport edges, set in calculateLayout
+	let viewportLeft = 0;
+	let viewportTop = 0;
 
 	function calculatePositions(width: number, height: number, mobile: boolean, list: boolean): PositionedPage[] {
 		const { centerX, centerY, baseRadius } = getGeometry(width, height, mobile, list);
@@ -176,6 +178,8 @@
 				}
 				x = centerX + Math.cos(angle + angleOffset) * radius * stretch;
 				y = centerY + Math.sin(angle + angleOffset) * radius;
+				// the stepped-out labels at the top of the arc mustn't leave the window
+				if (orbit === 3) y = Math.max(y, 28 - viewportTop);
 			}
 
 			return { ...page, x, y, anchor };
@@ -187,7 +191,9 @@
 		const width = containerRef.clientWidth;
 		const mobile = window.innerWidth < MOBILE_BREAKPOINT;
 		isMobile = mobile;
-		viewportLeft = containerRef.getBoundingClientRect().left;
+		const rect = containerRef.getBoundingClientRect();
+		viewportLeft = rect.left;
+		viewportTop = rect.top + window.scrollY;
 		listMode = needsList(width, viewportLeft, mobile);
 		containerHeight = getHeight(listMode, mobile);
 		positions = calculatePositions(width, containerHeight, mobile, listMode);
@@ -199,6 +205,8 @@
 		const driftInterval = setInterval(() => {
 			time += 0.002;
 			if (containerRef) {
+				// re-read: the container settles a frame after its height changes
+				viewportTop = containerRef.getBoundingClientRect().top + window.scrollY;
 				positions = calculatePositions(containerRef.clientWidth, containerHeight, isMobile, listMode);
 			}
 		}, 50);
@@ -363,7 +371,8 @@
 <style>
 	.index-page {
 		width: 100%;
-		min-height: 100vh;
+		/* minus the root layout's .app padding, or the page always scrolls a little */
+		min-height: calc(100vh - 2rem);
 		padding: 1rem;
 		display: flex;
 		align-items: center;
@@ -498,6 +507,7 @@
 
 	@media (min-width: 640px) {
 		.index-page {
+			min-height: calc(100vh - 4rem);
 			padding: 2rem;
 		}
 	}
