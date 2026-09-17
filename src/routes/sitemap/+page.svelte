@@ -450,6 +450,9 @@
 	.index-link.listed {
 		max-width: 46%;
 		opacity: 0.8;
+		/* fill most of the 44px row so the gap between rows is tappable too */
+		min-height: 40px;
+		justify-content: center;
 	}
 
 	/* descriptions are hover-only; in the list they'd just widen the row */
