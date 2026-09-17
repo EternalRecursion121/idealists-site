@@ -1279,6 +1279,9 @@
 
 <style>
 	.frame {
+		/* --rule was used by four borders below but never defined, so they fell
+		   back to 20%-black hairlines — invisible on the dark themes. */
+		--rule: color-mix(in srgb, var(--text) 22%, transparent);
 		max-width: 56rem;
 		margin: 0 auto;
 		padding: 0 1rem;
