@@ -353,8 +353,8 @@
 									{/each}
 									<div class="budget-row budget-total">
 										<span>Total</span>
-										<span>£10,200</span>
-										<span>£43,400</span>
+										<span class="budget-amount">£10,200</span>
+										<span class="budget-amount">£43,400</span>
 									</div>
 								</div>
 							{/if}
@@ -1065,7 +1065,8 @@
 
 	.budget-header, .budget-row {
 		display: grid;
-		grid-template-columns: 1fr auto auto;
+		/* fixed amount columns so every row (and the total) lines up */
+		grid-template-columns: 1fr 4.75rem 4.75rem;
 		gap: 1rem;
 		padding: 1rem;
 	}
@@ -1107,6 +1108,11 @@
 	.budget-total {
 		background: color-mix(in srgb, var(--accent) 5%, transparent);
 		font-weight: 600;
+	}
+
+	/* totals share the amount columns (size + right alignment) but stay full strength */
+	.budget-total .budget-amount {
+		opacity: 1;
 	}
 
 	.budget-total span {
@@ -1200,6 +1206,7 @@
 		/* at 320 the two amount columns were clipped mid-figure by the table */
 		.budget-header,
 		.budget-row {
+			grid-template-columns: 1fr 3.6rem 3.6rem;
 			gap: 0.4rem;
 			padding: 0.75rem 0.5rem;
 		}
@@ -1212,6 +1219,23 @@
 		.budget-category {
 			min-width: 0;
 			overflow-wrap: anywhere;
+			hyphens: auto; /* "Accommo-dation", not "Accommodati / on" */
+		}
+	}
+
+	/* Narrowest phones: the table is only ~190px wide, so the category takes the
+	   full row and the two figures sit on the line beneath, still in their columns. */
+	@media (max-width: 400px) {
+		.budget-row .budget-category {
+			grid-column: 1 / -1;
+		}
+
+		.budget-row .budget-amount:nth-child(2) {
+			grid-column: 2;
+		}
+
+		.budget-row .budget-amount:nth-child(3) {
+			grid-column: 3;
 		}
 	}
 
