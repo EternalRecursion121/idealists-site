@@ -202,7 +202,7 @@
 		}
 
 		formPosition = {
-			x: Math.max(10, currentSelection.rect.left),
+			x: clampPanelX(currentSelection.rect.left),
 			y: currentSelection.rect.bottom + window.scrollY + 10
 		};
 		showForm = true;
@@ -364,6 +364,14 @@
 		}
 	}
 
+	// The form and thread panels are 280px wide; keep them inside the viewport
+	// (an unclamped one near the right edge made the whole page scroll sideways).
+	const PANEL_WIDTH = 280;
+	function clampPanelX(x: number): number {
+		const width = Math.min(PANEL_WIDTH, window.innerWidth - 32);
+		return Math.max(16, Math.min(x, window.innerWidth - width - 16));
+	}
+
 	function showAnnotation(id: string, element: HTMLElement) {
 		const ann = annotations.find(a => a.id === id);
 		if (!ann) return;
@@ -371,7 +379,7 @@
 		viewingAnnotation = ann;
 		const rect = element.getBoundingClientRect();
 		viewPosition = {
-			x: rect.left,
+			x: clampPanelX(rect.left),
 			y: rect.bottom + window.scrollY + 10
 		};
 	}
@@ -503,6 +511,7 @@
 		border-radius: 8px;
 		padding: 12px;
 		width: 280px;
+		max-width: calc(100vw - 2rem);
 		z-index: 1001;
 		box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 	}
@@ -514,6 +523,7 @@
 		border-radius: 8px;
 		padding: 12px;
 		width: 280px;
+		max-width: calc(100vw - 2rem);
 		max-height: 400px;
 		overflow-y: auto;
 		z-index: 1001;
