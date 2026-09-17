@@ -478,8 +478,10 @@
 		white-space: nowrap;
 	}
 
-	.index-link:hover .link-description,
-	.index-link.highlighted .link-description {
+	/* Only the hovered node explains itself. Connected nodes already light up
+	   in the accent colour; showing all their descriptions at once made
+	   neighbours run together ("visual inspirationour influences"). */
+	.index-link:hover .link-description {
 		opacity: 0.6;
 		transform: translateY(0);
 	}
