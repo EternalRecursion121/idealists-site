@@ -19,7 +19,8 @@
 	let current: PageType = $derived.by(() => {
 		const path = $page.url.pathname;
 		if (path === '/library') return 'library';
-		if (path === '/projects') return 'projects';
+		// /unconference is reached from /projects and isn't on the ring itself
+		if (path === '/projects' || path === '/unconference') return 'projects';
 		if (path === '/members') return 'members';
 		if (path.startsWith('/writings')) return 'writings';
 		return 'home';

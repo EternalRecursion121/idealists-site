@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/state';
+
 	type Page = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
 
 	const ring: Page[] = ['projects', 'writings', 'home', 'library', 'members', 'vibes'];
@@ -20,6 +22,9 @@
 	let idx = $derived(ring.indexOf(current));
 	let prev = $derived(ring[(idx - 1 + ring.length) % ring.length]);
 	let next = $derived(ring[(idx + 1) % ring.length]);
+
+	// /join sits off the ring; there, "join us" would just link to itself
+	let onJoin = $derived(page.url.pathname === '/join');
 </script>
 
 <footer class="site-footer">
@@ -27,7 +32,11 @@
 		<span class="line-h"></span>
 		<a href={paths[prev]} class="nav-prev opacity-70 hover:opacity-100">← {prev}</a>
 		<div class="nav-center">
-			<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
+			{#if onJoin}
+				<a href="/" class="text-[var(--accent)] opacity-85 hover:opacity-100">home</a>
+			{:else}
+				<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
+			{/if}
 			<span class="divider"></span>
 			<a href="/sitemap" class="opacity-70 hover:opacity-100">index</a>
 		</div>
