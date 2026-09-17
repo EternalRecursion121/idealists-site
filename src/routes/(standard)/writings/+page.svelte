@@ -40,8 +40,8 @@
 					{#if startsYear(i)}
 						<span class="year-mark">{new Date(writing.updatedAt).getFullYear()}</span>
 					{/if}
-					<a href="/writings/{writing.slug}" class="block group">
-						<h2 class="font-semibold mb-1 group-hover:opacity-70">{writing.title}</h2>
+					<a href="/writings/{writing.slug}" class="block">
+						<h2 class="font-semibold mb-1">{writing.title}</h2>
 						{#if writing.description}
 							<p class="text-sm opacity-60 mb-2">{writing.description}</p>
 						{/if}
