@@ -21,6 +21,8 @@
 	interface PositionedPage extends PageNode {
 		x: number;
 		y: number;
+		// which side of its point the label grows from
+		anchor: 'center' | 'left' | 'right';
 	}
 
 	let containerRef: HTMLDivElement | null = $state(null);
@@ -28,6 +30,7 @@
 	let hoveredPage: string | null = $state(null);
 	let isMobile = $state(false);
 	let time = $state(0);
+	let containerHeight = $state(600);
 
 	const MOBILE_BREAKPOINT = 640;
 
@@ -70,8 +73,8 @@
 			angles.set(path, (i / orbit2.length) * Math.PI * 2 - Math.PI / 3);
 		});
 		// Spread writings evenly across the top arc (away from main nav items)
-		const arcStart = -Math.PI * 0.85; // start from upper left
-		const arcEnd = -Math.PI * 0.15; // end at upper right
+		const arcStart = -Math.PI * 0.92; // start from upper left
+		const arcEnd = -Math.PI * 0.08; // end at upper right
 		const arcSpan = arcEnd - arcStart;
 		orbit3.forEach((path, i) => {
 			const t = orbit3.length > 1 ? i / (orbit3.length - 1) : 0.5;
@@ -89,40 +92,90 @@
 		return angles;
 	}
 
-	function calculatePositions(width: number, height: number, mobile: boolean): PositionedPage[] {
-		const centerX = width / 2;
-		const centerY = height / 2;
-		const baseRadius = Math.min(width, height) * (mobile ? 0.25 : 0.18);
-		const orbitRadii = [0, baseRadius, baseRadius * 1.6, baseRadius * 3];
+	// Where the writings arc can't fit at a readable size (phones, narrow
+	// windows) they become a two-column list above the graph, still wired to
+	// the `writings` node.
+	const LIST_ROW_HEIGHT = 44;
+	const LIST_TOP = 72; // clears the fixed index/theme toggles
+	const LIST_GRAPH_HEIGHT = 400; // phones
+	const LIST_GRAPH_HEIGHT_WIDE = 540; // tablets / narrow windows
+	const WRITING_LABEL_WIDTH = 170; // px, a bit more than the label max-width
+	const WRITING_ORBIT = 2.6;
+
+	let writingCount = $derived(data.pages.filter((p) => p.isWriting).length);
+	let listMode = $state(false);
+
+	function needsList(width: number, viewportLeft: number, mobile: boolean): boolean {
+		if (mobile) return true;
+		const baseRadius = Math.min(width, Math.max(500, window.innerHeight - 100)) * 0.18;
+		// room between the graph centre and the viewport edge for arc + outward label
+		const room = width / 2 + viewportLeft - WRITING_LABEL_WIDTH;
+		return room < baseRadius * WRITING_ORBIT;
+	}
+
+	function getHeight(list: boolean, mobile: boolean): number {
+		const base = Math.max(500, window.innerHeight - 100);
+		if (!list) return base;
+		const listHeight = LIST_TOP + Math.ceil(writingCount / 2) * LIST_ROW_HEIGHT;
+		return Math.max(base, listHeight + (mobile ? LIST_GRAPH_HEIGHT : LIST_GRAPH_HEIGHT_WIDE));
+	}
+
+	function getGeometry(width: number, height: number, mobile: boolean, list: boolean) {
+		const listHeight = list ? LIST_TOP + Math.ceil(writingCount / 2) * LIST_ROW_HEIGHT : 0;
+		const graphHeight = height - listHeight;
+		return {
+			centerX: width / 2,
+			centerY: listHeight + graphHeight / 2,
+			baseRadius: Math.min(width, graphHeight) * (mobile ? 0.25 : list ? 0.24 : 0.18)
+		};
+	}
+
+	function calculatePositions(width: number, height: number, mobile: boolean, list: boolean): PositionedPage[] {
+		const { centerX, centerY, baseRadius } = getGeometry(width, height, mobile, list);
+		const orbitRadii = [0, baseRadius, baseRadius * 1.6, baseRadius * WRITING_ORBIT];
 
 		const angles = assignAngles(data.pages);
+		let writingIndex = 0;
 
 		return data.pages.map((page) => {
 			const orbit = page.path === '/sitemap' ? 0 : getOrbit(page, data.pages);
 			const angle = angles.get(page.path) || 0;
 
 			let x: number, y: number;
+			let anchor: PositionedPage['anchor'] = 'center';
 			if (orbit === 0) {
 				x = centerX;
 				y = centerY;
+			} else if (orbit === 3 && list) {
+				const i = writingIndex++;
+				x = width * (i % 2 === 0 ? 0.26 : 0.74);
+				y = LIST_TOP + Math.floor(i / 2) * LIST_ROW_HEIGHT + LIST_ROW_HEIGHT / 2;
 			} else {
-				const radius = orbitRadii[orbit];
+				let radius = orbitRadii[orbit];
+				if (orbit === 3) {
+					// Labels on the sides grow outwards, away from each other. Near the
+					// top of the arc they sit side by side, so alternate ones step out.
+					const side = Math.cos(angle);
+					anchor = side < -0.45 ? 'right' : side > 0.45 ? 'left' : 'center';
+					if (writingIndex++ % 2 === 1 && anchor === 'center') radius += baseRadius * 0.55;
+				}
 				const angleOffset = Math.sin(time + angle * 2) * 0.03;
 				x = centerX + Math.cos(angle + angleOffset) * radius;
 				y = centerY + Math.sin(angle + angleOffset) * radius;
 			}
 
-			return { ...page, x, y };
+			return { ...page, x, y, anchor };
 		});
 	}
 
 	function calculateLayout() {
 		if (!containerRef) return;
 		const width = containerRef.clientWidth;
-		const height = Math.max(500, window.innerHeight - 100);
 		const mobile = window.innerWidth < MOBILE_BREAKPOINT;
 		isMobile = mobile;
-		positions = calculatePositions(width, height, mobile);
+		listMode = needsList(width, containerRef.getBoundingClientRect().left, mobile);
+		containerHeight = getHeight(listMode, mobile);
+		positions = calculatePositions(width, containerHeight, mobile, listMode);
 	}
 
 	onMount(() => {
@@ -131,9 +184,7 @@
 		const driftInterval = setInterval(() => {
 			time += 0.002;
 			if (containerRef) {
-				const width = containerRef.clientWidth;
-				const height = Math.max(500, window.innerHeight - 100);
-				positions = calculatePositions(width, height, isMobile);
+				positions = calculatePositions(containerRef.clientWidth, containerHeight, isMobile, listMode);
 			}
 		}, 50);
 
@@ -183,7 +234,7 @@
 	}
 
 	function getSize(page: PageNode): string {
-		if (page.isWriting) return '0.45rem'; // writings are smaller
+		if (page.isWriting) return '0.62rem'; // writings are smaller
 		const count = getConnectionCount(page);
 		// Scale from 0.6rem (0 connections) to 1.2rem (10+ connections)
 		const size = Math.min(1.2, 0.6 + count * 0.072);
@@ -191,14 +242,13 @@
 	}
 
 	function getMobileSize(page: PageNode): string {
-		if (page.isWriting) return '0.36rem';
+		if (page.isWriting) return '0.78rem';
 		const count = getConnectionCount(page);
 		const size = Math.min(0.9, 0.51 + count * 0.048);
 		return `${size}rem`;
 	}
 
 	let connectionLines = $derived(getConnectionLines());
-	let containerHeight = $derived(Math.max(500, typeof window !== 'undefined' ? window.innerHeight - 100 : 600));
 </script>
 
 <svelte:head>
@@ -209,9 +259,7 @@
 	<div bind:this={containerRef} class="index-container" style="height: {containerHeight}px;">
 		<svg class="connections" style="height: {containerHeight}px;">
 			{#if positions.length > 0}
-				{@const centerX = containerRef?.clientWidth ? containerRef.clientWidth / 2 : 400}
-				{@const centerY = containerHeight / 2}
-				{@const baseRadius = Math.min(containerRef?.clientWidth ?? 800, containerHeight) * (isMobile ? 0.25 : 0.18)}
+				{@const { centerX, centerY, baseRadius } = getGeometry(containerRef?.clientWidth ?? 800, containerHeight, isMobile, listMode)}
 				<circle
 					cx={centerX}
 					cy={centerY}
@@ -277,11 +325,14 @@
 				class:accent={page.path === '/join'}
 				class:center={page.path === '/sitemap'}
 				class:writing={page.isWriting}
+				class:listed={page.isWriting && listMode}
+				class:anchor-left={page.anchor === 'left'}
+				class:anchor-right={page.anchor === 'right'}
 				class:highlighted={hoveredPage && (page.path === hoveredPage || data.connections.some(c => (c.from === hoveredPage && c.to === page.path) || (c.to === hoveredPage && c.from === page.path)))}
 				style="
 					left: {page.x}px;
 					top: {page.y}px;
-					font-size: {isMobile ? getMobileSize(page) : getSize(page)};
+					font-size: {isMobile ? getMobileSize(page) : listMode && page.isWriting ? '0.72rem' : getSize(page)};
 				"
 				onmouseenter={() => hoveredPage = page.path}
 				onmouseleave={() => hoveredPage = null}
@@ -357,6 +408,37 @@
 	.index-link.writing .link-name {
 		font-weight: 400;
 		font-style: italic;
+	}
+
+	/* Slugs are long: wrap them at the hyphens instead of running into neighbours */
+	.index-link.writing {
+		width: max-content;
+		max-width: 8.75rem;
+		padding: 0.25rem 0.5rem;
+		line-height: 1.25;
+		text-wrap: balance;
+	}
+
+	.index-link.anchor-left {
+		transform: translate(0, -50%);
+		align-items: flex-start;
+		text-align: left;
+	}
+
+	.index-link.anchor-right {
+		transform: translate(-100%, -50%);
+		align-items: flex-end;
+		text-align: right;
+	}
+
+	.index-link.listed {
+		max-width: 46%;
+		opacity: 0.8;
+	}
+
+	/* descriptions are hover-only; in the list they'd just widen the row */
+	.index-link.listed .link-description {
+		display: none;
 	}
 
 	.link-name {
