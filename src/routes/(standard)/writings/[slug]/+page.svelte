@@ -283,6 +283,17 @@
 		padding: 0.65rem 0;
 	}
 
+	/* The one-sided padding makes the default focus box lopsided and clip the
+	   neighbouring chevrons; mark the focused half with full strength + a dotted
+	   underline instead. */
+	.sep-link:focus-visible {
+		outline: none;
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		text-underline-offset: 0.35em;
+		opacity: 1;
+	}
+
 	.sep-back {
 		padding-left: 1rem;
 	}
