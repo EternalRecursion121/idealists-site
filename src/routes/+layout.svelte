@@ -299,6 +299,9 @@
 		position: fixed;
 		top: 1rem;
 		right: 1rem;
+		/* same layer as the index toggle; without it, panels that create their own
+		   stacking context (unconference's backdrop-filter cards) cover the button */
+		z-index: 100;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
