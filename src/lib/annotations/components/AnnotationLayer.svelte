@@ -395,7 +395,7 @@
 {#if currentSelection && !showForm}
 	<div
 		class="annotation-popover"
-		style="left: {currentSelection.rect.left + currentSelection.rect.width / 2}px; top: {currentSelection.rect.top + window.scrollY - 45}px;"
+		style="left: {currentSelection.rect.left + currentSelection.rect.width / 2}px; top: {Math.max(currentSelection.rect.top - 45, 8) + window.scrollY}px;"
 	>
 		{#if useGitHub && !isLoggedIn}
 			<button onclick={loginWithGitHub}>login to annotate</button>
