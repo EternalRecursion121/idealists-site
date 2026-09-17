@@ -446,6 +446,9 @@
 	}
 
 	.writing-content :global(a) {
+		/* a bare URL as link text is one unbreakable 480px word: it pinned the
+		   whole page wider than a phone */
+		overflow-wrap: anywhere;
 		color: var(--accent);
 		text-decoration: underline;
 		text-underline-offset: 2px;
