@@ -1178,6 +1178,26 @@
 	}
 
 	/* Responsive */
+	/* Phones: five nested paddings left quotes ~190px wide (3 words a line).
+	   Drop the outer rings so the cards get the width back. */
+	@media (max-width: 639px) {
+		.unconference {
+			--section-padding: 1.25rem 0;
+		}
+
+		.section-inner {
+			padding-inline: 0.85rem;
+		}
+
+		.category-quotes {
+			padding: 0 0.6rem 0.75rem 0.6rem;
+		}
+
+		.testimonial {
+			padding: 0.85rem 0.85rem 0.8rem 0.9rem;
+		}
+	}
+
 	@media (min-width: 640px) {
 		.unconference {
 			--section-padding: 2rem 2rem;
