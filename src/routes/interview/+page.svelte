@@ -570,8 +570,10 @@
 	});
 
 	let humanModalEl: HTMLDivElement | null = $state(null);
+	let humanModalOpener: HTMLElement | null = null;
 
 	async function openHumanModal() {
+		humanModalOpener = document.activeElement as HTMLElement | null;
 		humanModalOpen = true;
 		humanError = '';
 		humanSubmitted = false;
@@ -584,6 +586,9 @@
 
 	function closeHumanModal() {
 		humanModalOpen = false;
+		// hand focus back to whatever opened the dialog
+		humanModalOpener?.focus();
+		humanModalOpener = null;
 	}
 
 	async function submitHumanRequest() {
