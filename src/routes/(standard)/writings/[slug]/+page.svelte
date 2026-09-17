@@ -173,6 +173,7 @@
 <script module lang="ts">
 	import { marked, type TokenizerExtension, type RendererExtension } from 'marked';
 	import markedFootnote from 'marked-footnote';
+	import writingImages from '$lib/writings/images.json';
 
 	const styles = [
      'font-size: 1.8rem; font-weight: 600; color: var(--heading); margin: 2rem 0 1rem 0; letter-spacing: -0.02em;',
@@ -234,8 +235,21 @@
 			em(token) {
 				return `<em class="italic">${this.parser.parseInline(token.tokens)}</em>`;
 			},
+			// content.md keeps pointing at the original PNG/JPG (so old revisions
+			// still resolve, and optimizing never adds a revision to the timeline);
+			// images.json maps each one to its WebP and its dimensions.
+			image({ href, title, text }) {
+				const known = (writingImages as Record<string, { src: string; width: number; height: number }>)[href];
+				const size = known ? ` width="${known.width}" height="${known.height}"` : '';
+				const titleAttr = title ? ` title="${escapeAttr(title)}"` : '';
+				return `<img src="${escapeAttr(known?.src ?? href)}" alt="${escapeAttr(text)}"${titleAttr}${size} loading="lazy" decoding="async">`;
+			},
 		}
 	});
+
+	function escapeAttr(value: string): string {
+		return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+	}
 
 	function renderMarkdown(text: string): string {
 		return marked(text) as string;
