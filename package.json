@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "rm -rf .vercel/output .svelte-kit && node scripts/optimize-vibes.js && node scripts/generate-vibes-manifest.js && vite build",
+		"build": "rm -rf .vercel/output .svelte-kit && node scripts/optimize-vibes.js --if-ci && node scripts/generate-vibes-manifest.js && vite build",
+		"vibes": "node scripts/optimize-vibes.js && node scripts/generate-vibes-manifest.js",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
