@@ -54,7 +54,7 @@
 		<!-- Replies -->
 		{#if annotation.replies && annotation.replies.length > 0}
 			<div class="replies">
-				{#each annotation.replies as reply}
+				{#each annotation.replies as reply (reply.id)}
 					<div class="comment reply">
 						<div class="author">{reply.author}</div>
 						<div class="time">{formatDate(reply.createdAt)}</div>

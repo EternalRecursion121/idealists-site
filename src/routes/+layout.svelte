@@ -1,11 +1,12 @@
 <script lang="ts">
 	import './layout.css';
+	import type { Snippet } from 'svelte';
 	import FloatingLlama from '$lib/components/FloatingLlama.svelte';
 	import NavOverlay from '$lib/components/NavOverlay.svelte';
 	import { browser } from '$app/environment';
 
 	interface Props {
-		children: any;
+		children: Snippet;
 		data: {
 			navPages: { name: string; path: string; linksTo: string[]; isWriting?: boolean }[];
 			navConnections: { from: string; to: string }[];

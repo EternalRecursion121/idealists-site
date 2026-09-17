@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { marked } from 'marked';
 	import { interviewer as realInterviewer, InterviewerError } from '$lib/interviewer-client';
 	import { mockInterviewer, mockControls } from '$lib/interviewer-client-mock';
 
-	const isPreview = $derived($page.url.searchParams.has('preview'));
+	const isPreview = $derived(page.url.searchParams.has('preview'));
 	const interviewer = $derived(isPreview ? mockInterviewer : realInterviewer);
 
 	type Phase = 'welcome' | 'form' | 'conversation' | 'notes' | 'done' | 'error';

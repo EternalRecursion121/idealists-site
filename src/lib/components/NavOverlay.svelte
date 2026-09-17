@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
 	interface PageNode {
@@ -28,7 +28,7 @@
 		return fromPage && toPage && !fromPage.isWriting && !toPage.isWriting;
 	}));
 
-	let currentPath = $derived($page.url.pathname);
+	let currentPath = $derived(page.url.pathname);
 
 	interface PositionedPage extends PageNode {
 		x: number;

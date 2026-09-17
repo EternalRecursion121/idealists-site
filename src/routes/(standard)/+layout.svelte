@@ -1,23 +1,24 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import BottomNav from '$lib/components/BottomNav.svelte';
 
 	interface Props {
-		children: any;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
 
-	// Access page data via $page.data
-	let title = $derived($page.data.title as string | undefined);
-	let description = $derived($page.data.description as string | undefined);
-	let centered = $derived($page.data.centered as boolean | undefined);
+	// Access page data via page.data
+	let title = $derived(page.data.title as string | undefined);
+	let description = $derived(page.data.description as string | undefined);
+	let centered = $derived(page.data.centered as boolean | undefined);
 
 	// Derive current page from URL for BottomNav
 	type PageType = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
 	let current: PageType = $derived.by(() => {
-		const path = $page.url.pathname;
+		const path = page.url.pathname;
 		if (path === '/library') return 'library';
 		// /unconference is reached from /projects and isn't on the ring itself
 		if (path === '/projects' || path === '/unconference') return 'projects';
