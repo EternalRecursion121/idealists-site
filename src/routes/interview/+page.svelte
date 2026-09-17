@@ -161,7 +161,13 @@
 			await consumeStream(events);
 		} catch (e) {
 			handleError(e);
-			if (turns.length === 0) phase = 'form';
+			if (turns.length === 0) {
+				// Bouncing back to the form resets scroll to the top, leaving the
+				// message far below the fold — bring it into view.
+				phase = 'form';
+				await tick();
+				document.querySelector('.frame .error')?.scrollIntoView({ block: 'center' });
+			}
 		} finally {
 			busy = false;
 			await tick();
