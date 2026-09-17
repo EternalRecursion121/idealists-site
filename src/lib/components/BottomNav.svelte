@@ -69,6 +69,19 @@
 		opacity: 0.2;
 	}
 
+	/* text-height links were 18px tap targets; padding enlarges them without
+	   moving anything (negative margins hand the space back) */
+	.footer-grid a {
+		padding: 0.6rem 0.4rem;
+		margin: -0.6rem -0.4rem;
+	}
+
+	/* the stacked centre links are close together: smaller pads so they don't overlap */
+	.nav-center a {
+		padding: 0.35rem 0.3rem;
+		margin: -0.35rem -0.3rem;
+	}
+
 	.nav-prev {
 		text-align: right;
 	}
