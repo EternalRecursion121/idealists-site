@@ -1196,6 +1196,23 @@
 		.testimonial {
 			padding: 0.85rem 0.85rem 0.8rem 0.9rem;
 		}
+
+		/* at 320 the two amount columns were clipped mid-figure by the table */
+		.budget-header,
+		.budget-row {
+			gap: 0.4rem;
+			padding: 0.75rem 0.5rem;
+		}
+
+		.budget-amount {
+			font-size: 0.75rem;
+		}
+
+		/* let a long single word ("Accommodation") give way to the amounts */
+		.budget-category {
+			min-width: 0;
+			overflow-wrap: anywhere;
+		}
 	}
 
 	@media (min-width: 640px) {
