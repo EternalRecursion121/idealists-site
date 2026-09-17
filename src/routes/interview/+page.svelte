@@ -569,12 +569,17 @@
 		clearAsideTimer();
 	});
 
-	function openHumanModal() {
+	let humanModalEl: HTMLDivElement | null = $state(null);
+
+	async function openHumanModal() {
 		humanModalOpen = true;
 		humanError = '';
 		humanSubmitted = false;
 		// prefill name from the welcome input if they already typed one
 		if (memberHint && !humanName) humanName = memberHint;
+		// move focus into the dialog so Escape and Tab work from the keyboard
+		await tick();
+		humanModalEl?.focus();
 	}
 
 	function closeHumanModal() {
@@ -596,7 +601,12 @@
 			});
 			humanSubmitted = true;
 		} catch (e) {
-			humanError = e instanceof Error ? e.message : 'something went wrong.';
+			humanError =
+				e instanceof TypeError
+					? "couldn't reach us right now. try again in a moment."
+					: e instanceof Error
+						? e.message
+						: 'something went wrong.';
 		} finally {
 			humanSubmitting = false;
 		}
@@ -828,6 +838,7 @@
 				transition:fade={{ duration: 180 }}
 			>
 				<div
+					bind:this={humanModalEl}
 					class="modal"
 					role="dialog"
 					tabindex="-1"
@@ -1566,6 +1577,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
+	}
+
+	/* the dialog container takes focus only so keys work; it isn't a control */
+	.modal:focus {
+		outline: none;
 	}
 
 	.modal-title {
