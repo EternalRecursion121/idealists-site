@@ -537,6 +537,18 @@
 		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 	}
 
+	/* On phones a fixed 260px pill permanently covers the reading column and
+	   the footer links, so it joins the flow at the end of the piece instead. */
+	@media (max-width: 640px) {
+		.annotation-controls {
+			position: static;
+			align-self: center;
+			width: fit-content;
+			margin: 2.5rem auto 0;
+			box-shadow: none;
+		}
+	}
+
 	.annotation-controls .count {
 		opacity: 0.7;
 	}
