@@ -89,27 +89,4 @@ export class GitHubAuth implements AuthProvider {
 		const session = this.getSession();
 		return session?.accessToken || null;
 	}
-
-	// Check if user has write access to the repo
-	async hasRepoAccess(owner: string, repo: string): Promise<boolean> {
-		const token = this.getAccessToken();
-		if (!token) return false;
-
-		try {
-			const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-				headers: {
-					'Authorization': `Bearer ${token}`,
-					'Accept': 'application/vnd.github.v3+json'
-				}
-			});
-
-			if (!res.ok) return false;
-
-			const data = await res.json();
-			// Check for push permission
-			return data.permissions?.push === true;
-		} catch {
-			return false;
-		}
-	}
 }

@@ -16,10 +16,10 @@ export type {
 export { parseAnnotationsMarkdown, serializeAnnotationsMarkdown, formatDate } from './parser';
 
 // Stores
-export { FilesystemStore, MemoryStore, getStore } from './stores';
+export { FilesystemStore, MemoryStore } from './stores';
 
 // Auth
-export { AnonymousAuth, getAuthProvider } from './auth';
+export { AnonymousAuth } from './auth';
 
 // Components are exported individually since they're Svelte files
 // import AnnotationLayer from '$lib/annotations/components/AnnotationLayer.svelte';

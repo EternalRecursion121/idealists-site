@@ -3,8 +3,6 @@
 	import FloatingLlama from '$lib/components/FloatingLlama.svelte';
 	import NavOverlay from '$lib/components/NavOverlay.svelte';
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 
 	interface Props {
 		children: any;
@@ -15,9 +13,6 @@
 	}
 
 	let { children, data }: Props = $props();
-
-	// Hide nav on index pages
-	let showNav = $derived(!$page.url.pathname.startsWith('/index'));
 
 	const themes = {
 		dawn: { bg: '#FFFBF3', text: '#4A3728', accent: '#D89A6A', heading: '#B8804E', noise: 'rgba(216,154,106,1)' },
@@ -145,7 +140,7 @@
 >
 	<FloatingLlama />
 
-	{#if showNav && data.navPages}
+	{#if data.navPages}
 		<NavOverlay pages={data.navPages} connections={data.navConnections} />
 	{/if}
 

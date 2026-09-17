@@ -21,12 +21,11 @@
 	let hoveredPage: string | null = $state(null);
 
 	// Filter to main pages only
-	let mainPages = $derived(pages.filter(p => !p.isWriting && p.path !== '/index'));
+	let mainPages = $derived(pages.filter(p => !p.isWriting));
 	let mainConnections = $derived(connections.filter(c => {
 		const fromPage = pages.find(p => p.path === c.from);
 		const toPage = pages.find(p => p.path === c.to);
-		return fromPage && toPage && !fromPage.isWriting && !toPage.isWriting &&
-			fromPage.path !== '/index' && toPage.path !== '/index';
+		return fromPage && toPage && !fromPage.isWriting && !toPage.isWriting;
 	}));
 
 	let currentPath = $derived($page.url.pathname);

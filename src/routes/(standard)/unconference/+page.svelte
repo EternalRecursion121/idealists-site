@@ -397,18 +397,18 @@
 	}
 
 	/* No ring on mouse/touch focus, but keyboard users still get one. */
-	.unconference :is(a, button, summary, input, textarea, select):focus:not(:focus-visible) {
+	.unconference :is(a, button, summary):focus:not(:focus-visible) {
 		outline: none;
 		box-shadow: none;
 	}
 
-	.unconference :is(a, button, summary, input, textarea, select):focus-visible {
+	.unconference :is(a, button, summary):focus-visible {
 		outline: 1px solid var(--accent);
 		outline-offset: 3px;
 		border-radius: 2px;
 	}
 
-	.unconference :is(a, button, summary, input, textarea, select) {
+	.unconference :is(a, button, summary) {
 		-webkit-tap-highlight-color: transparent;
 	}
 
@@ -578,12 +578,6 @@
 		opacity: 0.85;
 	}
 
-	.full-draft-content blockquote {
-		margin: 0.5rem 0 1rem;
-		padding-left: 1rem;
-		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
-	}
-
 	/* Event Cards */
 	.event-cards {
 		display: grid;
@@ -687,68 +681,6 @@
 	}
 
 	/* Time Capsule */
-	.capsule {
-		background: transparent;
-	}
-
-	.capsule-card {
-		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-		border-radius: 4px;
-		background: color-mix(in srgb, var(--text) 2%, transparent);
-		max-width: 720px;
-		margin: 0 auto;
-		transition: border-color 0.3s, background 0.3s;
-	}
-
-	.capsule-card.expanded {
-		border-color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 5%, transparent);
-	}
-
-	.capsule-toggle {
-		width: 100%;
-		padding: 1.25rem 1.5rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		color: inherit;
-		text-align: left;
-	}
-
-	.capsule-toggle:hover {
-		color: var(--accent);
-	}
-
-	.capsule-toggle .expand-icon {
-		font-size: 1.25rem;
-		opacity: 0.5;
-	}
-
-	.capsule-content {
-		text-align: left;
-		padding: 0 1.5rem 1.5rem 1.5rem;
-	}
-
-	.capsule-title {
-		font-family: var(--font-display);
-		font-size: 1.5rem;
-		font-weight: 400;
-		margin: 0;
-		color: var(--heading);
-	}
-
-	.capsule-description {
-		font-family: var(--font-serif);
-		font-size: 1.1rem;
-		line-height: 1.7;
-		opacity: 0.8;
-		max-width: 700px;
-		margin: 0 0 1.25rem 0;
-	}
-
 	.capsule-examples {
 		list-style: disc;
 		margin: 0 0 1.25rem 1.25rem;
@@ -837,38 +769,7 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.workshop-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 0.9rem;
-	}
-
-	.workshop-card {
-		font-family: var(--font-serif);
-		font-size: 0.98rem;
-		line-height: 1.62;
-		letter-spacing: 0.005em;
-		opacity: 0.88;
-		padding: 1rem 1.1rem 0.95rem 1.2rem;
-		border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
-		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
-		border-radius: 0.45rem;
-		background: color-mix(in srgb, var(--accent) 7%, transparent);
-	}
-
 	/* Voices */
-	.voices {
-		background: transparent;
-	}
-
-	.voices-intro {
-		font-family: var(--font-serif);
-		font-size: 1.1rem;
-		line-height: 1.7;
-		opacity: 0.8;
-		margin-bottom: 2.5rem;
-	}
-
 	.voice-categories {
 		display: flex;
 		flex-direction: column;
@@ -947,48 +848,6 @@
 	}
 
 	/* Support */
-	.support {
-		background: transparent;
-	}
-
-	.support-card {
-		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-		border-radius: 4px;
-		background: color-mix(in srgb, var(--text) 2%, transparent);
-		transition: border-color 0.3s, background 0.3s;
-	}
-
-	.support-card.expanded {
-		border-color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 5%, transparent);
-	}
-
-	.support-toggle {
-		width: 100%;
-		padding: 1.5rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		color: inherit;
-		text-align: left;
-	}
-
-	.support-toggle:hover {
-		color: var(--accent);
-	}
-
-	.support-toggle .section-header {
-		margin: 0;
-	}
-
-	.support-toggle .expand-icon {
-		font-size: 1.25rem;
-		opacity: 0.5;
-	}
-
 	.support-content {
 		text-align: center;
 		padding: 0 1.5rem 1.5rem 1.5rem;
@@ -1248,10 +1107,6 @@
 			font-size: clamp(3rem, 10vw, 6rem);
 		}
 
-		.question {
-			font-size: 1.6rem;
-		}
-
 		.event-cards {
 			grid-template-columns: repeat(2, 1fr);
 		}
@@ -1260,9 +1115,6 @@
 			grid-template-columns: repeat(3, 1fr);
 		}
 
-		.testimonial-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
 	}
 
 	@media (min-width: 900px) {
