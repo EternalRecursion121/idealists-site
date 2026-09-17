@@ -165,7 +165,7 @@
 
 			<div class="event-cards">
 				<article class="event-card" class:expanded={retreatExpanded}>
-					<button class="event-toggle" onclick={() => retreatExpanded = !retreatExpanded}>
+					<button class="event-toggle" onclick={() => retreatExpanded = !retreatExpanded} aria-expanded={retreatExpanded}>
 						<div class="event-header">
 							<div>
 								<span class="event-day">Apr 4–10</span>
@@ -194,7 +194,7 @@
 				</article>
 
 				<article class="event-card" class:expanded={conferenceExpanded}>
-					<button class="event-toggle" onclick={() => conferenceExpanded = !conferenceExpanded}>
+					<button class="event-toggle" onclick={() => conferenceExpanded = !conferenceExpanded} aria-expanded={conferenceExpanded}>
 						<div class="event-header">
 							<div>
 								<span class="event-day">Apr 11–12</span>
@@ -230,7 +230,7 @@
 		<div class="section-inner">
 			<div class="expandables-group">
 				<div class="workshops-card" class:expanded={showCapsule}>
-					<button class="workshops-toggle" onclick={() => showCapsule = !showCapsule}>
+					<button class="workshops-toggle" onclick={() => showCapsule = !showCapsule} aria-expanded={showCapsule}>
 						<h2 class="section-header">a backward-looking time capsule</h2>
 						<span class="expand-icon">{showCapsule ? '−' : '+'}</span>
 					</button>
@@ -266,7 +266,7 @@
 			<div class="voice-categories">
 				{#each voiceCategories as category}
 					<div class="voice-category" class:expanded={expandedCategories.has(category.title)}>
-						<button class="category-toggle" onclick={() => toggleCategory(category.title)}>
+						<button class="category-toggle" onclick={() => toggleCategory(category.title)} aria-expanded={expandedCategories.has(category.title)}>
 							<h3 class="category-title">{category.title}</h3>
 							<span class="expand-icon">{expandedCategories.has(category.title) ? '−' : '+'}</span>
 						</button>
@@ -282,7 +282,7 @@
 					</div>
 				{/each}
 				<div class="voice-category" class:expanded={showWorkshops}>
-				<button class="category-toggle" onclick={() => showWorkshops = !showWorkshops}>
+				<button class="category-toggle" onclick={() => showWorkshops = !showWorkshops} aria-expanded={showWorkshops}>
 					<h3 class="category-title">workshop sketches</h3>
 					<span class="expand-icon">{showWorkshops ? '−' : '+'}</span>
 				</button>
@@ -305,7 +305,7 @@
 		<div class="section-inner">
 			<div class="expandables-group">
 				<div class="workshops-card support-highlight" class:expanded={showBudget}>
-					<button class="workshops-toggle" onclick={() => showBudget = !showBudget}>
+					<button class="workshops-toggle" onclick={() => showBudget = !showBudget} aria-expanded={showBudget}>
 						<h2 class="section-header">support this gathering</h2>
 						<span class="expand-icon">{showBudget ? '−' : '+'}</span>
 					</button>
@@ -330,7 +330,7 @@
 								</div>
 							</div>
 
-							<button class="budget-toggle" onclick={() => showBudgetBreakdown = !showBudgetBreakdown}>
+							<button class="budget-toggle" onclick={() => showBudgetBreakdown = !showBudgetBreakdown} aria-expanded={showBudgetBreakdown}>
 								{showBudgetBreakdown ? '− hide budget breakdown' : '+ view budget breakdown'}
 							</button>
 
