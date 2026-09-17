@@ -147,9 +147,10 @@
 				class="history-toggle"
 				class:history-expanded={historyExpanded}
 				onclick={() => historyExpanded = !historyExpanded}
+				aria-expanded={historyExpanded}
 			>
 				<span>revision history ({data.writing.revisions.length})</span>
-				<span class="toggle-icon">{historyExpanded ? '−' : '+'}</span>
+				<span class="toggle-icon">+</span>
 			</button>
 			{#if historyExpanded}
 				<div transition:slide={{ duration: 300 }}>
