@@ -91,6 +91,24 @@
 		opacity: 0.25;
 	}
 
+	/* On the narrowest phones the two decorative rules + gaps take 112px, and
+	   the labels wrap into each other. Drop the rules and keep labels on a line. */
+	@media (max-width: 400px) {
+		.footer-grid {
+			grid-template-columns: auto auto auto;
+			gap: 0.75rem;
+		}
+
+		.line-h {
+			display: none;
+		}
+
+		.nav-prev,
+		.nav-center,
+		.nav-next {
+			white-space: nowrap;
+		}
+	}
 
 	@media (min-width: 640px) {
 		.footer-grid {
