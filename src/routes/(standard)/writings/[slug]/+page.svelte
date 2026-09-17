@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
+	import { afterNavigate, goto } from '$app/navigation';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import AnnotationLayer from '$lib/annotations/components/AnnotationLayer.svelte';
 	import type { WritingWithHistory } from '$lib/types/writing';
@@ -14,6 +15,18 @@
 	}
 
 	let { data }: Props = $props();
+
+	// `<<<` means "back". On a deep link there is nothing of ours to go back to
+	// (history.back() would leave the site, or do nothing), so fall back to the list.
+	let cameFromSite = $state(false);
+	afterNavigate(({ from }) => {
+		if (from) cameFromSite = true;
+	});
+
+	function goBack() {
+		if (cameFromSite) history.back();
+		else goto('/writings');
+	}
 
 	let currentRevisionIndex = $state(0);
 	let historyExpanded = $state(false);
@@ -120,7 +133,7 @@
 			{/if}
 		</div>
 		<div class="separator">
-			<button onclick={() => history.back()} class="sep-link">&lt;&lt;&lt;</button><a href={`/writings/${data.nextSlug}`} class="sep-link">&gt;&gt;&gt;</a>
+			<button onclick={goBack} class="sep-link sep-back" aria-label="back">&lt;&lt;&lt;</button><a href={`/writings/${data.nextSlug}`} class="sep-link sep-next" aria-label="next writing">&gt;&gt;&gt;</a>
 		</div>
 	</header>
 
@@ -248,13 +261,14 @@
 	}
 
 	.separator {
-		margin-top: 1.5rem;
+		margin-top: 0.85rem;
+		margin-bottom: -0.65rem;
 		letter-spacing: 0.2em;
 	}
 
 	.sep-link {
 		color: var(--accent);
-		opacity: 0.5;
+		opacity: 0.75;
 		text-decoration: none;
 		transition: opacity 0.2s;
 		background: none;
@@ -262,7 +276,18 @@
 		font-family: inherit;
 		font-size: inherit;
 		cursor: pointer;
-		padding: 0;
+		/* Reads as one `<<<>>>` ornament, so the padding that makes each half a
+		   real tap target goes on the top, bottom and outer side only. */
+		display: inline-block;
+		padding: 0.65rem 0;
+	}
+
+	.sep-back {
+		padding-left: 1rem;
+	}
+
+	.sep-next {
+		padding-right: 1rem;
 	}
 
 	.sep-link:hover {
