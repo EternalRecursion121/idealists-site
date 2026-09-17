@@ -513,6 +513,26 @@
 		opacity: 0.8;
 	}
 
+	/* Section break: an asterism in the theme's accent instead of the
+	   browser's grey rule */
+	.writing-content :global(hr) {
+		border: none;
+		height: auto;
+		margin: 3rem auto;
+		text-align: center;
+		overflow: visible;
+	}
+
+	.writing-content :global(hr)::after {
+		content: '✦ · ✦';
+		color: var(--accent);
+		opacity: 0.5;
+		font-size: 0.75rem;
+		letter-spacing: 0.35em;
+		/* letter-spacing trails the last glyph; pull it back to true centre */
+		margin-right: -0.35em;
+	}
+
 	/* Footnote jumps (both directions) land below the fixed toggles, not at y=0 */
 	.writing-content :global([data-footnote-ref]),
 	.writing-content :global(section[data-footnotes] li) {
