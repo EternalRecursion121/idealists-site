@@ -16,7 +16,7 @@
 
 <section>
 	<ul class="space-y-4 inline-block">
-		{#each data.members as member (member.name)}
+		{#each data.members as member}
 			<li>
 				{#if member.url}
 					<a
