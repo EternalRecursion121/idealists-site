@@ -278,6 +278,21 @@
 		color: var(--bg);
 	}
 
+	/* Below the width where the reading column leaves empty gutters, content
+	   scrolls underneath the toggle — once scrolled (html.scrolled is set by the
+	   root layout) give it a soft chip so both stay legible. */
+	@media (max-width: 56rem) {
+		.nav-overlay:not(.expanded) {
+			border-radius: 999px;
+		}
+
+		:global(html.scrolled) .nav-overlay:not(.expanded) {
+			background: color-mix(in srgb, var(--bg) 70%, transparent);
+			backdrop-filter: blur(6px);
+			-webkit-backdrop-filter: blur(6px);
+		}
+	}
+
 	@media (max-width: 640px) {
 		.nav-overlay.expanded {
 			width: 240px;

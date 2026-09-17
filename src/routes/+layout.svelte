@@ -110,7 +110,16 @@
 			document.body.style.backgroundColor = currentColors.bg;
 		}
 	});
+
+	// Fixed chrome (index + theme toggles) only needs a backdrop once content
+	// has scrolled underneath it.
+	let scrollY = $state(0);
+	$effect(() => {
+		document.documentElement.classList.toggle('scrolled', scrollY > 24);
+	});
 </script>
+
+<svelte:window bind:scrollY />
 
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -321,6 +330,27 @@
 
 	.theme-toggle:hover {
 		opacity: 1;
+	}
+
+	/* Same chip as the index toggle: on narrow screens content scrolls under
+	   the fixed button, so once scrolled it gets a soft backdrop. The tooltip
+	   steps out of flow so the chip hugs the icon. */
+	@media (max-width: 56rem) {
+		.theme-toggle-wrap {
+			border-radius: 999px;
+			transition: background 0.3s ease;
+		}
+
+		:global(html.scrolled) .theme-toggle-wrap {
+			background: color-mix(in srgb, var(--bg) 70%, transparent);
+			backdrop-filter: blur(6px);
+			-webkit-backdrop-filter: blur(6px);
+		}
+
+		.theme-tooltip {
+			position: absolute;
+			right: calc(100% + 0.5rem);
+		}
 	}
 
 	:global(a) {
