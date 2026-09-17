@@ -2514,7 +2514,9 @@
 	}
 	.s1-input:focus {
 		outline: none;
-		border-bottom-color: currentColor;
+		/* accent, like .underline-input and .modal-input — a 1px rule going from
+		   22% to 100% text was the faintest focus cue on the page */
+		border-bottom-color: var(--accent);
 	}
 	.chips {
 		display: flex;
