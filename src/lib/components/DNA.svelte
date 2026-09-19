@@ -154,7 +154,7 @@
                     >
                 </div>
             {:else}
-                <div class="principle-card">
+                <div class="principle-card {item.title}-card">
                     <span class="principle-title">{item.title}</span>
                     <p class="principle-desc"
                         >{#each item.segments as seg, i (i)}{#if seg.highlight}<span class="highlight"
@@ -319,7 +319,41 @@
         transform: translateY(-6px) translateX(-4px) rotate(-7deg);
     }
 
+    /* utopian: a small sunrise. The title lifts, warms and gains a halo. */
+    .utopian-card .principle-title {
+        transition: color 0.6s ease, text-shadow 0.6s ease, transform 0.6s ease;
+    }
+
+    .utopian-card:hover .principle-title {
+        transform: translateY(-4px);
+        color: color-mix(in srgb, var(--heading) 55%, var(--accent));
+        text-shadow:
+            0 0 0.6em color-mix(in srgb, var(--accent) 55%, transparent),
+            0 0.5em 1.4em color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    /* loving: the closing "love <3" gives two heartbeats and settles. */
+    .loving-card .highlight:last-child {
+        display: inline-block;
+        transform-origin: center;
+    }
+
+    .loving-card:hover .highlight:last-child {
+        color: var(--accent);
+        animation: loving-heartbeat 0.9s ease-in-out 2;
+    }
+
+    @keyframes loving-heartbeat {
+        0%, 100% { transform: scale(1); }
+        14% { transform: scale(1.16); }
+        28% { transform: scale(1); }
+        42% { transform: scale(1.1); }
+        56% { transform: scale(1); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
+        .utopian-card .principle-title,
+        .loving-card .highlight:last-child,
         .playful-card .principle-title.bouncing,
         .autonomous-card .principle-title,
         .autonomous-card .chunk,
