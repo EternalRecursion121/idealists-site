@@ -15,17 +15,6 @@
 	let description = $derived(page.data.description as string | undefined);
 	let centered = $derived(page.data.centered as boolean | undefined);
 
-	// Derive current page from URL for BottomNav
-	type PageType = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
-	let current: PageType = $derived.by(() => {
-		const path = page.url.pathname;
-		if (path === '/library') return 'library';
-		// /unconference is reached from /projects and isn't on the ring itself
-		if (path === '/projects' || path === '/unconference') return 'projects';
-		if (path === '/members') return 'members';
-		if (path.startsWith('/writings')) return 'writings';
-		return 'home';
-	});
 </script>
 
 <div class="page-layout" class:centered class:untitled={!title}>
@@ -33,7 +22,7 @@
 		<PageHeader {title} {description} />
 	{/if}
 	{@render children()}
-	<BottomNav {current} />
+	<BottomNav />
 </div>
 
 <style>

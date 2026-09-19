@@ -1,24 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { ring, ringPathFor, pageName } from '$lib/nav';
 
-	type Page = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
-
-	const ring: Page[] = ['projects', 'writings', 'home', 'library', 'members', 'vibes'];
-	const paths: Record<Page, string> = {
-		home: '/',
-		writings: '/writings',
-		vibes: '/vibes',
-		library: '/library',
-		projects: '/projects',
-		members: '/members'
-	};
-
-	interface Props {
-		current: Page;
-	}
-
-	let { current }: Props = $props();
-
+	// which ring page we're on: its own, its parent (/unconference -> /projects), or home
+	let current = $derived(ringPathFor(page.url.pathname));
 	let idx = $derived(ring.indexOf(current));
 	let prev = $derived(ring[(idx - 1 + ring.length) % ring.length]);
 	let next = $derived(ring[(idx + 1) % ring.length]);
@@ -30,7 +15,7 @@
 <footer class="site-footer">
 	<div class="footer-grid">
 		<span class="line-h"></span>
-		<a href={paths[prev]} class="nav-prev opacity-70 hover:opacity-100">← {prev}</a>
+		<a href={prev} class="nav-prev opacity-70 hover:opacity-100">← {pageName(prev)}</a>
 		<div class="nav-center">
 			{#if onJoin}
 				<a href="/" class="text-[var(--accent)] opacity-85 hover:opacity-100">home</a>
@@ -40,7 +25,7 @@
 			<span class="divider"></span>
 			<a href="/sitemap" class="opacity-70 hover:opacity-100">index</a>
 		</div>
-		<a href={paths[next]} class="nav-next opacity-70 hover:opacity-100">{next} →</a>
+		<a href={next} class="nav-next opacity-70 hover:opacity-100">{pageName(next)} →</a>
 		<span class="line-h"></span>
 	</div>
 </footer>

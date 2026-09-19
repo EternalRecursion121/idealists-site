@@ -25,7 +25,7 @@
 
 	<ScatteredGallery images={data.images} />
 
-	<BottomNav current="vibes" />
+	<BottomNav />
 </div>
 
 <style>

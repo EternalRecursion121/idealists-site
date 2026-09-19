@@ -244,7 +244,7 @@ we are a collective. this literally means we are made up of people. you there, i
 		</a>
 	</div>
 
-	<BottomNav current="home" />
+	<BottomNav />
 </div>
 
 <style>

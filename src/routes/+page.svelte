@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <BottomNav current="home" />
+    <BottomNav />
 </div>
 
 <style>
