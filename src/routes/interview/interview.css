@@ -1,0 +1,205 @@
+/* Styles shared by two or more of the interview page's sections (Welcome and
+   Stage1Form share the whole title/form vocabulary; Notes, Done and ErrorState
+   share h1/.lede/.sub/.link). Everything is scoped under .frame so nothing
+   leaks past the page. Section-specific rules live in each component. */
+
+.frame h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 2rem;
+	margin: 4rem 0 1.5rem;
+	line-height: 1.1;
+	color: var(--heading);
+}
+
+@media (min-width: 640px) {
+	.frame h1 {
+		font-size: 2.75rem;
+		margin-top: 5rem;
+	}
+}
+
+.frame .lede {
+	font-size: 1.05rem;
+	line-height: 1.55;
+	max-width: 38rem;
+	margin: 0 0 1rem;
+}
+
+.frame .sub {
+	font-size: 0.95rem;
+	line-height: 1.6;
+	opacity: 0.78;
+	max-width: 38rem;
+	margin: 0 0 0.75rem;
+}
+
+.frame .error {
+	color: color-mix(in srgb, var(--accent) 70%, #c44 30%);
+	font-size: 0.9rem;
+}
+
+.frame .link {
+	display: inline-block;
+	margin-top: 2rem;
+	padding: 0.5rem 0;
+	font-family: var(--font-display);
+	font-size: 0.95rem;
+	opacity: 0.7;
+	text-decoration: none;
+	border-bottom: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
+	transition: all 0.15s;
+	color: var(--text);
+}
+
+.frame .link:hover {
+	opacity: 1;
+	border-bottom-color: var(--accent);
+	color: var(--accent);
+}
+
+/* .link styles already cover the visual; .link-as-button just neutralizes
+   default <button> chrome so it inherits .link's underline-on-hover look. */
+.frame .link-as-button {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+}
+
+/* ---------- welcome + stage-1 form vocabulary ---------- */
+.frame .welcome {
+	padding: 5rem 0 6rem;
+	max-width: 42rem;
+}
+
+.frame .display-title {
+	font-family: var(--font-display);
+	font-weight: 500;
+	font-size: clamp(2.8rem, 8vw, 5.5rem);
+	line-height: 0.98;
+	margin: 0 0 1.75rem;
+	letter-spacing: -0.015em;
+	display: flex;
+	flex-direction: column;
+	gap: 0.05em;
+}
+
+.frame .title-line-1 {
+	color: var(--heading);
+}
+.frame .title-line-2 {
+	color: var(--accent);
+	font-style: italic;
+	padding-left: 0.6em;
+}
+
+.frame .rule {
+	width: 4rem;
+	height: 1px;
+	background: var(--accent);
+	opacity: 0.6;
+	margin: 0 0 1.75rem;
+}
+
+.frame .form {
+	margin-top: 3rem;
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	max-width: 34rem;
+}
+
+.frame .actions {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1.5rem;
+}
+
+.frame .field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.frame .field-label {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	text-transform: lowercase;
+	letter-spacing: 0.1em;
+	opacity: 0.6;
+	color: var(--heading);
+}
+
+.frame .field-label em {
+	opacity: 0.65;
+	font-style: italic;
+	letter-spacing: 0.04em;
+}
+
+/* underline-style input — no full border, just a baseline */
+.frame .underline-input {
+	width: 100%;
+	padding: 0.6rem 0.1rem;
+	font-family: var(--font-display);
+	font-size: 1.25rem;
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid color-mix(in srgb, var(--text) 30%, transparent);
+	color: var(--heading);
+	outline: none;
+	transition: border-color 0.2s, color 0.2s;
+}
+
+.frame .underline-input:focus {
+	border-bottom-color: var(--accent);
+	color: var(--accent);
+}
+
+.frame .underline-input::placeholder {
+	opacity: 0.3;
+	font-style: italic;
+	font-size: 1rem;
+}
+
+.frame .begin-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.9rem;
+	padding: 0.4rem 0;
+	font-family: var(--font-display);
+	font-style: italic;
+	font-size: 1.6rem;
+	font-weight: 500;
+	line-height: 1;
+	background: transparent;
+	border: none;
+	color: var(--accent);
+	cursor: pointer;
+	position: relative;
+	transition: color 0.2s ease;
+}
+
+.frame .begin-btn:hover:not(:disabled) .begin-arrow {
+	transform: translateX(6px);
+}
+
+.frame .begin-btn:active:not(:disabled) {
+	opacity: 0.8;
+}
+
+.frame .begin-btn:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+.frame .begin-text {
+	display: inline-block;
+	line-height: 1;
+}
+
+.frame .begin-arrow {
+	display: inline-block;
+	transition: transform 0.25s ease;
+	flex-shrink: 0;
+}
