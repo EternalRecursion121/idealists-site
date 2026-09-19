@@ -24,19 +24,21 @@ You can use the Svelte MCP server for Svelte 5/SvelteKit guidance. Follow this s
 - Framework: SvelteKit + Svelte 5 runes.
 - Styling: Tailwind v4 + component-scoped styles.
 - Adapter: Vercel (`@sveltejs/adapter-vercel`).
-- This project has a manually-maintained nav graph and a GitHub-backed writings/annotations system.
+- The nav graph is a hand-edited list in `src/lib/nav.ts` (writings are globbed at build time); writings history and annotations are GitHub-backed.
 
 ## Critical files to know
 
 - `src/routes/+layout.svelte` - global theme state and app chrome.
-- `src/routes/+layout.server.ts` - hardcoded nav graph (`mainPages` and `writings`).
-- `src/routes/(standard)/+layout.svelte` - page wrapper and footer-nav page typing.
-- `src/routes/sitemap/+page.server.ts` - human descriptions for nav graph.
-- `src/lib/components/BottomNav.svelte` - ring order and prev/next behavior.
+- `src/lib/nav.ts` - the one hand-edited source for main pages, descriptions and the footer ring; everything else derives from it.
+- `src/routes/+layout.server.ts` - builds the nav graph from `nav.ts` plus a build-time glob of `src/lib/writings/*/content.md`.
+- `src/routes/(standard)/+layout.svelte` - page wrapper (header + footer).
+- `src/routes/sitemap/+page.server.ts` - attaches the short descriptions from `nav.ts`.
+- `src/lib/components/BottomNav.svelte` - prev/next links derived from the ring in `nav.ts`.
 - `src/lib/server/git-history.ts` - GitHub API integration for writings revisions and annotations.
 - `src/routes/api/annotations/+server.ts` - annotation read/write API.
-- `scripts/optimize-vibes.js` - converts `static/vibes/` PNG/JPG/GIF to WebP (deletes originals).
+- `scripts/optimize-vibes.js` - converts `static/vibes/` PNG/JPG/GIF to WebP (deletes originals). `npm run vibes` runs it with the manifest step; `npm run build` only runs it on Vercel/CI.
 - `scripts/generate-vibes-manifest.js` - rebuilds `static/vibes/images.json`.
+- `scripts/optimize-writings.js` - gives `static/writings/` images a WebP sibling (keeps originals) and writes `src/lib/writings/images.json`. `npm run writing-images`.
 
 ## Common workflows
 
@@ -44,23 +46,19 @@ You can use the Svelte MCP server for Svelte 5/SvelteKit guidance. Follow this s
 
 1. Edit/create `src/lib/writings/<slug>/content.md`.
 2. Preserve valid frontmatter structure (`title`, `description`, `author`/`authors`, optional `style`, optional `branches`).
-3. If this writing should appear in graph nav, update hardcoded entries in `src/routes/+layout.server.ts`.
+3. Nothing to register: the nav graph picks up `content.md` at build time.
+4. Images go under `static/writings/<slug>/`; run `npm run writing-images` afterwards.
 
 ### Add a new top-level page
 
 1. Create route files.
-2. Update `src/routes/+layout.server.ts` route graph and links.
-3. Update `src/routes/sitemap/+page.server.ts` description map.
-4. If relevant, update:
-   - `src/lib/components/BottomNav.svelte` ring,
-   - `src/routes/(standard)/+layout.svelte` page-type detection.
+2. Add the page to `mainPages` in `src/lib/nav.ts`.
+3. If it belongs on the footer ring, add its path to `ring` there (or to `ringAliases` if it sits under another ring page).
 
 ### Add vibes images
 
 1. Add files to `static/vibes/`.
-2. Optimize and regenerate `static/vibes/images.json` using:
-   - `node scripts/optimize-vibes.js && node scripts/generate-vibes-manifest.js`, or
-   - `npm run build` (runs both automatically).
+2. Run `npm run vibes` to convert them and regenerate `static/vibes/images.json` (a local build no longer does this automatically; Vercel/CI does).
 
 ## Validation checklist before finishing
 
