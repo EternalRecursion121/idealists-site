@@ -385,18 +385,26 @@
 		font-weight: 400;
 		color: var(--text);
 		opacity: 0;
-		transition: opacity 0.2s, transform 0.2s;
+		/* An invisible nowrap label still widens the page (8px of sideways
+		   scroll on phones), so it stays collapsed until it is shown. The
+		   delayed max-width lets the fade-out finish first. */
+		max-width: 0;
+		overflow: hidden;
+		transition: opacity 0.2s, transform 0.2s, max-width 0s 0.2s;
 		white-space: nowrap;
 		pointer-events: none;
 	}
 
 	.sitemap-link:hover .link-description {
 		opacity: 0.6;
+		max-width: 100vw;
+		transition: opacity 0.2s, transform 0.2s, max-width 0s;
 		transform: translateX(-50%) translateY(0);
 	}
 
 	.sitemap-container.always-visible .link-description {
 		opacity: 0.55;
+		max-width: none;
 		transform: translateX(-50%) translateY(0);
 	}
 

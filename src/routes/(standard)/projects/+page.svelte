@@ -19,8 +19,12 @@
 		<article>
 			{#if project.url}
 				{@const isExternal = project.url.startsWith('http')}
-				<a href={project.url} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="group">
-					<h2 class="font-semibold mb-2 group-hover:opacity-70">{project.name}</h2>
+				<a href={project.url} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener' : undefined} class="inline-block gutter-link">
+					<!-- same marker as /members, so linked projects are tellable from unlinked ones without hover -->
+					<h2 class="font-semibold mb-2">
+						{project.name}
+						<span class="text-xs font-normal opacity-50 ml-1">{isExternal ? '↗' : '→'}</span>
+					</h2>
 				</a>
 			{:else}
 				<h2 class="font-semibold mb-2">{project.name}</h2>

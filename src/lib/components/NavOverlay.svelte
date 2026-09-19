@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
 	interface PageNode {
@@ -21,15 +21,14 @@
 	let hoveredPage: string | null = $state(null);
 
 	// Filter to main pages only
-	let mainPages = $derived(pages.filter(p => !p.isWriting && p.path !== '/index'));
+	let mainPages = $derived(pages.filter(p => !p.isWriting));
 	let mainConnections = $derived(connections.filter(c => {
 		const fromPage = pages.find(p => p.path === c.from);
 		const toPage = pages.find(p => p.path === c.to);
-		return fromPage && toPage && !fromPage.isWriting && !toPage.isWriting &&
-			fromPage.path !== '/index' && toPage.path !== '/index';
+		return fromPage && toPage && !fromPage.isWriting && !toPage.isWriting;
 	}));
 
-	let currentPath = $derived($page.url.pathname);
+	let currentPath = $derived(page.url.pathname);
 
 	interface PositionedPage extends PageNode {
 		x: number;
@@ -47,8 +46,10 @@
 	function calculatePositions(width: number, height: number): PositionedPage[] {
 		const centerX = width / 2;
 		const centerY = height / 2;
-		const baseRadius = Math.min(width, height) * 0.32;
-		const orbitRadii = [0, baseRadius * 0.55, baseRadius];
+		// An ellipse that fills the panel, leaving room for half a label at the
+		// sides and a line of text top and bottom.
+		const radiusX = width / 2 - 44;
+		const radiusY = height / 2 - 24;
 
 		const orbit1: PageNode[] = [];
 		const orbit2: PageNode[] = [];
@@ -64,15 +65,19 @@
 		orbit1.forEach((p, i) => angles.set(p.path, (i / orbit1.length) * Math.PI * 2 - Math.PI / 2));
 		orbit2.forEach((p, i) => angles.set(p.path, (i / orbit2.length) * Math.PI * 2 - Math.PI / 3));
 
+		// With nothing on the outer orbit the inner one takes the whole panel
+		// (otherwise every node huddles in the middle on top of its neighbours).
+		const orbitScale = [0, orbit2.length > 0 ? 0.55 : 1, 1];
+
 		return mainPages.map((pg) => {
 			const orbit = pg.path === '/' ? 0 : getOrbit(pg);
 			const angle = angles.get(pg.path) || 0;
-			const radius = orbitRadii[orbit];
+			const scale = orbitScale[orbit];
 
 			return {
 				...pg,
-				x: centerX + (orbit > 0 ? Math.cos(angle) * radius : 0),
-				y: centerY + (orbit > 0 ? Math.sin(angle) * radius : 0)
+				x: centerX + Math.cos(angle) * radiusX * scale,
+				y: centerY + Math.sin(angle) * radiusY * scale
 			};
 		});
 	}
@@ -85,14 +90,29 @@
 	$effect(() => {
 		if (expanded) {
 			// Small delay to let the container expand
-			setTimeout(updatePositions, 50);
+			const timeout = setTimeout(updatePositions, 50);
+			return () => clearTimeout(timeout);
 		}
 	});
 
+	let overlayRef: HTMLDivElement | null = $state(null);
+
 	onMount(() => {
 		const handleResize = () => updatePositions();
+		const handleKeydown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && expanded) expanded = false;
+		};
+		const handlePointerDown = (e: PointerEvent) => {
+			if (expanded && overlayRef && !overlayRef.contains(e.target as Node)) expanded = false;
+		};
 		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
+		window.addEventListener('keydown', handleKeydown);
+		window.addEventListener('pointerdown', handlePointerDown);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+			window.removeEventListener('keydown', handleKeydown);
+			window.removeEventListener('pointerdown', handlePointerDown);
+		};
 	});
 
 	function getConnectionLines() {
@@ -113,7 +133,7 @@
 	let connectionLines = $derived(getConnectionLines());
 </script>
 
-<div class="nav-overlay" class:expanded>
+<div bind:this={overlayRef} class="nav-overlay" class:expanded>
 	<button
 		class="nav-toggle"
 		onclick={() => expanded = !expanded}
@@ -249,10 +269,10 @@
 	.nav-node {
 		position: absolute;
 		transform: translate(-50%, -50%);
-		font-size: 0.65rem;
+		font-size: 0.75rem;
 		color: var(--text);
 		text-decoration: none;
-		padding: 0.15rem 0.3rem;
+		padding: 0.35rem 0.45rem;
 		border-radius: 2px;
 		transition: color 0.15s, background 0.15s;
 		white-space: nowrap;
@@ -278,14 +298,31 @@
 		color: var(--bg);
 	}
 
+	/* Below the width where the reading column leaves empty gutters, content
+	   scrolls underneath the toggle — once scrolled (html.scrolled is set by the
+	   root layout) give it a soft chip so both stay legible. */
+	@media (max-width: 56rem) {
+		.nav-overlay:not(.expanded) {
+			border-radius: 999px;
+		}
+
+		:global(html.scrolled) .nav-overlay:not(.expanded) {
+			background: color-mix(in srgb, var(--bg) 70%, transparent);
+			backdrop-filter: blur(6px);
+			-webkit-backdrop-filter: blur(6px);
+		}
+	}
+
 	@media (max-width: 640px) {
 		.nav-overlay.expanded {
-			width: 240px;
-			height: 180px;
+			/* stop short of the fixed theme toggle (top right, same z-index), or on
+			   ~320px phones it sits on top of this panel's close button */
+			width: min(calc(100vw - 5rem), 300px);
+			height: 220px;
 		}
 
 		.nav-node {
-			font-size: 0.6rem;
+			font-size: 0.8rem;
 		}
 	}
 </style>

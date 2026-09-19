@@ -41,12 +41,15 @@ npm run dev
 - `/join` — Membership page with animated llama
 - `/sitemap` — Constellation graph of the whole site
 - `/unconference` — The Idealists Unconference
+- `/interview` — A conversation with the collective's interviewer (not in the nav graph; needs `PUBLIC_INTERVIEWER_API`)
 
 ## Commands
 
 ```sh
 npm run dev          # Start development server
-npm run build        # Production build (optimizes vibes images + regenerates manifest)
+npm run build        # Production build (image optimization only runs on Vercel/CI)
 npm run preview      # Preview production build
 npm run check        # Type-check with svelte-check
+npm run vibes        # Convert static/vibes images to WebP + rebuild the manifest
+npm run writing-images  # WebP copies for static/writings images
 ```

@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <BottomNav current="home" />
+    <BottomNav />
 </div>
 
 <style>
@@ -184,6 +184,12 @@
         }
     }
 
+    /* let the columns shrink below their longest word instead of pinning the
+       whole page to it */
+    .hero-grid > :global(*) {
+        min-width: 0;
+    }
+
     .title-col {
         text-align: left;
     }
@@ -191,7 +197,9 @@
     .title {
         font-family: 'Texturina', 'IM Fell DW Pica', 'Resistance', var(--font-display);
         font-weight: 400;
-        font-size: clamp(4rem, 11vw, 6rem);
+        /* 4rem floor as before, except on phones narrower than the word
+           COLLECTIVE at that size (~6.3em wide), where it scales to fit */
+        font-size: clamp(2.4rem, max(11vw, min(4rem, calc((100vw - 4rem) / 6.3))), 6rem);
         line-height: 1;
         letter-spacing: 0.01em;
         color: var(--heading);
@@ -263,10 +271,16 @@
         }
     }
 
+    /* the glow alone is nearly invisible on dawn, so keyboard focus also gets a ring */
+    .footnote:focus-visible,
+    .random-bracket:focus-visible {
+        outline: 1px dotted var(--accent);
+        outline-offset: 3px;
+    }
+
     .footnote:hover,
     .footnote:focus-visible {
         opacity: 1;
-        outline: none;
         text-shadow:
             0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
             0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
@@ -340,7 +354,6 @@
     .random-bracket:hover,
     .random-bracket:focus-visible {
         color: var(--heading);
-        outline: none;
         text-shadow:
             0 0 8px color-mix(in srgb, var(--accent) 60%, transparent),
             0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);

@@ -1,22 +1,12 @@
-// Re-use nav data from layout and add descriptions
-const pageDescriptions: Record<string, string> = {
-	'/': 'the collective',
-	'/writings': 'essays & thoughts',
-	'/projects': 'things we\'re building',
-	'/library': 'our influences',
-	'/vibes': 'visual inspiration',
-	'/members': 'the people',
-	'/join': 'become one of us',
-	'/sitemap': 'you are here'
-};
+import { mainPages } from '$lib/nav';
 
 export async function load({ parent }) {
 	const { navPages, navConnections } = await parent();
 
-	// Add descriptions to pages
-	const pages = navPages.map(p => ({
+	// the short descriptions sit beside each node on the index page
+	const pages = navPages.map((p) => ({
 		...p,
-		description: pageDescriptions[p.path] || ''
+		description: mainPages.find((m) => m.path === p.path)?.short ?? ''
 	}));
 
 	return { pages, connections: navConnections };

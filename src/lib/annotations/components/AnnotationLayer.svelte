@@ -202,7 +202,7 @@
 		}
 
 		formPosition = {
-			x: Math.max(10, currentSelection.rect.left),
+			x: clampPanelX(currentSelection.rect.left),
 			y: currentSelection.rect.bottom + window.scrollY + 10
 		};
 		showForm = true;
@@ -364,6 +364,14 @@
 		}
 	}
 
+	// The form and thread panels are 280px wide; keep them inside the viewport
+	// (an unclamped one near the right edge made the whole page scroll sideways).
+	const PANEL_WIDTH = 280;
+	function clampPanelX(x: number): number {
+		const width = Math.min(PANEL_WIDTH, window.innerWidth - 32);
+		return Math.max(16, Math.min(x, window.innerWidth - width - 16));
+	}
+
 	function showAnnotation(id: string, element: HTMLElement) {
 		const ann = annotations.find(a => a.id === id);
 		if (!ann) return;
@@ -371,7 +379,7 @@
 		viewingAnnotation = ann;
 		const rect = element.getBoundingClientRect();
 		viewPosition = {
-			x: rect.left,
+			x: clampPanelX(rect.left),
 			y: rect.bottom + window.scrollY + 10
 		};
 	}
@@ -387,7 +395,7 @@
 {#if currentSelection && !showForm}
 	<div
 		class="annotation-popover"
-		style="left: {currentSelection.rect.left + currentSelection.rect.width / 2}px; top: {currentSelection.rect.top + window.scrollY - 45}px;"
+		style="left: {currentSelection.rect.left + currentSelection.rect.width / 2}px; top: {Math.max(currentSelection.rect.top - 45, 8) + window.scrollY}px;"
 	>
 		{#if useGitHub && !isLoggedIn}
 			<button onclick={loginWithGitHub}>login to annotate</button>
@@ -454,15 +462,46 @@
 </div>
 
 <style>
+	/* Marginalia: an annotated passage carries an accent-tinted underline glow
+	   and a small asterisk, so a note reads as a hand-marked passage in every
+	   theme (the old hard-coded yellow was a bright slab on the dark ones). */
 	:global(.annotated-text) {
-		background: rgba(255, 220, 100, 0.35);
 		cursor: pointer;
-		border-radius: 2px;
-		transition: background 0.15s;
+		box-shadow: inset 0 -0.38em 0 0 color-mix(in srgb, var(--accent) 20%, transparent);
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+		padding-bottom: 1px;
+		transition: box-shadow 0.15s;
 	}
 
 	:global(.annotated-text:hover) {
+		box-shadow: inset 0 -1em 0 0 color-mix(in srgb, var(--accent) 26%, transparent);
+	}
+
+	:global(.annotated-text)::after {
+		content: '*';
+		font-size: 0.9em;
+		line-height: 0;
+		vertical-align: super;
+		color: var(--accent);
+		opacity: 0.85;
+		margin-left: 0.12em;
+	}
+
+	/* The notebook writing keeps its yellow highlighter */
+	:global(.notebook-style .annotated-text) {
+		background: rgba(255, 220, 100, 0.35);
+		border-radius: 2px;
+		border-bottom: none;
+		box-shadow: none;
+		padding-bottom: 0;
+	}
+
+	:global(.notebook-style .annotated-text:hover) {
 		background: rgba(255, 220, 100, 0.6);
+	}
+
+	:global(.notebook-style .annotated-text)::after {
+		content: none;
 	}
 
 	.annotation-popover {
@@ -503,6 +542,7 @@
 		border-radius: 8px;
 		padding: 12px;
 		width: 280px;
+		max-width: calc(100vw - 2rem);
 		z-index: 1001;
 		box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 	}
@@ -514,6 +554,7 @@
 		border-radius: 8px;
 		padding: 12px;
 		width: 280px;
+		max-width: calc(100vw - 2rem);
 		max-height: 400px;
 		overflow-y: auto;
 		z-index: 1001;
@@ -535,6 +576,19 @@
 		font-size: 0.75rem;
 		z-index: 999;
 		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+	}
+
+	/* The reading column is 65ch centred, so a fixed 260px pill at the right
+	   only clears it from ~1270px up. Below that it covered body text (and, on
+	   phones, the footer links), so it joins the flow at the end of the piece. */
+	@media (max-width: 80rem) {
+		.annotation-controls {
+			position: static;
+			align-self: center;
+			width: fit-content;
+			margin: 2.5rem auto 0;
+			box-shadow: none;
+		}
 	}
 
 	.annotation-controls .count {

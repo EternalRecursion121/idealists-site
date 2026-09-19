@@ -39,3 +39,51 @@
 html {
 	overflow-x: clip;
 }
+
+/* List links (/library, /projects): hover arrives instead of fading. A small
+   ✦ steps in from the left gutter; the title already takes the accent from the
+   global a:hover rule. Keyboard focus gets the same mark. */
+.gutter-link {
+	position: relative;
+}
+
+.gutter-link::before {
+	content: '✦';
+	position: absolute;
+	left: -1.35rem;
+	top: 0.15rem;
+	font-size: 0.6rem;
+	color: var(--accent);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.gutter-link:hover::before,
+.gutter-link:focus-visible::before {
+	opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.gutter-link::before {
+		transform: translateX(-4px);
+		transition: opacity 0.2s ease, transform 0.2s ease;
+	}
+
+	.gutter-link:hover::before,
+	.gutter-link:focus-visible::before {
+		transform: translateX(0);
+	}
+}
+
+/* Visitors who ask for less motion still get every end state, just without
+   the looping/decorative animation (shimmers, spins, bounces, fades). */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

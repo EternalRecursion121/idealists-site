@@ -1,37 +1,31 @@
 <script lang="ts">
-	type Page = 'home' | 'writings' | 'vibes' | 'library' | 'projects' | 'members';
+	import { page } from '$app/state';
+	import { ring, ringPathFor, pageName } from '$lib/nav';
 
-	const ring: Page[] = ['projects', 'writings', 'home', 'library', 'members', 'vibes'];
-	const paths: Record<Page, string> = {
-		home: '/',
-		writings: '/writings',
-		vibes: '/vibes',
-		library: '/library',
-		projects: '/projects',
-		members: '/members'
-	};
-
-	interface Props {
-		current: Page;
-	}
-
-	let { current }: Props = $props();
-
+	// which ring page we're on: its own, its parent (/unconference -> /projects), or home
+	let current = $derived(ringPathFor(page.url.pathname));
 	let idx = $derived(ring.indexOf(current));
 	let prev = $derived(ring[(idx - 1 + ring.length) % ring.length]);
 	let next = $derived(ring[(idx + 1) % ring.length]);
+
+	// /join sits off the ring; there, "join us" would just link to itself
+	let onJoin = $derived(page.url.pathname === '/join');
 </script>
 
 <footer class="site-footer">
 	<div class="footer-grid">
 		<span class="line-h"></span>
-		<a href={paths[prev]} class="nav-prev opacity-70 hover:opacity-100">← {prev}</a>
+		<a href={prev} class="nav-prev opacity-70 hover:opacity-100">← {pageName(prev)}</a>
 		<div class="nav-center">
-			<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
+			{#if onJoin}
+				<a href="/" class="text-[var(--accent)] opacity-85 hover:opacity-100">home</a>
+			{:else}
+				<a href="/join" class="text-[var(--accent)] opacity-85 hover:opacity-100">join us</a>
+			{/if}
 			<span class="divider"></span>
 			<a href="/sitemap" class="opacity-70 hover:opacity-100">index</a>
 		</div>
-		<a href={paths[next]} class="nav-next opacity-70 hover:opacity-100">{next} →</a>
+		<a href={next} class="nav-next opacity-70 hover:opacity-100">{pageName(next)} →</a>
 		<span class="line-h"></span>
 	</div>
 </footer>
@@ -60,6 +54,19 @@
 		opacity: 0.2;
 	}
 
+	/* text-height links were 18px tap targets; padding enlarges them without
+	   moving anything (negative margins hand the space back) */
+	.footer-grid a {
+		padding: 0.6rem 0.4rem;
+		margin: -0.6rem -0.4rem;
+	}
+
+	/* the stacked centre links are close together: smaller pads so they don't overlap */
+	.nav-center a {
+		padding: 0.35rem 0.3rem;
+		margin: -0.35rem -0.3rem;
+	}
+
 	.nav-prev {
 		text-align: right;
 	}
@@ -82,6 +89,24 @@
 		opacity: 0.25;
 	}
 
+	/* On the narrowest phones the two decorative rules + gaps take 112px, and
+	   the labels wrap into each other. Drop the rules and keep labels on a line. */
+	@media (max-width: 400px) {
+		.footer-grid {
+			grid-template-columns: auto auto auto;
+			gap: 0.75rem;
+		}
+
+		.line-h {
+			display: none;
+		}
+
+		.nav-prev,
+		.nav-center,
+		.nav-next {
+			white-space: nowrap;
+		}
+	}
 
 	@media (min-width: 640px) {
 		.footer-grid {

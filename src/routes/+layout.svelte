@@ -1,13 +1,12 @@
 <script lang="ts">
 	import './layout.css';
+	import type { Snippet } from 'svelte';
 	import FloatingLlama from '$lib/components/FloatingLlama.svelte';
 	import NavOverlay from '$lib/components/NavOverlay.svelte';
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 
 	interface Props {
-		children: any;
+		children: Snippet;
 		data: {
 			navPages: { name: string; path: string; linksTo: string[]; isWriting?: boolean }[];
 			navConnections: { from: string; to: string }[];
@@ -15,9 +14,6 @@
 	}
 
 	let { children, data }: Props = $props();
-
-	// Hide nav on index pages
-	let showNav = $derived(!$page.url.pathname.startsWith('/index'));
 
 	const themes = {
 		dawn: { bg: '#FFFBF3', text: '#4A3728', accent: '#D89A6A', heading: '#B8804E', noise: 'rgba(216,154,106,1)' },
@@ -76,16 +72,29 @@
 		}
 	}
 
-	// Update auto theme every minute
+	// Update auto theme every minute. When the clock crosses one of the four
+	// boundaries the sky fades over three seconds instead of hard-cutting; the
+	// long transition is gated to that moment so manual theme clicks stay snappy.
+	let autoFlip = $state(false);
 	$effect(() => {
 		if (theme !== 'auto') return;
 
 		autoThemeName = getTimeBasedTheme();
 
+		let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 		const interval = setInterval(() => {
-			autoThemeName = getTimeBasedTheme();
+			const next = getTimeBasedTheme();
+			if (next === autoThemeName) return;
+			autoFlip = true;
+			autoThemeName = next;
+			if (fadeTimer) clearTimeout(fadeTimer);
+			fadeTimer = setTimeout(() => (autoFlip = false), 3200);
 		}, 60000);
-		return () => clearInterval(interval);
+		return () => {
+			clearInterval(interval);
+			if (fadeTimer) clearTimeout(fadeTimer);
+			autoFlip = false;
+		};
 	});
 
 	let activeTheme = $derived<BaseThemeName>(theme === 'auto' ? autoThemeName : theme);
@@ -110,7 +119,20 @@
 			document.body.style.backgroundColor = currentColors.bg;
 		}
 	});
+
+	$effect(() => {
+		document.documentElement.classList.toggle('theme-fading', autoFlip);
+	});
+
+	// Fixed chrome (index + theme toggles) only needs a backdrop once content
+	// has scrolled underneath it.
+	let scrollY = $state(0);
+	$effect(() => {
+		document.documentElement.classList.toggle('scrolled', scrollY > 24);
+	});
 </script>
+
+<svelte:window bind:scrollY />
 
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -120,6 +142,7 @@
 
 <div
 	class="bg-noise"
+	class:theme-fading={autoFlip}
 	aria-hidden="true"
 	data-theme={activeTheme}
 	style="--bg: {currentColors.bg}; --noise: {currentColors.noise};"
@@ -131,12 +154,13 @@
 
 <div
 	class="app"
+	class:theme-fading={autoFlip}
 	data-theme={activeTheme}
 	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --noise: {currentColors.noise};"
 >
 	<FloatingLlama />
 
-	{#if showNav && data.navPages}
+	{#if data.navPages}
 		<NavOverlay pages={data.navPages} connections={data.navConnections} />
 	{/if}
 
@@ -182,7 +206,9 @@
 			{/if}
 		</button>
 	</div>
-	{@render children()}
+	<main>
+		{@render children()}
+	</main>
 </div>
 
 <style>
@@ -276,6 +302,22 @@
 		z-index: 1;
 	}
 
+	/* the auto theme's hourly flip: a sunset, not a light switch. Only while
+	   .theme-fading is set (3.2s around the flip); reduced-motion visitors get
+	   the instant switch via the global rule in layout.css. */
+	:global(html.theme-fading),
+	:global(html.theme-fading body) {
+		transition: background-color 3s ease;
+	}
+
+	.bg-noise.theme-fading {
+		transition: background-color 3s ease;
+	}
+
+	.app.theme-fading {
+		transition: color 3s ease;
+	}
+
 	@media (min-width: 640px) {
 		:global(html) {
 			font-size: 17px;
@@ -290,6 +332,9 @@
 		position: fixed;
 		top: 1rem;
 		right: 1rem;
+		/* same layer as the index toggle; without it, panels that create their own
+		   stacking context (unconference's backdrop-filter cards) cover the button */
+		z-index: 100;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -321,6 +366,27 @@
 
 	.theme-toggle:hover {
 		opacity: 1;
+	}
+
+	/* Same chip as the index toggle: on narrow screens content scrolls under
+	   the fixed button, so once scrolled it gets a soft backdrop. The tooltip
+	   steps out of flow so the chip hugs the icon. */
+	@media (max-width: 56rem) {
+		.theme-toggle-wrap {
+			border-radius: 999px;
+			transition: background 0.3s ease;
+		}
+
+		:global(html.scrolled) .theme-toggle-wrap {
+			background: color-mix(in srgb, var(--bg) 70%, transparent);
+			backdrop-filter: blur(6px);
+			-webkit-backdrop-filter: blur(6px);
+		}
+
+		.theme-tooltip {
+			position: absolute;
+			right: calc(100% + 0.5rem);
+		}
 	}
 
 	:global(a) {
