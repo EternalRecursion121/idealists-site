@@ -462,15 +462,46 @@
 </div>
 
 <style>
+	/* Marginalia: an annotated passage carries an accent-tinted underline glow
+	   and a small asterisk, so a note reads as a hand-marked passage in every
+	   theme (the old hard-coded yellow was a bright slab on the dark ones). */
 	:global(.annotated-text) {
-		background: rgba(255, 220, 100, 0.35);
 		cursor: pointer;
-		border-radius: 2px;
-		transition: background 0.15s;
+		box-shadow: inset 0 -0.38em 0 0 color-mix(in srgb, var(--accent) 20%, transparent);
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+		padding-bottom: 1px;
+		transition: box-shadow 0.15s;
 	}
 
 	:global(.annotated-text:hover) {
+		box-shadow: inset 0 -1em 0 0 color-mix(in srgb, var(--accent) 26%, transparent);
+	}
+
+	:global(.annotated-text)::after {
+		content: '*';
+		font-size: 0.9em;
+		line-height: 0;
+		vertical-align: super;
+		color: var(--accent);
+		opacity: 0.85;
+		margin-left: 0.12em;
+	}
+
+	/* The notebook writing keeps its yellow highlighter */
+	:global(.notebook-style .annotated-text) {
+		background: rgba(255, 220, 100, 0.35);
+		border-radius: 2px;
+		border-bottom: none;
+		box-shadow: none;
+		padding-bottom: 0;
+	}
+
+	:global(.notebook-style .annotated-text:hover) {
 		background: rgba(255, 220, 100, 0.6);
+	}
+
+	:global(.notebook-style .annotated-text)::after {
+		content: none;
 	}
 
 	.annotation-popover {
