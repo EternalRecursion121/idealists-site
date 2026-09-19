@@ -72,16 +72,29 @@
 		}
 	}
 
-	// Update auto theme every minute
+	// Update auto theme every minute. When the clock crosses one of the four
+	// boundaries the sky fades over three seconds instead of hard-cutting; the
+	// long transition is gated to that moment so manual theme clicks stay snappy.
+	let autoFlip = $state(false);
 	$effect(() => {
 		if (theme !== 'auto') return;
 
 		autoThemeName = getTimeBasedTheme();
 
+		let fadeTimer: ReturnType<typeof setTimeout> | null = null;
 		const interval = setInterval(() => {
-			autoThemeName = getTimeBasedTheme();
+			const next = getTimeBasedTheme();
+			if (next === autoThemeName) return;
+			autoFlip = true;
+			autoThemeName = next;
+			if (fadeTimer) clearTimeout(fadeTimer);
+			fadeTimer = setTimeout(() => (autoFlip = false), 3200);
 		}, 60000);
-		return () => clearInterval(interval);
+		return () => {
+			clearInterval(interval);
+			if (fadeTimer) clearTimeout(fadeTimer);
+			autoFlip = false;
+		};
 	});
 
 	let activeTheme = $derived<BaseThemeName>(theme === 'auto' ? autoThemeName : theme);
@@ -107,6 +120,10 @@
 		}
 	});
 
+	$effect(() => {
+		document.documentElement.classList.toggle('theme-fading', autoFlip);
+	});
+
 	// Fixed chrome (index + theme toggles) only needs a backdrop once content
 	// has scrolled underneath it.
 	let scrollY = $state(0);
@@ -125,6 +142,7 @@
 
 <div
 	class="bg-noise"
+	class:theme-fading={autoFlip}
 	aria-hidden="true"
 	data-theme={activeTheme}
 	style="--bg: {currentColors.bg}; --noise: {currentColors.noise};"
@@ -136,6 +154,7 @@
 
 <div
 	class="app"
+	class:theme-fading={autoFlip}
 	data-theme={activeTheme}
 	style="--bg: {currentColors.bg}; --text: {currentColors.text}; --accent: {currentColors.accent}; --heading: {currentColors.heading}; --noise: {currentColors.noise};"
 >
@@ -281,6 +300,22 @@
 	.app {
 		position: relative;
 		z-index: 1;
+	}
+
+	/* the auto theme's hourly flip: a sunset, not a light switch. Only while
+	   .theme-fading is set (3.2s around the flip); reduced-motion visitors get
+	   the instant switch via the global rule in layout.css. */
+	:global(html.theme-fading),
+	:global(html.theme-fading body) {
+		transition: background-color 3s ease;
+	}
+
+	.bg-noise.theme-fading {
+		transition: background-color 3s ease;
+	}
+
+	.app.theme-fading {
+		transition: color 3s ease;
 	}
 
 	@media (min-width: 640px) {
