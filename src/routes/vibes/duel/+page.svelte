@@ -79,7 +79,7 @@
 			</button>
 		</form>
 
-		<p class="hint">tap one, or use ← → (↓ to skip)</p>
+		<p class="hint">tap one<span class="keys">, or use ← → (↓ to skip)</span></p>
 
 		<p class="result" aria-live="polite">
 			{#if form && 'message' in form}
@@ -128,7 +128,8 @@
 	.arena {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr);
-		--max-h: min(36vh, 420px);
+		/* Stacked on phones: split the screen height left after the heading, vs and skip (~280px). */
+		--max-h: clamp(120px, calc((100dvh - 280px) / 2), 420px);
 		align-items: center;
 		gap: 0.75rem;
 		width: 100%;
@@ -161,10 +162,22 @@
 			border-color 0.2s;
 	}
 
-	.arena button:hover:not(:disabled),
 	.arena button:focus-visible {
 		transform: scale(1.02) rotate(-0.5deg);
 		border-color: var(--accent);
+	}
+
+	/* Hover only where there's a real pointer, so the tilt doesn't stick after a tap. */
+	@media (hover: hover) {
+		.arena button:hover:not(:disabled) {
+			transform: scale(1.02) rotate(-0.5deg);
+			border-color: var(--accent);
+		}
+
+		.arena .skip:hover:not(:disabled) {
+			transform: none;
+			opacity: 1;
+		}
 	}
 
 	.arena button:disabled {
@@ -187,7 +200,6 @@
 		opacity: 0.7;
 	}
 
-	.arena .skip:hover:not(:disabled),
 	.arena .skip:focus-visible {
 		transform: none;
 		opacity: 1;
@@ -203,7 +215,8 @@
 	@media (min-width: 640px) {
 		.arena {
 			grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-			--max-h: min(62vh, 600px);
+			/* Side by side: the screen height left after the heading and skip (~300px). */
+			--max-h: clamp(100px, calc(100dvh - 300px), 600px);
 			gap: 1.5rem;
 		}
 	}
@@ -211,6 +224,12 @@
 	.hint {
 		font-size: 0.75rem;
 		opacity: 0.5;
+	}
+
+	@media (hover: none) {
+		.keys {
+			display: none;
+		}
 	}
 
 	.result {
