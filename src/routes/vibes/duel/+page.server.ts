@@ -2,21 +2,14 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import {
 	PROMPT,
-	PROVISIONAL_RD,
 	createMatchup,
 	getRatings,
+	imageMetadata,
 	isEnabled,
-	leaderboard,
 	skip,
+	vibeSrc as src,
 	vote
 } from '$lib/server/vibes-elo';
-
-async function imageMetadata(fetch: typeof globalThis.fetch) {
-	const response = await fetch('/vibes/images.json');
-	return (await response.json()) as Record<string, [number, number]>;
-}
-
-const src = (name: string) => `/vibes/${encodeURIComponent(name)}`;
 
 export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
 	// Every load writes a fresh matchup, so this must never be cached.
@@ -25,7 +18,7 @@ export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
 	if (!isEnabled()) return { enabled: false as const };
 
 	const meta = await imageMetadata(fetch);
-	const { ratings, totalVotes } = await getRatings(Object.keys(meta));
+	const { ratings } = await getRatings(Object.keys(meta));
 	const matchup = await createMatchup(ratings);
 
 	const side = (name: string) => ({ name, src: src(name), width: meta[name][0], height: meta[name][1] });
@@ -37,15 +30,7 @@ export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
 			prompt: PROMPT,
 			a: side(matchup.a),
 			b: side(matchup.b)
-		},
-		leaderboard: leaderboard(ratings).map((v) => ({
-			src: src(v.name),
-			rating: Math.round(v.rating),
-			rd: Math.round(v.rd),
-			games: v.games,
-			provisional: v.rd > PROVISIONAL_RD
-		})),
-		totalVotes
+		}
 	};
 };
 

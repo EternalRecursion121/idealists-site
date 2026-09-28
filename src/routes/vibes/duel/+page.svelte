@@ -35,7 +35,10 @@
 </svelte:head>
 
 <div class="duel-page">
-	<a href="/vibes" class="back">← all vibes</a>
+	<nav class="top">
+		<a href="/vibes">← all vibes</a>
+		{#if data.enabled}<a href="/vibes/duel/board">see the board →</a>{/if}
+	</nav>
 
 	{#if !data.enabled}
 		<p class="resting">the duel is resting — no database is connected here.</p>
@@ -45,16 +48,25 @@
 		<form bind:this={arena} method="POST" action="?/vote" use:enhance={submit} class="arena" class:pending>
 			<input type="hidden" name="match" value={data.matchup.id} />
 			{#each [data.matchup.a, data.matchup.b] as side, i (side.name)}
-				<button
-					data-choice={i === 0 ? 'left' : 'right'}
-					type="submit"
-					name="winner"
-					value={side.name}
-					disabled={pending}
-					aria-label="choose the {i === 0 ? 'left' : 'right'} vibe"
-				>
-					<img src={side.src} alt="" width={side.width} height={side.height} />
-				</button>
+				<div class="side">
+					<button
+						data-choice={i === 0 ? 'left' : 'right'}
+						type="submit"
+						name="winner"
+						value={side.name}
+						disabled={pending}
+						aria-label="choose the {i === 0 ? 'left' : 'right'} vibe"
+					>
+						<img
+							src={side.src}
+							alt=""
+							width={side.width}
+							height={side.height}
+							style:--ar={side.width / side.height}
+							style:--natural-w="{side.width}px"
+						/>
+					</button>
+				</div>
 				{#if i === 0}<span class="vs" aria-hidden="true">vs</span>{/if}
 			{/each}
 			<button
@@ -79,26 +91,6 @@
 				<img src={form.loser} alt="" class="chip" /> {form.loserDelta}
 			{/if}
 		</p>
-
-		{#if data.leaderboard.length > 0}
-			<section class="board">
-				<h2>the board</h2>
-				<p class="meta">
-					{data.totalVotes} votes so far · ranked by a cautious estimate (rating − 2 × uncertainty), so a
-					lucky first win doesn’t top the board
-				</p>
-				<ol>
-					{#each data.leaderboard as vibe, rank (vibe.src)}
-						<li class:provisional={vibe.provisional}>
-							<span class="rank">{rank + 1}</span>
-							<img src={vibe.src} alt="" loading="lazy" />
-							<span class="score">{vibe.rating} <small>± {vibe.rd}</small></span>
-							<span class="games">{vibe.games} {vibe.games === 1 ? 'match' : 'matches'}</span>
-						</li>
-					{/each}
-				</ol>
-			</section>
-		{/if}
 	{/if}
 </div>
 
@@ -115,13 +107,18 @@
 		gap: 1rem;
 	}
 
-	.back {
-		align-self: flex-start;
+	.top {
+		align-self: stretch;
+		display: flex;
+		justify-content: space-between;
 		font-size: 0.875rem;
+	}
+
+	.top a {
 		opacity: 0.6;
 	}
 
-	.back:hover {
+	.top a:hover {
 		opacity: 1;
 	}
 
@@ -134,7 +131,8 @@
 
 	.arena {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
+		--max-h: min(36vh, 420px);
 		align-items: center;
 		gap: 0.75rem;
 		width: 100%;
@@ -145,11 +143,18 @@
 		opacity: 0.5;
 	}
 
+	/* Fills its grid column so the image can size against it (cqi). */
+	.side {
+		container-type: inline-size;
+		display: flex;
+		justify-content: center;
+		min-width: 0;
+	}
+
 	.arena button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		height: min(42vh, 480px);
 		padding: 0.5rem;
 		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
 		border-radius: 0.5rem;
@@ -170,18 +175,17 @@
 		cursor: wait;
 	}
 
+	/* Fit within the column and --max-h, preserving aspect ratio; upscale small images at most 2×. */
 	.arena img {
-		max-width: 100%;
-		max-height: 100%;
-		width: auto;
+		display: block;
+		width: min(100cqi - 1rem - 2px, calc(var(--max-h) * var(--ar)), calc(var(--natural-w) * 2));
 		height: auto;
-		object-fit: contain;
+		aspect-ratio: var(--ar);
 	}
 
 	.arena .skip {
 		grid-column: 1 / -1;
 		justify-self: center;
-		height: auto;
 		padding: 0.35rem 0.9rem;
 		font-size: 0.8rem;
 		opacity: 0.7;
@@ -202,12 +206,9 @@
 
 	@media (min-width: 640px) {
 		.arena {
-			grid-template-columns: 1fr auto 1fr;
+			grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+			--max-h: min(62vh, 600px);
 			gap: 1.5rem;
-		}
-
-		.arena button {
-			height: min(60vh, 560px);
 		}
 	}
 
@@ -229,62 +230,6 @@
 		height: 2rem;
 		object-fit: cover;
 		border-radius: 0.25rem;
-	}
-
-	.board {
-		width: 100%;
-		max-width: 560px;
-		margin-top: 2rem;
-	}
-
-	.board h2 {
-		font-family: var(--font-title);
-		font-size: 1.5rem;
-		color: var(--heading);
-	}
-
-	.meta {
-		font-size: 0.75rem;
-		opacity: 0.6;
-		margin-bottom: 1rem;
-	}
-
-	.board ol {
-		list-style: none;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.board li {
-		display: grid;
-		grid-template-columns: 2rem 3.5rem 1fr auto;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.board li.provisional {
-		opacity: 0.55;
-	}
-
-	.board li img {
-		width: 3.5rem;
-		height: 3.5rem;
-		object-fit: cover;
-		border-radius: 0.25rem;
-	}
-
-	.rank {
-		font-family: var(--font-title);
-		text-align: right;
-		opacity: 0.7;
-	}
-
-	.score small,
-	.games {
-		font-size: 0.75rem;
-		opacity: 0.6;
 	}
 
 	.resting {

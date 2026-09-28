@@ -58,7 +58,7 @@ Use these after adding/removing files under `static/vibes/`.
 - `src/routes/(standard)/writings/[slug]/+page.server.ts` - writing body/revisions/annotations loader.
 - `src/routes/(standard)/writings/[slug]/+page.svelte` - markdown rendering, timeline, annotations UI.
 - `src/routes/vibes/+page.server.ts` - reads `/vibes/images.json`.
-- `src/routes/vibes/duel/` - vibe vs vibe pairwise voting (Glicko ratings, info-maximising matchups, skip); intentionally unlinked and not in the nav graph. Logic lives in `src/lib/server/vibes-elo.ts` (Upstash Redis; the `vibes:votes` stream is the source of truth).
+- `src/routes/vibes/duel/` - vibe vs vibe pairwise voting (Glicko ratings, info-maximising matchups, skip) with its leaderboard at `/vibes/duel/board`; intentionally unlinked and not in the nav graph. Logic lives in `src/lib/server/vibes-elo.ts` (Upstash Redis; the `vibes:votes` stream is the source of truth).
 - `src/routes/sitemap/+page.server.ts` - per-route descriptions for graph page.
 - `src/routes/interview/+page.svelte` - talks to an external interviewer backend (`PUBLIC_INTERVIEWER_API`); not part of the nav graph.
 

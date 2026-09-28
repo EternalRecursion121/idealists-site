@@ -61,6 +61,14 @@ function client(): Redis | null {
 /** Votes are logged against a truncated hash, never the raw address. */
 const hashIp = (ip: string) => createHash('sha256').update(ip).digest('hex').slice(0, 16);
 
+/** Filename → [width, height] for every image in the gallery. */
+export async function imageMetadata(fetch: typeof globalThis.fetch) {
+	const response = await fetch('/vibes/images.json');
+	return (await response.json()) as Record<string, [number, number]>;
+}
+
+export const vibeSrc = (name: string) => `/vibes/${encodeURIComponent(name)}`;
+
 export function isEnabled(): boolean {
 	return client() !== null;
 }
@@ -98,6 +106,16 @@ function informationScore(i: VibeRating, j: VibeRating): number {
 	return p * (1 - p) * (i.rd * i.rd + j.rd * j.rd);
 }
 
+/**
+ * With automaticDeserialization off, Upstash returns ZRANGE WITHSCORES and
+ * HGETALL as flat [key, value, key, value, …] arrays.
+ */
+function pairs(flat: string[] | null): Map<string, number> {
+	const map = new Map<string, number>();
+	for (let k = 0; flat && k < flat.length; k += 2) map.set(flat[k], Number(flat[k + 1]));
+	return map;
+}
+
 /** Current ratings for every image in the gallery (unrated images get defaults). */
 export async function getRatings(names: string[]): Promise<{ ratings: VibeRating[]; totalVotes: number }> {
 	const r = client();
@@ -109,16 +127,17 @@ export async function getRatings(names: string[]): Promise<{ ratings: VibeRating
 		.hgetall(RD)
 		.hgetall(GAMES)
 		.xlen(VOTES)
-		.exec<[string[], Record<string, string> | null, Record<string, string> | null, number]>();
+		.exec<[string[], string[] | null, string[] | null, number]>();
 
-	const ratingByName = new Map<string, number>();
-	for (let k = 0; k < flat.length; k += 2) ratingByName.set(flat[k], Number(flat[k + 1]));
+	const ratingByName = pairs(flat);
+	const rdByName = pairs(rds);
+	const gamesByName = pairs(games);
 
 	const ratings = names.map((name) => ({
 		name,
 		rating: ratingByName.get(name) ?? DEFAULT_RATING,
-		rd: rds?.[name] ? Number(rds[name]) : DEFAULT_RD,
-		games: games?.[name] ? Number(games[name]) : 0
+		rd: rdByName.get(name) ?? DEFAULT_RD,
+		games: gamesByName.get(name) ?? 0
 	}));
 
 	return { ratings, totalVotes: Number(totalVotes) };
