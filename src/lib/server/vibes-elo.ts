@@ -42,7 +42,7 @@ export const PROMPTS: Record<string, string> = {
 	utopian: 'which feels more utopian?',
 	cooperative: 'which feels more cooperative?',
 	autonomous: 'which feels more autonomous?',
-	love: 'which has more love in it?'
+	ideal: 'which is more ideal?'
 };
 
 let redis: Redis | null = null;
