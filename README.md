@@ -42,6 +42,7 @@ npm run dev
 - `/sitemap` — Constellation graph of the whole site
 - `/unconference` — The Idealists Unconference
 - `/interview` — A conversation with the collective's interviewer (not in the nav graph; needs `PUBLIC_INTERVIEWER_API`)
+- `/vibes/duel` — Vibe vs vibe: pick the more ideal of two vibes, with a leaderboard at `/vibes/duel/leaderboard` (unlinked, not in the nav graph; needs Upstash Redis `KV_REST_API_*`)
 
 ## Commands
 

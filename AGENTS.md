@@ -74,6 +74,7 @@ See `.env.example`.
 - Recommended: `GITHUB_TOKEN` (rate limits + collaborator checks)
 - OAuth (annotation login): `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
 - Interview page: `PUBLIC_INTERVIEWER_API` (falls back to `http://127.0.0.1:8000`)
+- Vibe duel (`/vibes/duel`): `KV_REST_API_URL`, `KV_REST_API_TOKEN` (Upstash Redis via the Vercel Marketplace; the page rests without them)
 
 ## Common pitfalls
 

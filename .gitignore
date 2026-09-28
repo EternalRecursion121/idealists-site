@@ -21,3 +21,9 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Intro video build output (the sources live on the intro-video branch)
+scripts/intro-video/out/
+scripts/intro-video/node_modules/
+scripts/intro-video/films/*/out/
+scripts/intro-video/films/*/voice/

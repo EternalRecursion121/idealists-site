@@ -59,6 +59,7 @@ Run the first after adding or removing files under `static/vibes/`, the second a
 - `src/routes/(standard)/writings/[slug]/+page.server.ts` - writing body/revisions/annotations loader.
 - `src/routes/(standard)/writings/[slug]/+page.svelte` - markdown rendering, timeline, annotations UI.
 - `src/routes/vibes/+page.server.ts` - reads `/vibes/images.json`.
+- `src/routes/vibes/duel/` - vibe vs vibe pairwise voting (Glicko ratings, info-maximising matchups, skip) with its leaderboard at `/vibes/duel/leaderboard`; intentionally unlinked and not in the nav graph. Logic lives in `src/lib/server/vibes-elo.ts` (Upstash Redis; the `vibes:votes` stream is the source of truth).
 - `src/routes/sitemap/+page.server.ts` - attaches the short descriptions from `nav.ts` to the graph.
 - `src/routes/interview/+page.svelte` - talks to an external interviewer backend (`PUBLIC_INTERVIEWER_API`); not part of the nav graph.
 
@@ -130,6 +131,10 @@ Needed for GitHub OAuth annotation login:
 Needed for `/interview`:
 
 - `PUBLIC_INTERVIEWER_API` (falls back to `http://127.0.0.1:8000` when unset).
+
+Needed for `/vibes/duel`:
+
+- `KV_REST_API_URL`, `KV_REST_API_TOKEN` (Upstash Redis via the Vercel Marketplace).
 
 ## Gotchas
 

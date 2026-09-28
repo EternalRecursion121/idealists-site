@@ -27,6 +27,8 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
+		"@upstash/ratelimit": "^2.2.0",
+		"@upstash/redis": "^1.39.0",
 		"diff": "^8.0.3",
 		"image-size": "^2.0.2",
 		"marked": "^17.0.1",
