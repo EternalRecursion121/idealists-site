@@ -37,7 +37,6 @@
 <div class="duel-page">
 	<nav class="top">
 		<a href="/vibes">← all vibes</a>
-		{#if data.enabled}<a href="/vibes/duel/board">see the board →</a>{/if}
 	</nav>
 
 	{#if !data.enabled}
@@ -91,6 +90,8 @@
 				<img src={form.loser} alt="" class="chip" /> {form.loserDelta}
 			{/if}
 		</p>
+
+		<a href="/vibes/duel/board" class="board-link">see the board →</a>
 	{/if}
 </div>
 
@@ -108,9 +109,7 @@
 	}
 
 	.top {
-		align-self: stretch;
-		display: flex;
-		justify-content: space-between;
+		align-self: flex-start;
 		font-size: 0.875rem;
 	}
 
@@ -118,7 +117,8 @@
 		opacity: 0.6;
 	}
 
-	.top a:hover {
+	.top a:hover,
+	.board-link:hover {
 		opacity: 1;
 	}
 
@@ -230,6 +230,11 @@
 		height: 2rem;
 		object-fit: cover;
 		border-radius: 0.25rem;
+	}
+
+	.board-link {
+		font-size: 0.875rem;
+		opacity: 0.6;
 	}
 
 	.resting {
