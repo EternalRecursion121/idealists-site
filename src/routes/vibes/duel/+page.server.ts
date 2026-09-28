@@ -48,13 +48,7 @@ export const actions: Actions = {
 		const result = await vote(match, winner, getClientAddress());
 		switch (result.status) {
 			case 'ok':
-				return {
-					winner: src(result.winner),
-					loser: src(result.loser),
-					winnerDelta: Math.round(result.winnerDelta),
-					loserDelta: Math.round(result.loserDelta),
-					upset: result.expected < 0.35
-				};
+				return { voted: true };
 			case 'ratelimited':
 				return fail(429, { message: 'slow down — let the vibes breathe' });
 			case 'gone':

@@ -84,10 +84,6 @@
 		<p class="result" aria-live="polite">
 			{#if form && 'message' in form}
 				{form.message}
-			{:else if form && 'winner' in form}
-				{form.upset ? 'an upset!' : 'noted.'}
-				<img src={form.winner} alt="" class="chip" /> +{form.winnerDelta}
-				<img src={form.loser} alt="" class="chip" /> {form.loserDelta}
 			{/if}
 		</p>
 
@@ -225,12 +221,6 @@
 		font-size: 0.9rem;
 	}
 
-	.chip {
-		width: 2rem;
-		height: 2rem;
-		object-fit: cover;
-		border-radius: 0.25rem;
-	}
 
 	.leaderboard-link {
 		font-size: 0.875rem;
