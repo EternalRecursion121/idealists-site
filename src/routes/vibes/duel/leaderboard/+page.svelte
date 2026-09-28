@@ -30,26 +30,19 @@
 </script>
 
 <svelte:head>
-	<title>The Board — Vibe vs Vibe — The Idealists Collective</title>
+	<title>The Leaderboard — Vibe vs Vibe — The Idealists Collective</title>
 </svelte:head>
 
-<div class="board-page">
+<div class="leaderboard-page">
 	<nav class="top">
 		<a href="/vibes/duel">← back to the duel</a>
 	</nav>
 
-	<h1>the board</h1>
+	<h1>the leaderboard</h1>
 
 	{#if !data.enabled}
-		<p class="meta">the board is resting — no database is connected here.</p>
+		<p class="meta">the leaderboard is resting — no database is connected here.</p>
 	{:else}
-		<p class="meta">
-			which is most ideal, according to {data.totalVotes}
-			{data.totalVotes === 1 ? 'vote' : 'votes'}. Each rating comes with a 95% range; vibes whose ranges
-			overlap share a place (=), because we can’t yet tell them apart. Faded vibes haven’t played enough
-			to be sure.
-		</p>
-
 		<button
 			type="button"
 			class="order"
@@ -82,7 +75,7 @@
 </div>
 
 <style>
-	.board-page {
+	.leaderboard-page {
 		width: 100%;
 		max-width: 640px;
 		min-height: 100vh;

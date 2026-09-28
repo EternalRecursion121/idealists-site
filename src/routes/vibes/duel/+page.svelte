@@ -91,7 +91,7 @@
 			{/if}
 		</p>
 
-		<a href="/vibes/duel/board" class="board-link">see the board →</a>
+		<a href="/vibes/duel/leaderboard" class="leaderboard-link">see the leaderboard →</a>
 	{/if}
 </div>
 
@@ -118,7 +118,7 @@
 	}
 
 	.top a:hover,
-	.board-link:hover {
+	.leaderboard-link:hover {
 		opacity: 1;
 	}
 
@@ -232,7 +232,7 @@
 		border-radius: 0.25rem;
 	}
 
-	.board-link {
+	.leaderboard-link {
 		font-size: 0.875rem;
 		opacity: 0.6;
 	}
