@@ -8,12 +8,12 @@
  *   vibes:rating   sorted set  filename → rating (default 1500)
  *   vibes:rd       hash        filename → rating deviation (default 350)
  *   vibes:games    hash        filename → matches played
- *   vibes:votes    stream      append-only log {winner, loser, word, ts, ip}
+ *   vibes:votes    stream      append-only log {winner, loser, ts, ip}
  *   vibes:skips    stream      pairs someone declined to choose between
  *   vibes:match:*  string      a served matchup, consumed by the vote
  *
  * The vote log is the source of truth: ratings can be recomputed from it with
- * different parameters (or per DNA word) whenever we like.
+ * different parameters whenever we like.
  */
 import { createHash, randomUUID } from 'node:crypto';
 import { env } from '$env/dynamic/private';
@@ -35,15 +35,8 @@ const MATCH_TTL_SECONDS = 60 * 60;
 /** Sample from this many of the most informative pairs, so concurrent visitors don't all see the same one. */
 const CANDIDATE_PAIRS = 30;
 
-/** The collective's DNA, phrased as a question. Stored with each vote. */
-export const PROMPTS: Record<string, string> = {
-	alive: 'which feels more alive?',
-	playful: 'which feels more playful?',
-	utopian: 'which feels more utopian?',
-	cooperative: 'which feels more cooperative?',
-	autonomous: 'which feels more autonomous?',
-	ideal: 'which is more ideal?'
-};
+/** The one question every matchup asks. */
+export const PROMPT = 'which is more ideal?';
 
 let redis: Redis | null = null;
 let ratelimit: Ratelimit | null = null;
@@ -83,7 +76,6 @@ export interface Matchup {
 	id: string;
 	a: string;
 	b: string;
-	word: string;
 }
 
 // Glicko-1 constants and helpers (mirrored in the Lua script below).
@@ -165,15 +157,13 @@ export async function createMatchup(ratings: VibeRating[]): Promise<Matchup> {
 
 	// Randomise left/right so position doesn't bias the vote.
 	const [left, right] = Math.random() < 0.5 ? [chosen.i, chosen.j] : [chosen.j, chosen.i];
-	const words = Object.keys(PROMPTS);
 	const matchup: Matchup = {
 		id: randomUUID(),
 		a: ratings[left].name,
-		b: ratings[right].name,
-		word: words[Math.floor(Math.random() * words.length)]
+		b: ratings[right].name
 	};
 
-	await r.set(MATCH_PREFIX + matchup.id, [matchup.a, matchup.b, matchup.word].join('\n'), {
+	await r.set(MATCH_PREFIX + matchup.id, [matchup.a, matchup.b].join('\n'), {
 		ex: MATCH_TTL_SECONDS
 	});
 	return matchup;
@@ -186,7 +176,7 @@ export async function createMatchup(ratings: VibeRating[]): Promise<Matchup> {
 const VOTE_SCRIPT = `
 local m = redis.call('GETDEL', KEYS[1])
 if not m then return {'gone'} end
-local a, b, word = string.match(m, '^([^\\n]*)\\n([^\\n]*)\\n(.*)$')
+local a, b = string.match(m, '^([^\\n]*)\\n(.*)$')
 local w = ARGV[1]
 local l
 if w == a then l = b elseif w == b then l = a else return {'invalid'} end
@@ -214,7 +204,7 @@ redis.call('ZADD', KEYS[2], tostring(nrw), w, tostring(nrl), l)
 redis.call('HSET', KEYS[3], w, tostring(ndw), l, tostring(ndl))
 redis.call('HINCRBY', KEYS[4], w, 1)
 redis.call('HINCRBY', KEYS[4], l, 1)
-redis.call('XADD', KEYS[5], '*', 'winner', w, 'loser', l, 'word', word, 'ts', ARGV[2], 'ip', ARGV[3])
+redis.call('XADD', KEYS[5], '*', 'winner', w, 'loser', l, 'ts', ARGV[2], 'ip', ARGV[3])
 
 -- Lua numbers would be truncated to integers on return, so send strings.
 return {'ok', w, l, tostring(rw), tostring(nrw), tostring(rl), tostring(nrl), tostring(ew)}
@@ -264,8 +254,8 @@ export async function skip(matchId: string, ip: string): Promise<'ok' | 'gone' |
 
 	const match = await r.getdel<string>(MATCH_PREFIX + matchId);
 	if (!match) return 'gone';
-	const [a, b, word] = match.split('\n');
-	await r.xadd(SKIPS, '*', { a, b, word, ts: String(Date.now()), ip: ipHash });
+	const [a, b] = match.split('\n');
+	await r.xadd(SKIPS, '*', { a, b, ts: String(Date.now()), ip: ipHash });
 	return 'ok';
 }
 

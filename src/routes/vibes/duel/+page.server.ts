@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import {
-	PROMPTS,
+	PROMPT,
 	PROVISIONAL_RD,
 	createMatchup,
 	getRatings,
@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
 		enabled: true as const,
 		matchup: {
 			id: matchup.id,
-			prompt: PROMPTS[matchup.word],
+			prompt: PROMPT,
 			a: side(matchup.a),
 			b: side(matchup.b)
 		},
