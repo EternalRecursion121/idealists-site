@@ -165,7 +165,7 @@
 
 			<div class="event-cards">
 				<article class="event-card" class:expanded={retreatExpanded}>
-					<button class="event-toggle" onclick={() => retreatExpanded = !retreatExpanded}>
+					<button class="event-toggle" onclick={() => retreatExpanded = !retreatExpanded} aria-expanded={retreatExpanded}>
 						<div class="event-header">
 							<div>
 								<span class="event-day">Apr 4–10</span>
@@ -194,7 +194,7 @@
 				</article>
 
 				<article class="event-card" class:expanded={conferenceExpanded}>
-					<button class="event-toggle" onclick={() => conferenceExpanded = !conferenceExpanded}>
+					<button class="event-toggle" onclick={() => conferenceExpanded = !conferenceExpanded} aria-expanded={conferenceExpanded}>
 						<div class="event-header">
 							<div>
 								<span class="event-day">Apr 11–12</span>
@@ -230,7 +230,7 @@
 		<div class="section-inner">
 			<div class="expandables-group">
 				<div class="workshops-card" class:expanded={showCapsule}>
-					<button class="workshops-toggle" onclick={() => showCapsule = !showCapsule}>
+					<button class="workshops-toggle" onclick={() => showCapsule = !showCapsule} aria-expanded={showCapsule}>
 						<h2 class="section-header">a backward-looking time capsule</h2>
 						<span class="expand-icon">{showCapsule ? '−' : '+'}</span>
 					</button>
@@ -266,7 +266,7 @@
 			<div class="voice-categories">
 				{#each voiceCategories as category}
 					<div class="voice-category" class:expanded={expandedCategories.has(category.title)}>
-						<button class="category-toggle" onclick={() => toggleCategory(category.title)}>
+						<button class="category-toggle" onclick={() => toggleCategory(category.title)} aria-expanded={expandedCategories.has(category.title)}>
 							<h3 class="category-title">{category.title}</h3>
 							<span class="expand-icon">{expandedCategories.has(category.title) ? '−' : '+'}</span>
 						</button>
@@ -282,7 +282,7 @@
 					</div>
 				{/each}
 				<div class="voice-category" class:expanded={showWorkshops}>
-				<button class="category-toggle" onclick={() => showWorkshops = !showWorkshops}>
+				<button class="category-toggle" onclick={() => showWorkshops = !showWorkshops} aria-expanded={showWorkshops}>
 					<h3 class="category-title">workshop sketches</h3>
 					<span class="expand-icon">{showWorkshops ? '−' : '+'}</span>
 				</button>
@@ -305,7 +305,7 @@
 		<div class="section-inner">
 			<div class="expandables-group">
 				<div class="workshops-card support-highlight" class:expanded={showBudget}>
-					<button class="workshops-toggle" onclick={() => showBudget = !showBudget}>
+					<button class="workshops-toggle" onclick={() => showBudget = !showBudget} aria-expanded={showBudget}>
 						<h2 class="section-header">support this gathering</h2>
 						<span class="expand-icon">{showBudget ? '−' : '+'}</span>
 					</button>
@@ -330,7 +330,7 @@
 								</div>
 							</div>
 
-							<button class="budget-toggle" onclick={() => showBudgetBreakdown = !showBudgetBreakdown}>
+							<button class="budget-toggle" onclick={() => showBudgetBreakdown = !showBudgetBreakdown} aria-expanded={showBudgetBreakdown}>
 								{showBudgetBreakdown ? '− hide budget breakdown' : '+ view budget breakdown'}
 							</button>
 
@@ -353,8 +353,8 @@
 									{/each}
 									<div class="budget-row budget-total">
 										<span>Total</span>
-										<span>£10,200</span>
-										<span>£43,400</span>
+										<span class="budget-amount">£10,200</span>
+										<span class="budget-amount">£43,400</span>
 									</div>
 								</div>
 							{/if}
@@ -396,13 +396,19 @@
 		opacity: 1;
 	}
 
-	.unconference :is(a, button, summary, input, textarea, select):focus,
-	.unconference :is(a, button, summary, input, textarea, select):focus-visible {
+	/* No ring on mouse/touch focus, but keyboard users still get one. */
+	.unconference :is(a, button, summary):focus:not(:focus-visible) {
 		outline: none;
 		box-shadow: none;
 	}
 
-	.unconference :is(a, button, summary, input, textarea, select) {
+	.unconference :is(a, button, summary):focus-visible {
+		outline: 1px solid var(--accent);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+
+	.unconference :is(a, button, summary) {
 		-webkit-tap-highlight-color: transparent;
 	}
 
@@ -572,12 +578,6 @@
 		opacity: 0.85;
 	}
 
-	.full-draft-content blockquote {
-		margin: 0.5rem 0 1rem;
-		padding-left: 1rem;
-		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
-	}
-
 	/* Event Cards */
 	.event-cards {
 		display: grid;
@@ -681,68 +681,6 @@
 	}
 
 	/* Time Capsule */
-	.capsule {
-		background: transparent;
-	}
-
-	.capsule-card {
-		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-		border-radius: 4px;
-		background: color-mix(in srgb, var(--text) 2%, transparent);
-		max-width: 720px;
-		margin: 0 auto;
-		transition: border-color 0.3s, background 0.3s;
-	}
-
-	.capsule-card.expanded {
-		border-color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 5%, transparent);
-	}
-
-	.capsule-toggle {
-		width: 100%;
-		padding: 1.25rem 1.5rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		color: inherit;
-		text-align: left;
-	}
-
-	.capsule-toggle:hover {
-		color: var(--accent);
-	}
-
-	.capsule-toggle .expand-icon {
-		font-size: 1.25rem;
-		opacity: 0.5;
-	}
-
-	.capsule-content {
-		text-align: left;
-		padding: 0 1.5rem 1.5rem 1.5rem;
-	}
-
-	.capsule-title {
-		font-family: var(--font-display);
-		font-size: 1.5rem;
-		font-weight: 400;
-		margin: 0;
-		color: var(--heading);
-	}
-
-	.capsule-description {
-		font-family: var(--font-serif);
-		font-size: 1.1rem;
-		line-height: 1.7;
-		opacity: 0.8;
-		max-width: 700px;
-		margin: 0 0 1.25rem 0;
-	}
-
 	.capsule-examples {
 		list-style: disc;
 		margin: 0 0 1.25rem 1.25rem;
@@ -831,38 +769,7 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.workshop-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 0.9rem;
-	}
-
-	.workshop-card {
-		font-family: var(--font-serif);
-		font-size: 0.98rem;
-		line-height: 1.62;
-		letter-spacing: 0.005em;
-		opacity: 0.88;
-		padding: 1rem 1.1rem 0.95rem 1.2rem;
-		border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
-		border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
-		border-radius: 0.45rem;
-		background: color-mix(in srgb, var(--accent) 7%, transparent);
-	}
-
 	/* Voices */
-	.voices {
-		background: transparent;
-	}
-
-	.voices-intro {
-		font-family: var(--font-serif);
-		font-size: 1.1rem;
-		line-height: 1.7;
-		opacity: 0.8;
-		margin-bottom: 2.5rem;
-	}
-
 	.voice-categories {
 		display: flex;
 		flex-direction: column;
@@ -941,48 +848,6 @@
 	}
 
 	/* Support */
-	.support {
-		background: transparent;
-	}
-
-	.support-card {
-		border: 1px solid color-mix(in srgb, var(--text) 15%, transparent);
-		border-radius: 4px;
-		background: color-mix(in srgb, var(--text) 2%, transparent);
-		transition: border-color 0.3s, background 0.3s;
-	}
-
-	.support-card.expanded {
-		border-color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 5%, transparent);
-	}
-
-	.support-toggle {
-		width: 100%;
-		padding: 1.5rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		color: inherit;
-		text-align: left;
-	}
-
-	.support-toggle:hover {
-		color: var(--accent);
-	}
-
-	.support-toggle .section-header {
-		margin: 0;
-	}
-
-	.support-toggle .expand-icon {
-		font-size: 1.25rem;
-		opacity: 0.5;
-	}
-
 	.support-content {
 		text-align: center;
 		padding: 0 1.5rem 1.5rem 1.5rem;
@@ -1059,7 +924,8 @@
 
 	.budget-header, .budget-row {
 		display: grid;
-		grid-template-columns: 1fr auto auto;
+		/* fixed amount columns so every row (and the total) lines up */
+		grid-template-columns: 1fr 4.75rem 4.75rem;
 		gap: 1rem;
 		padding: 1rem;
 	}
@@ -1101,6 +967,11 @@
 	.budget-total {
 		background: color-mix(in srgb, var(--accent) 5%, transparent);
 		font-weight: 600;
+	}
+
+	/* totals share the amount columns (size + right alignment) but stay full strength */
+	.budget-total .budget-amount {
+		opacity: 1;
 	}
 
 	.budget-total span {
@@ -1172,6 +1043,61 @@
 	}
 
 	/* Responsive */
+	/* Phones: five nested paddings left quotes ~190px wide (3 words a line).
+	   Drop the outer rings so the cards get the width back. */
+	@media (max-width: 639px) {
+		.unconference {
+			--section-padding: 1.25rem 0;
+		}
+
+		.section-inner {
+			padding-inline: 0.85rem;
+		}
+
+		.category-quotes {
+			padding: 0 0.6rem 0.75rem 0.6rem;
+		}
+
+		.testimonial {
+			padding: 0.85rem 0.85rem 0.8rem 0.9rem;
+		}
+
+		/* at 320 the two amount columns were clipped mid-figure by the table */
+		.budget-header,
+		.budget-row {
+			grid-template-columns: 1fr 3.6rem 3.6rem;
+			gap: 0.4rem;
+			padding: 0.75rem 0.5rem;
+		}
+
+		.budget-amount {
+			font-size: 0.75rem;
+		}
+
+		/* let a long single word ("Accommodation") give way to the amounts */
+		.budget-category {
+			min-width: 0;
+			overflow-wrap: anywhere;
+			hyphens: auto; /* "Accommo-dation", not "Accommodati / on" */
+		}
+	}
+
+	/* Narrowest phones: the table is only ~190px wide, so the category takes the
+	   full row and the two figures sit on the line beneath, still in their columns. */
+	@media (max-width: 400px) {
+		.budget-row .budget-category {
+			grid-column: 1 / -1;
+		}
+
+		.budget-row .budget-amount:nth-child(2) {
+			grid-column: 2;
+		}
+
+		.budget-row .budget-amount:nth-child(3) {
+			grid-column: 3;
+		}
+	}
+
 	@media (min-width: 640px) {
 		.unconference {
 			--section-padding: 2rem 2rem;
@@ -1179,10 +1105,6 @@
 
 		.hero-title {
 			font-size: clamp(3rem, 10vw, 6rem);
-		}
-
-		.question {
-			font-size: 1.6rem;
 		}
 
 		.event-cards {
@@ -1193,9 +1115,6 @@
 			grid-template-columns: repeat(3, 1fr);
 		}
 
-		.testimonial-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
 	}
 
 	@media (min-width: 900px) {

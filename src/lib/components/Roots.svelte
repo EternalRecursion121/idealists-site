@@ -215,7 +215,8 @@
 </script>
 
 <div class="roots-container" style="left: {containerLeft}px;">
-    <canvas bind:this={canvasEl}></canvas>
+    <!-- 0x0 until it grows: an idle canvas defaults to 300x150, which pokes past a 320px screen -->
+    <canvas bind:this={canvasEl} width="0" height="0"></canvas>
 </div>
 
 <style>

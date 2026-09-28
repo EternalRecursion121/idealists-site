@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
+	import { afterNavigate, goto } from '$app/navigation';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import AnnotationLayer from '$lib/annotations/components/AnnotationLayer.svelte';
 	import type { WritingWithHistory } from '$lib/types/writing';
@@ -14,6 +15,18 @@
 	}
 
 	let { data }: Props = $props();
+
+	// `<<<` means "back". On a deep link there is nothing of ours to go back to
+	// (history.back() would leave the site, or do nothing), so fall back to the list.
+	let cameFromSite = $state(false);
+	afterNavigate(({ from }) => {
+		if (from) cameFromSite = true;
+	});
+
+	function goBack() {
+		if (cameFromSite) history.back();
+		else goto('/writings');
+	}
 
 	let currentRevisionIndex = $state(0);
 	let historyExpanded = $state(false);
@@ -120,7 +133,7 @@
 			{/if}
 		</div>
 		<div class="separator">
-			<button onclick={() => history.back()} class="sep-link">&lt;&lt;&lt;</button><a href={`/writings/${data.nextSlug}`} class="sep-link">&gt;&gt;&gt;</a>
+			<button onclick={goBack} class="sep-link sep-back" aria-label="back">&lt;&lt;&lt;</button><a href={`/writings/${data.nextSlug}`} class="sep-link sep-next" aria-label="next writing">&gt;&gt;&gt;</a>
 		</div>
 	</header>
 
@@ -134,9 +147,10 @@
 				class="history-toggle"
 				class:history-expanded={historyExpanded}
 				onclick={() => historyExpanded = !historyExpanded}
+				aria-expanded={historyExpanded}
 			>
 				<span>revision history ({data.writing.revisions.length})</span>
-				<span class="toggle-icon">{historyExpanded ? '−' : '+'}</span>
+				<span class="toggle-icon">+</span>
 			</button>
 			{#if historyExpanded}
 				<div transition:slide={{ duration: 300 }}>
@@ -159,6 +173,7 @@
 <script module lang="ts">
 	import { marked, type TokenizerExtension, type RendererExtension } from 'marked';
 	import markedFootnote from 'marked-footnote';
+	import writingImages from '$lib/writings/images.json';
 
 	const styles = [
      'font-size: 1.8rem; font-weight: 600; color: var(--heading); margin: 2rem 0 1rem 0; letter-spacing: -0.02em;',
@@ -220,8 +235,21 @@
 			em(token) {
 				return `<em class="italic">${this.parser.parseInline(token.tokens)}</em>`;
 			},
+			// content.md keeps pointing at the original PNG/JPG (so old revisions
+			// still resolve, and optimizing never adds a revision to the timeline);
+			// images.json maps each one to its WebP and its dimensions.
+			image({ href, title, text }) {
+				const known = (writingImages as Record<string, { src: string; width: number; height: number }>)[href];
+				const size = known ? ` width="${known.width}" height="${known.height}"` : '';
+				const titleAttr = title ? ` title="${escapeAttr(title)}"` : '';
+				return `<img src="${escapeAttr(known?.src ?? href)}" alt="${escapeAttr(text)}"${titleAttr}${size} loading="lazy" decoding="async">`;
+			},
 		}
 	});
+
+	function escapeAttr(value: string): string {
+		return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+	}
 
 	function renderMarkdown(text: string): string {
 		return marked(text) as string;
@@ -248,13 +276,14 @@
 	}
 
 	.separator {
-		margin-top: 1.5rem;
+		margin-top: 0.85rem;
+		margin-bottom: -0.65rem;
 		letter-spacing: 0.2em;
 	}
 
 	.sep-link {
 		color: var(--accent);
-		opacity: 0.5;
+		opacity: 0.75;
 		text-decoration: none;
 		transition: opacity 0.2s;
 		background: none;
@@ -262,7 +291,29 @@
 		font-family: inherit;
 		font-size: inherit;
 		cursor: pointer;
-		padding: 0;
+		/* Reads as one `<<<>>>` ornament, so the padding that makes each half a
+		   real tap target goes on the top, bottom and outer side only. */
+		display: inline-block;
+		padding: 0.65rem 0;
+	}
+
+	/* The one-sided padding makes the default focus box lopsided and clip the
+	   neighbouring chevrons; mark the focused half with full strength + a dotted
+	   underline instead. */
+	.sep-link:focus-visible {
+		outline: none;
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		text-underline-offset: 0.35em;
+		opacity: 1;
+	}
+
+	.sep-back {
+		padding-left: 1rem;
+	}
+
+	.sep-next {
+		padding-right: 1rem;
 	}
 
 	.sep-link:hover {
@@ -409,6 +460,9 @@
 	}
 
 	.writing-content :global(a) {
+		/* a bare URL as link text is one unbreakable 480px word: it pinned the
+		   whole page wider than a phone */
+		overflow-wrap: anywhere;
 		color: var(--accent);
 		text-decoration: underline;
 		text-underline-offset: 2px;
@@ -457,6 +511,38 @@
 		font-style: italic;
 		font-size: 0.95em;
 		opacity: 0.8;
+	}
+
+	/* Section break: an asterism in the theme's accent instead of the
+	   browser's grey rule */
+	.writing-content :global(hr) {
+		border: none;
+		height: auto;
+		margin: 3rem auto;
+		text-align: center;
+		overflow: visible;
+	}
+
+	.writing-content :global(hr)::after {
+		content: '✦ · ✦';
+		color: var(--accent);
+		opacity: 0.5;
+		font-size: 0.75rem;
+		letter-spacing: 0.35em;
+		/* letter-spacing trails the last glyph; pull it back to true centre */
+		margin-right: -0.35em;
+	}
+
+	/* Footnote jumps (both directions) land below the fixed toggles, not at y=0 */
+	.writing-content :global([data-footnote-ref]),
+	.writing-content :global(section[data-footnotes] li) {
+		scroll-margin-top: 5.5rem;
+	}
+
+	/* The quote is already italic and dimmed; don't dim *emphasis* inside it a
+	   second time (0.85 x 0.8 x 0.8 came out around 3:1 on dawn). */
+	.writing-content :global(blockquote em) {
+		opacity: 1;
 	}
 
 	.writing-content :global(blockquote p) {

@@ -1,71 +1,16 @@
-interface PageNode {
-	name: string;
-	path: string;
-	linksTo: string[];
-	isWriting?: boolean;
-}
+import { buildNavGraph } from '$lib/nav';
 
-// Hardcoded route data (filesystem scanning doesn't work in production on Vercel)
-const mainPages: PageNode[] = [
-	{ name: 'home', path: '/', linksTo: ['/writings', '/library', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'writings', path: '/writings', linksTo: ['/', '/library', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'projects', path: '/projects', linksTo: ['/', '/writings', '/library', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'library', path: '/library', linksTo: ['/', '/writings', '/projects', '/members', '/vibes', '/join', '/sitemap'] },
-	{ name: 'vibes', path: '/vibes', linksTo: ['/', '/writings', '/projects', '/library', '/members', '/join', '/sitemap'] },
-	{ name: 'members', path: '/members', linksTo: ['/', '/writings', '/projects', '/library', '/vibes', '/join', '/sitemap'] },
-	{ name: 'join', path: '/join', linksTo: ['/', '/writings', '/projects', '/library', '/vibes', '/members', '/sitemap'] },
-	{ name: 'index', path: '/sitemap', linksTo: ['/', '/writings', '/projects', '/library', '/vibes', '/members', '/join'] }
-];
+// Writings are discovered at build time, so this works on Vercel without
+// filesystem access at runtime. Adding src/lib/writings/<slug>/content.md is
+// enough for it to appear in the constellation.
+const writingSlugs = Object.keys(import.meta.glob('/src/lib/writings/*/content.md'))
+	.map((file) => file.match(/\/writings\/([^/]+)\/content\.md$/)?.[1])
+	.filter((slug): slug is string => Boolean(slug))
+	.sort();
 
-const writings: PageNode[] = [
-	{ name: 'aliveness', path: '/writings/aliveness', linksTo: ['/writings'], isWriting: true },
-	{ name: 'an-introduction-to-neo-fatalism', path: '/writings/an-introduction-to-neo-fatalism', linksTo: ['/writings'], isWriting: true },
-	{ name: 'autonomy-freedom-and-control', path: '/writings/autonomy-freedom-and-control', linksTo: ['/writings'], isWriting: true },
-	{ name: 'cautious-technooptimism', path: '/writings/cautious-technooptimism', linksTo: ['/writings'], isWriting: true },
-	{ name: 'delight-in-the-details', path: '/writings/delight-in-the-details', linksTo: ['/writings'], isWriting: true },
-	{ name: 'eigenslop', path: '/writings/eigenslop', linksTo: ['/writings'], isWriting: true },
-	{ name: 'everything-everywhere-all-at-once', path: '/writings/everything-everywhere-all-at-once', linksTo: ['/writings'], isWriting: true },
-	{ name: 'full-stack-futurism-apparently', path: '/writings/full-stack-futurism-apparently', linksTo: ['/writings'], isWriting: true },
-	{ name: 'high-bandwidth-communication', path: '/writings/high-bandwidth-communication', linksTo: ['/writings'], isWriting: true },
-	{ name: 'hyperslopification', path: '/writings/hyperslopification', linksTo: ['/writings'], isWriting: true },
-	{ name: 'i-want-to-write-code-like-im-playing-jazz', path: '/writings/i-want-to-write-code-like-im-playing-jazz', linksTo: ['/writings'], isWriting: true },
-	{ name: 'taste', path: '/writings/taste', linksTo: ['/writings'], isWriting: true },
-	{ name: 'there-are-two-types-of-work', path: '/writings/there-are-two-types-of-work', linksTo: ['/writings'], isWriting: true },
-	{ name: 'webring-topology', path: '/writings/webring-topology', linksTo: ['/writings'], isWriting: true },
-	{ name: 'what-is-this', path: '/writings/what-is-this', linksTo: ['/writings'], isWriting: true }
-];
-
-function getRoutesData(): { pages: PageNode[]; connections: { from: string; to: string }[] } {
-	// Combine main pages and writings
-	const pages = [...mainPages];
-
-	// Add writings and link them from /writings page
-	const writingsPage = pages.find(p => p.path === '/writings');
-	for (const writing of writings) {
-		pages.push(writing);
-		if (writingsPage && !writingsPage.linksTo.includes(writing.path)) {
-			writingsPage.linksTo.push(writing.path);
-		}
-	}
-
-	// Build connections (deduplicated)
-	const connections: { from: string; to: string }[] = [];
-	const seen = new Set<string>();
-	for (const page of pages) {
-		for (const target of page.linksTo) {
-			const key = [page.path, target].sort().join('|');
-			if (!seen.has(key)) {
-				seen.add(key);
-				connections.push({ from: page.path, to: target });
-			}
-		}
-	}
-
-	return { pages, connections };
-}
+const { pages, connections } = buildNavGraph(writingSlugs);
 
 export async function load() {
-	const { pages, connections } = getRoutesData();
 	return {
 		navPages: pages,
 		navConnections: connections

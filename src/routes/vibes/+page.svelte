@@ -17,13 +17,15 @@
 
 <div class="vibes-page">
 	<div class="mobile-spacer"></div>
+	<!-- the gallery images are decorative (alt=""), so without this the page has no name -->
+	<h1 class="sr-only">vibes</h1>
 	<p class="text-sm opacity-60 mb-4 text-center">
 		inspired by <a href="https://www.xavicf.com/vibes" target="_blank" rel="noopener" class="underline hover:opacity-100">Xavi</a>
 	</p>
 
 	<ScatteredGallery images={data.images} />
 
-	<BottomNav current="vibes" />
+	<BottomNav />
 </div>
 
 <style>

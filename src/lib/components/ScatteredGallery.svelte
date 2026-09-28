@@ -80,6 +80,13 @@
 
 		for (const img of shuffled) {
 			const scaled = scaleImage(img.width, img.height, TARGET_AREA);
+			// Equal-area scaling makes very wide images (a 1200x54 strip becomes
+			// ~2100px) wider than the canvas — cap them to it, keeping the aspect.
+			const maxW = width - PADDING * 2;
+			if (scaled.w > maxW) {
+				scaled.h = Math.round((scaled.h * maxW) / scaled.w);
+				scaled.w = maxW;
+			}
 			let bestPosition: { x: number; y: number } | null = null;
 			let attempts = 0;
 

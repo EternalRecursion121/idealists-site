@@ -298,7 +298,7 @@
 		flex-direction: column;
 		gap: 0.1rem;
 		font-size: 0.75rem;
-		opacity: 0.6;
+		opacity: 0.8;
 		transition: opacity 0.2s ease;
 	}
 
