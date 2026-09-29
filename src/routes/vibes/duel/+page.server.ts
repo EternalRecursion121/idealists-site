@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import {
 	PROMPT,
+	RECENT_LIMIT,
 	createMatchup,
 	getRatings,
 	imageMetadata,
@@ -11,14 +12,33 @@ import {
 	vote
 } from '$lib/server/vibes-elo';
 
-export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
+const SEEN_COOKIE = 'vibes_seen';
+
+/** The vibes this browser saw most recently, so it isn't shown them again straight away. */
+function readSeen(raw: string | undefined): string[] {
+	try {
+		const parsed = JSON.parse(raw ?? '[]');
+		return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+	} catch {
+		return [];
+	}
+}
+
+export const load: PageServerLoad = async ({ fetch, setHeaders, cookies }) => {
 	// Every load writes a fresh matchup, so this must never be cached.
 	setHeaders({ 'cache-control': 'private, no-store' });
 
 	if (!isEnabled()) return { enabled: false as const };
 
 	const meta = await imageMetadata(fetch);
-	const matchup = await createMatchup(await getRatings(Object.keys(meta)));
+	const seen = readSeen(cookies.get(SEEN_COOKIE));
+	const matchup = await createMatchup(await getRatings(Object.keys(meta)), seen);
+	cookies.set(SEEN_COOKIE, JSON.stringify([...seen, matchup.a, matchup.b].slice(-RECENT_LIMIT)), {
+		path: '/vibes/duel',
+		httpOnly: true,
+		sameSite: 'lax',
+		maxAge: 60 * 60 * 24
+	});
 
 	const side = (name: string) => ({ name, src: src(name), width: meta[name][0], height: meta[name][1] });
 

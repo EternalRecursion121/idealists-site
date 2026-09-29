@@ -3,8 +3,8 @@
  *
  * Ratings come from a Bayesian Bradley–Terry fit over every vote (see
  * bradley-terry.ts), refitted every REFIT_EVERY votes and on demand via
- * POST /api/vibes/refit. Matchups are chosen by how much we expect to learn
- * from them. Everything lives in Upstash Redis:
+ * POST /api/vibes/refit. Matchups are random, nudged toward vibes we know
+ * least about. Everything lives in Upstash Redis:
  *
  *   vibes:pairs    hash        "winner\nloser" → times that ordered pair happened
  *   vibes:fit      string      JSON of the latest fit (see StoredFit)
@@ -40,8 +40,10 @@ const BASE_RATING = 1500;
 const MATCH_TTL_SECONDS = 60 * 60;
 /** Refit after every this many votes (and whenever a read finds the stored fit this far behind). */
 const REFIT_EVERY = 10;
-/** Sample from this many of the most informative pairs, so concurrent visitors don't all see the same one. */
-const CANDIDATE_PAIRS = 30;
+/** How many of their most recent vibes a visitor won't be shown again. */
+export const RECENT_LIMIT = 10;
+/** A vibe we know little about is at most this many times likelier to be picked than a typical one. */
+const MAX_UNCERTAINTY_BOOST = 2;
 
 /** The one question every matchup asks. */
 export const PROMPT = 'which is more ideal?';
@@ -101,29 +103,12 @@ export interface VibeRating {
 export interface VibeState {
 	ratings: VibeRating[];
 	totalVotes: number;
-	/** Logit-scale strength of ratings[i]. */
-	theta: Float64Array;
-	/** Posterior variance of θᵢ − θⱼ (logit scale), for ratings indices i and j. */
-	differenceVariance: (i: number, j: number) => number;
 }
 
 export interface Matchup {
 	id: string;
 	a: string;
 	b: string;
-}
-
-/**
- * How much a comparison should teach us: p(1−p)·Var(θᵢ − θⱼ). High when the
- * outcome is a coin flip and when we're unsure how the two compare. It's the
- * expected shrinkage in that variance from one more vote.
- */
-function informationScore(state: VibeState, i: number, j: number): number {
-	const variance = state.differenceVariance(i, j);
-	// Averaging the win probability over our uncertainty pulls it toward ½.
-	const d = (state.theta[i] - state.theta[j]) / Math.sqrt(1 + (Math.PI * variance) / 8);
-	const p = 1 / (1 + Math.exp(-d));
-	return p * (1 - p) * variance;
 }
 
 /** With automaticDeserialization off, Upstash returns HGETALL as a flat [key, value, …] array. */
@@ -266,14 +251,10 @@ export async function getRatings(names: string[]): Promise<VibeState> {
 	}
 
 	const byName = new Map(stored?.names.map((name, k) => [name, k]));
-	const theta = new Float64Array(names.length);
-	const variance = new Float64Array(names.length);
-	const ratings = names.map((name, i) => {
+	const ratings = names.map((name) => {
 		const k = byName.get(name);
 		const t = k === undefined ? 0 : stored!.theta[k];
 		const sd = k === undefined ? PRIOR_SD : stored!.sd[k];
-		theta[i] = t;
-		variance[i] = sd * sd;
 		return {
 			name,
 			rating: BASE_RATING + ELO_SCALE * t,
@@ -282,53 +263,47 @@ export async function getRatings(names: string[]): Promise<VibeState> {
 		};
 	});
 
-	return {
-		ratings,
-		totalVotes,
-		theta,
-		// Only each vibe's own variance is stored, so treat the two as independent.
-		differenceVariance: (i, j) => variance[i] + variance[j]
-	};
+	return { ratings, totalVotes };
 }
 
-/** Pick one of the most informative pairs at random, weighted by information, and remember it. */
-export async function createMatchup(state: VibeState): Promise<Matchup> {
-	const { ratings } = state;
+/**
+ * Pick a matchup and remember it. Simulations showed choosing the "most
+ * informative" pair ranks no better than random pairing here, and it let a
+ * brand-new vibe appear in every matchup until one visitor had decided its
+ * rating. So: pick one vibe, nudged toward those we know least about (capped
+ * at MAX_UNCERTAINTY_BOOST× a typical vibe), pair it with a uniformly random
+ * other, and skip anything this visitor saw in their last RECENT_LIMIT vibes.
+ */
+export async function createMatchup(state: VibeState, recent: string[] = []): Promise<Matchup> {
 	const r = client();
 	if (!r) throw new Error('vibes-elo: Redis not configured');
-	if (ratings.length < 2) throw new Error('vibes-elo: need at least two images');
+	if (state.ratings.length < 2) throw new Error('vibes-elo: need at least two images');
 
-	const pairs: { i: number; j: number; score: number }[] = [];
-	for (let i = 0; i < ratings.length; i++) {
-		for (let j = i + 1; j < ratings.length; j++) {
-			pairs.push({ i, j, score: informationScore(state, i, j) });
-		}
-	}
-	// Shuffle before sorting so ties (e.g. everything unrated) break randomly.
-	for (let k = pairs.length - 1; k > 0; k--) {
-		const m = Math.floor(Math.random() * (k + 1));
-		[pairs[k], pairs[m]] = [pairs[m], pairs[k]];
-	}
-	pairs.sort((x, y) => y.score - x.score);
-	const candidates = pairs.slice(0, CANDIDATE_PAIRS);
+	const seen = new Set(recent);
+	const fresh = state.ratings.filter((v) => !seen.has(v.name));
+	const pool = fresh.length >= 2 ? fresh : state.ratings;
 
-	const total = candidates.reduce((sum, p) => sum + p.score, 0);
-	let pick = Math.random() * total;
-	let chosen = candidates[0];
-	for (const p of candidates) {
-		pick -= p.score;
+	const variances = pool.map((v) => (v.rd / ELO_SCALE) ** 2);
+	const typical = [...variances].sort((x, y) => x - y)[Math.floor(variances.length / 2)];
+	const weights = variances.map((v) => Math.min(v, MAX_UNCERTAINTY_BOOST * typical));
+	let pick = Math.random() * weights.reduce((sum, w) => sum + w, 0);
+	let first = pool.length - 1;
+	for (let k = 0; k < pool.length; k++) {
+		pick -= weights[k];
 		if (pick <= 0) {
-			chosen = p;
+			first = k;
 			break;
 		}
 	}
+	let second = Math.floor(Math.random() * (pool.length - 1));
+	if (second >= first) second++;
 
 	// Randomise left/right so position doesn't bias the vote.
-	const [left, right] = Math.random() < 0.5 ? [chosen.i, chosen.j] : [chosen.j, chosen.i];
+	const [left, right] = Math.random() < 0.5 ? [first, second] : [second, first];
 	const matchup: Matchup = {
 		id: randomUUID(),
-		a: ratings[left].name,
-		b: ratings[right].name
+		a: pool[left].name,
+		b: pool[right].name
 	};
 
 	await r.set(MATCH_PREFIX + matchup.id, [matchup.a, matchup.b].join('\n'), {
