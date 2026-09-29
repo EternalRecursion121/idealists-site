@@ -59,7 +59,7 @@ Run the first after adding or removing files under `static/vibes/`, the second a
 - `src/routes/(standard)/writings/[slug]/+page.server.ts` - writing body/revisions/annotations loader.
 - `src/routes/(standard)/writings/[slug]/+page.svelte` - markdown rendering, timeline, annotations UI.
 - `src/routes/vibes/+page.server.ts` - reads `/vibes/images.json`.
-- `src/routes/vibes/duel/` - vibe vs vibe pairwise voting (Bayesian Bradley–Terry fit over all votes, info-maximising matchups, skip) with its leaderboard at `/vibes/duel/leaderboard`; intentionally unlinked and not in the nav graph. Logic lives in `src/lib/server/vibes-elo.ts`, the fit in `src/lib/server/bradley-terry.ts` (Upstash Redis; the `vibes:votes` stream is the source of truth, `vibes:pairs` a rebuildable summary).
+- `src/routes/vibes/duel/` - vibe vs vibe pairwise voting (Bayesian Bradley–Terry fit over all votes, info-maximising matchups, skip) with its leaderboard at `/vibes/duel/leaderboard`; intentionally unlinked and not in the nav graph. Logic lives in `src/lib/server/vibes-elo.ts`, the fit in `src/lib/server/bradley-terry.ts` (Upstash Redis; the `vibes:votes` stream is the source of truth, `vibes:pairs` a rebuildable summary, `vibes:fit` the stored fit, refreshed every 10 votes).
 - `src/routes/sitemap/+page.server.ts` - attaches the short descriptions from `nav.ts` to the graph.
 - `src/routes/interview/+page.svelte` - talks to an external interviewer backend (`PUBLIC_INTERVIEWER_API`); not part of the nav graph.
 
@@ -85,6 +85,7 @@ Run the first after adding or removing files under `static/vibes/`, the second a
 - `src/routes/api/auth/github/+server.ts`
 - `src/routes/api/auth/github/callback/+server.ts`
 - `src/routes/api/annotations/+server.ts`
+- `src/routes/api/vibes/refit/+server.ts` - POST refits the vibe ratings on demand (needs `VIBES_REFIT_TOKEN` as a bearer token).
 
 ## Common task checklists
 
@@ -135,6 +136,7 @@ Needed for `/interview`:
 Needed for `/vibes/duel`:
 
 - `KV_REST_API_URL`, `KV_REST_API_TOKEN` (Upstash Redis via the Vercel Marketplace).
+- Optional `VIBES_REFIT_TOKEN` enables `POST /api/vibes/refit`; without it the endpoint 404s (the automatic refit every 10 votes still runs).
 
 ## Gotchas
 

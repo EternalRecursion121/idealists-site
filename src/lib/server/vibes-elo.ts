@@ -2,10 +2,12 @@
  * Vibe vs vibe: pairwise ratings for the vibes gallery.
  *
  * Ratings come from a Bayesian Bradley–Terry fit over every vote (see
- * bradley-terry.ts), refitted on read. Matchups are chosen by how much we
- * expect to learn from them. Everything lives in Upstash Redis:
+ * bradley-terry.ts), refitted every REFIT_EVERY votes and on demand via
+ * POST /api/vibes/refit. Matchups are chosen by how much we expect to learn
+ * from them. Everything lives in Upstash Redis:
  *
  *   vibes:pairs    hash        "winner\nloser" → times that ordered pair happened
+ *   vibes:fit      string      JSON of the latest fit (see StoredFit)
  *   vibes:votes    stream      append-only log {winner, loser, ts, ip}
  *   vibes:skips    stream      pairs someone declined to choose between
  *   vibes:match:*  string      a served matchup, consumed by the vote
@@ -17,11 +19,13 @@ import { createHash, randomUUID } from 'node:crypto';
 import { env } from '$env/dynamic/private';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
-import { fitBradleyTerry, type BradleyTerryFit, type Comparison } from './bradley-terry';
+import { fitBradleyTerry, type Comparison } from './bradley-terry';
 
 const PAIRS = 'vibes:pairs';
 const VOTES = 'vibes:votes';
 const SKIPS = 'vibes:skips';
+const FIT = 'vibes:fit';
+const FIT_LOCK = 'vibes:fit:lock';
 const MATCH_PREFIX = 'vibes:match:';
 
 /**
@@ -34,6 +38,8 @@ const PRIOR_SD = 1;
 const ELO_SCALE = 400 / Math.LN10;
 const BASE_RATING = 1500;
 const MATCH_TTL_SECONDS = 60 * 60;
+/** Refit after every this many votes (and whenever a read finds the stored fit this far behind). */
+const REFIT_EVERY = 10;
 /** Sample from this many of the most informative pairs, so concurrent visitors don't all see the same one. */
 const CANDIDATE_PAIRS = 30;
 
@@ -42,6 +48,7 @@ export const PROMPT = 'which is more ideal?';
 
 let redis: Redis | null = null;
 let ratelimit: Ratelimit | null = null;
+let skipRatelimit: Ratelimit | null = null;
 
 function client(): Redis | null {
 	if (redis) return redis;
@@ -52,10 +59,17 @@ function client(): Redis | null {
 		// filenames like "2024.webp" must stay strings
 		automaticDeserialization: false
 	});
+	// Generous: faster than anyone votes by hand, so it only catches scripts.
 	ratelimit = new Ratelimit({
 		redis,
-		limiter: Ratelimit.slidingWindow(60, '1 m'),
+		limiter: Ratelimit.slidingWindow(300, '1 m'),
 		prefix: 'vibes:ratelimit'
+	});
+	// Skips get their own allowance so they never eat into voting.
+	skipRatelimit = new Ratelimit({
+		redis,
+		limiter: Ratelimit.slidingWindow(300, '1 m'),
+		prefix: 'vibes:ratelimit:skip'
 	});
 	return redis;
 }
@@ -147,64 +161,133 @@ async function rebuildPairs(r: Redis): Promise<[string, number][]> {
 	return [...counts];
 }
 
-/** The last fit, reused while nothing has changed and as a warm start when something has. */
-let cache: { key: string; names: string[]; fit: BradleyTerryFit } | null = null;
+/** What vibes:fit holds: the posterior for every vibe that has played, in logits. */
+interface StoredFit {
+	votes: number;
+	fittedAt: string;
+	names: string[];
+	theta: number[];
+	sd: number[];
+	games: number[];
+}
 
-/** Current ratings for every image in the gallery, from a Bradley–Terry fit over all votes. */
+export interface RefitResult {
+	status: 'fitted' | 'busy';
+	votes: number;
+	vibes: number;
+	iterations?: number;
+	ms?: number;
+}
+
+/**
+ * Fit Bradley–Terry to every vote and store the result. Only vibes that have
+ * played are fitted: an unplayed vibe's posterior is just the prior. The
+ * previous fit is the warm start. A short lock keeps concurrent refits from
+ * racing; the loser reports 'busy'.
+ */
+export async function refit(): Promise<RefitResult> {
+	const r = client();
+	if (!r) throw new Error('vibes-elo: Redis not configured');
+
+	if ((await r.set(FIT_LOCK, '1', { nx: true, ex: 30 })) === null) {
+		return { status: 'busy', votes: Number(await r.xlen(VOTES)), vibes: 0 };
+	}
+	try {
+		const started = performance.now();
+		const [flatPairs, rawTotal, rawPrevious] = await r
+			.pipeline()
+			.hgetall(PAIRS)
+			.xlen(VOTES)
+			.get(FIT)
+			.exec<[string[] | null, number, string | null]>();
+		const votes = Number(rawTotal);
+		let pairCounts = entries(flatPairs);
+		if (pairCounts.reduce((sum, [, c]) => sum + c, 0) !== votes) pairCounts = await rebuildPairs(r);
+
+		const index = new Map<string, number>();
+		const names: string[] = [];
+		const games: number[] = [];
+		const indexOf = (name: string) => {
+			let k = index.get(name);
+			if (k === undefined) {
+				k = names.length;
+				index.set(name, k);
+				names.push(name);
+				games.push(0);
+			}
+			return k;
+		};
+		const comparisons: Comparison[] = pairCounts.map(([key, count]) => {
+			const [winner, loser] = key.split('\n');
+			const w = indexOf(winner);
+			const l = indexOf(loser);
+			games[w] += count;
+			games[l] += count;
+			return { winner: w, loser: l, count };
+		});
+
+		const previous: StoredFit | null = rawPrevious ? JSON.parse(rawPrevious) : null;
+		const prior = new Map(previous?.names.map((name, k) => [name, previous.theta[k]]));
+		const init = Float64Array.from(names, (name) => prior.get(name) ?? 0);
+		const fit = fitBradleyTerry(names.length, comparisons, { priorSd: PRIOR_SD, init });
+
+		const n = names.length;
+		const round = (x: number) => Math.round(x * 1e6) / 1e6;
+		const stored: StoredFit = {
+			votes,
+			fittedAt: new Date().toISOString(),
+			names,
+			theta: Array.from(fit.theta, round),
+			sd: names.map((_, k) => round(Math.sqrt(fit.cov[k * n + k]))),
+			games
+		};
+		await r.set(FIT, JSON.stringify(stored));
+		return { status: 'fitted', votes, vibes: n, iterations: fit.iterations, ms: Math.round(performance.now() - started) };
+	} finally {
+		await r.del(FIT_LOCK);
+	}
+}
+
+/** Current ratings for every image in the gallery, from the stored Bradley–Terry fit. */
 export async function getRatings(names: string[]): Promise<VibeState> {
 	const r = client();
 	if (!r) throw new Error('vibes-elo: Redis not configured');
 
-	const [flatPairs, rawTotal] = await r.pipeline().hgetall(PAIRS).xlen(VOTES).exec<[string[] | null, number]>();
+	const [rawFit, rawTotal] = await r.pipeline().get(FIT).xlen(VOTES).exec<[string | null, number]>();
 	const totalVotes = Number(rawTotal);
-	let pairCounts = entries(flatPairs);
-	if (pairCounts.reduce((sum, [, c]) => sum + c, 0) !== totalVotes) pairCounts = await rebuildPairs(r);
+	let stored: StoredFit | null = rawFit ? JSON.parse(rawFit) : null;
 
-	// Fit over every vibe that has ever played (retired ones still inform the rest), then report the gallery.
-	const index = new Map<string, number>();
-	const all: string[] = [];
-	const indexOf = (name: string) => {
-		let k = index.get(name);
-		if (k === undefined) {
-			k = all.length;
-			index.set(name, k);
-			all.push(name);
+	// Self-heal if a refit was missed (or there has never been one).
+	if (totalVotes > 0 && (!stored || totalVotes - stored.votes >= REFIT_EVERY)) {
+		if ((await refit()).status === 'fitted') {
+			const fresh = await r.get<string>(FIT);
+			stored = fresh ? JSON.parse(fresh) : stored;
 		}
-		return k;
-	};
-	for (const name of names) indexOf(name);
-	const games = new Map<string, number>();
-	const comparisons: Comparison[] = pairCounts.map(([key, count]) => {
-		const [winner, loser] = key.split('\n');
-		games.set(winner, (games.get(winner) ?? 0) + count);
-		games.set(loser, (games.get(loser) ?? 0) + count);
-		return { winner: indexOf(winner), loser: indexOf(loser), count };
-	});
-
-	const key = `${totalVotes}|${all.join('\n')}`;
-	let fit: BradleyTerryFit;
-	if (cache?.key === key) {
-		fit = cache.fit;
-	} else {
-		const previous = cache ? new Map(cache.names.map((name, k) => [name, cache!.fit.theta[k]])) : null;
-		const init = previous ? Float64Array.from(all, (name) => previous.get(name) ?? 0) : undefined;
-		fit = fitBradleyTerry(all.length, comparisons, { priorSd: PRIOR_SD, init });
-		cache = { key, names: all, fit };
 	}
 
-	const n = all.length;
-	const ratings = names.map((name, k) => ({
-		name,
-		rating: BASE_RATING + ELO_SCALE * fit.theta[k],
-		rd: ELO_SCALE * Math.sqrt(fit.cov[k * n + k]),
-		games: games.get(name) ?? 0
-	}));
+	const byName = new Map(stored?.names.map((name, k) => [name, k]));
+	const theta = new Float64Array(names.length);
+	const variance = new Float64Array(names.length);
+	const ratings = names.map((name, i) => {
+		const k = byName.get(name);
+		const t = k === undefined ? 0 : stored!.theta[k];
+		const sd = k === undefined ? PRIOR_SD : stored!.sd[k];
+		theta[i] = t;
+		variance[i] = sd * sd;
+		return {
+			name,
+			rating: BASE_RATING + ELO_SCALE * t,
+			rd: ELO_SCALE * sd,
+			games: k === undefined ? 0 : stored!.games[k]
+		};
+	});
 
 	return {
 		ratings,
 		totalVotes,
-		theta: fit.theta.subarray(0, names.length),
-		differenceVariance: (i, j) => fit.cov[i * n + i] + fit.cov[j * n + j] - 2 * fit.cov[i * n + j]
+		theta,
+		// Only each vibe's own variance is stored, so treat the two as independent.
+		differenceVariance: (i, j) => variance[i] + variance[j]
 	};
 }
 
@@ -268,7 +351,7 @@ if w == a then l = b elseif w == b then l = a else return 'invalid' end
 
 redis.call('HINCRBY', KEYS[2], w .. '\\n' .. l, 1)
 redis.call('XADD', KEYS[3], '*', 'winner', w, 'loser', l, 'ts', ARGV[2], 'ip', ARGV[3])
-return 'ok'
+return {'ok', tostring(redis.call('XLEN', KEYS[3]))}
 `;
 
 export type VoteResult = 'ok' | 'gone' | 'invalid' | 'ratelimited';
@@ -281,11 +364,22 @@ export async function vote(matchId: string, winner: string, ip: string): Promise
 	const { success } = await ratelimit.limit(ipHash);
 	if (!success) return 'ratelimited';
 
-	return await r.eval<string[], VoteResult>(
+	const result = await r.eval<string[], string | string[]>(
 		VOTE_SCRIPT,
 		[MATCH_PREFIX + matchId, PAIRS, VOTES],
 		[winner, String(Date.now()), ipHash]
 	);
+	if (!Array.isArray(result)) return result as 'gone' | 'invalid';
+
+	// Every REFIT_EVERY-th vote refreshes the fit (a missed one is caught on the next read).
+	if (Number(result[1]) % REFIT_EVERY === 0) {
+		try {
+			await refit();
+		} catch (err) {
+			console.error('vibes-elo: refit after vote failed', err);
+		}
+	}
+	return 'ok';
 }
 
 /**
@@ -294,10 +388,10 @@ export async function vote(matchId: string, winner: string, ip: string): Promise
  */
 export async function skip(matchId: string, ip: string): Promise<'ok' | 'gone' | 'ratelimited'> {
 	const r = client();
-	if (!r || !ratelimit) throw new Error('vibes-elo: Redis not configured');
+	if (!r || !skipRatelimit) throw new Error('vibes-elo: Redis not configured');
 
 	const ipHash = hashIp(ip);
-	const { success } = await ratelimit.limit(ipHash);
+	const { success } = await skipRatelimit.limit(ipHash);
 	if (!success) return 'ratelimited';
 
 	const match = await r.getdel<string>(MATCH_PREFIX + matchId);
