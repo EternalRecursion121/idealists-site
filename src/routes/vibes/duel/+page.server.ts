@@ -18,8 +18,7 @@ export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
 	if (!isEnabled()) return { enabled: false as const };
 
 	const meta = await imageMetadata(fetch);
-	const { ratings } = await getRatings(Object.keys(meta));
-	const matchup = await createMatchup(ratings);
+	const matchup = await createMatchup(await getRatings(Object.keys(meta)));
 
 	const side = (name: string) => ({ name, src: src(name), width: meta[name][0], height: meta[name][1] });
 
@@ -45,8 +44,7 @@ export const actions: Actions = {
 			return fail(400, { message: 'that vote got lost on the way' });
 		}
 
-		const result = await vote(match, winner, getClientAddress());
-		switch (result.status) {
+		switch (await vote(match, winner, getClientAddress())) {
 			case 'ok':
 				return { voted: true };
 			case 'ratelimited':
